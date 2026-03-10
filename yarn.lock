@@ -361,6 +361,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@calendarjs/ce@npm:^1.0.6":
+  version: 1.0.6
+  resolution: "@calendarjs/ce@npm:1.0.6"
+  dependencies:
+    lemonadejs: "npm:^5.3.3"
+  checksum: 10c0/ef762291e5797f05c0d5218b08e5d42a6d83fab6b4bcb791b9cb0700356d1e42b10e96b61edc2ed7711e525f4c1551acd6a0bbd7b87ed176264184b62ea3a06f
+  languageName: node
+  linkType: hard
+
 "@dotenvx/dotenvx@npm:^1.48.4":
   version: 1.52.0
   resolution: "@dotenvx/dotenvx@npm:1.52.0"
@@ -5927,6 +5936,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"lemonadejs@npm:^5.3.3":
+  version: 5.3.6
+  resolution: "lemonadejs@npm:5.3.6"
+  checksum: 10c0/79b47976d592deff4129e8cf17088adf06451b8f71bf37c2c7036eac1325a82e744a6f4c7bbab4de5a3ac1c99779c492e29211cd852ba4c303eb182d655a0205
+  languageName: node
+  linkType: hard
+
 "levn@npm:^0.4.1":
   version: 0.4.1
   resolution: "levn@npm:0.4.1"
@@ -6277,6 +6293,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "mind-boop@workspace:."
   dependencies:
+    "@calendarjs/ce": "npm:^1.0.6"
     "@eslint/js": "npm:^9.39.1"
     "@tailwindcss/vite": "npm:^4.2.1"
     "@types/node": "npm:^25.3.1"
