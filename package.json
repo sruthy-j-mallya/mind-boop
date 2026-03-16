@@ -11,14 +11,15 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@calendarjs/ce": "^1.0.6",
     "@tailwindcss/vite": "^4.2.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "dayjs": "^1.11.20",
     "formik": "^2.4.9",
-    "lucide-react": "^0.575.0",
+    "lucide-react": "^0.577.0",
     "radix-ui": "^1.4.3",
     "react": "^19.2.0",
+    "react-big-calendar": "^1.19.4",
     "react-dom": "^19.2.0",
     "tailwind-merge": "^3.5.0",
     "tailwindcss": "^4.2.1"
@@ -27,6 +28,7 @@
     "@eslint/js": "^9.39.1",
     "@types/node": "^25.3.1",
     "@types/react": "^19.2.7",
+    "@types/react-big-calendar": "^1",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.1",
     "electron": "^40.6.0",
