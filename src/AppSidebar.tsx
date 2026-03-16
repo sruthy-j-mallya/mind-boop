@@ -15,9 +15,9 @@ export function AppSidebar() {
     <Sidebar collapsible="none">
       <SidebarHeader>
         <Avatar>
-        <AvatarImage src="https://github.com/shadcn.png" />
-        <AvatarFallback>CN</AvatarFallback>
-      </Avatar>
+          <AvatarImage src="https://github.com/shadcn.png" />
+          <AvatarFallback>CN</AvatarFallback>
+        </Avatar>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup />
