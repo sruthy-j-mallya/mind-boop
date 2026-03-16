@@ -18,7 +18,7 @@ function App() {
           <AppSidebar />
         </SidebarProvider>
       </div>
-      <div className="overflow-hidden max-h-screen h-dvh w-screen mt-4">
+      <div className="h-dvh w-screen mt-4">
         <Calendar
           localizer={localizer}
           startAccessor="start"
