@@ -48,10 +48,6 @@ export default defineConfig([
       "react/boolean-prop-naming": "warn",
       "arrow-body-style": ["error", "as-needed"],
       "func-style": ["error", "expression", { allowArrowFunctions: true }],
-      "react/function-component-definition": ["error", {
-        "namedComponents": "function-expression",
-        "unnamedComponents": "arrow-function"
-      }],
       "react/react-in-jsx-scope": "off",
     }
   }
