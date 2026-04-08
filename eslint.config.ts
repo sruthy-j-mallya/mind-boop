@@ -6,15 +6,12 @@ import reactRefresh from "eslint-plugin-react-refresh";
 import { defineConfig } from "eslint/config";
 import unusedImports from "eslint-plugin-unused-imports";
 import reactHooks from "eslint-plugin-react-hooks";
+import prettierConfig from "eslint-config-prettier";
+import prettierPlugin from "eslint-plugin-prettier";
 
 export default defineConfig([
   {
-    ignores: [
-      "node_modules",
-      "src-tauri",
-      ".cursor",
-      ".vscode",
-      ".public"],
+    ignores: ["node_modules", "src-tauri", ".cursor", ".vscode", ".public"],
   },
   {
     settings: {
@@ -28,18 +25,20 @@ export default defineConfig([
     plugins: {
       js,
       unusedImports,
+      prettier: prettierPlugin,
     },
-    extends: [
-      js.configs.recommended,
-      reactRefresh.configs.vite,
-    ],
+    extends: [js.configs.recommended, reactRefresh.configs.vite],
     languageOptions: {
-      globals: globals.browser
-    }
+      globals: globals.browser,
+    },
+    rules: {
+      "prettier/prettier": "error",
+    },
   },
   tseslint.configs.recommended,
   pluginReact.configs.flat.recommended,
   reactHooks.configs.flat["recommended-latest"],
+  prettierConfig,
   {
     files: ["**/*.{tsx,ts}"],
     rules: {
@@ -49,6 +48,6 @@ export default defineConfig([
       "arrow-body-style": ["error", "as-needed"],
       "func-style": ["error", "expression", { allowArrowFunctions: true }],
       "react/react-in-jsx-scope": "off",
-    }
-  }
+    },
+  },
 ]);

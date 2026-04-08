@@ -1,0 +1,6 @@
+node_modules
+dist
+coverage
+.cursor
+src-tauri
+pnpm-lock.yaml

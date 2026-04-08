@@ -2,13 +2,13 @@ import { useState } from "react";
 import reactLogo from "./assets/react.svg";
 import { invoke } from "@tauri-apps/api/core";
 
-const App = function() {
+const App = function () {
   const [greetMsg, setGreetMsg] = useState("");
   const [name, setName] = useState("");
 
-  const greet = async function() {
+  const greet = async function () {
     setGreetMsg(await invoke("greet", { name }));
-  }
+  };
 
   return (
     <main className="container">
@@ -44,6 +44,6 @@ const App = function() {
       <p>{greetMsg}</p>
     </main>
   );
-}
+};
 
 export default App;
