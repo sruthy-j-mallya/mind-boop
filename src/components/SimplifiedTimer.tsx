@@ -19,7 +19,7 @@ import { decrementTime, displayTime, incrementTime } from "./utils";
 import { Play, Pause, Square } from "lucide-react";
 
 const timeDisplayClass =
-  "inline-block min-w-[5.5ch] text-center text-2xl font-semibold tabular-nums";
+  "inline-block min-w-[5.5ch] text-center text-2xl tabular-nums";
 
 const SimplifiedTimer = () => {
   const [mode, setMode] = useState<"timer" | "stopwatch">("stopwatch");
