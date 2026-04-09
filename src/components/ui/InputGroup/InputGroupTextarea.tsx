@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import Textarea from "@/components/ui/textarea";
+import Textarea from "@/components/ui/TextArea";
 import { cn } from "@/lib/utils";
 
 const InputGroupTextarea = ({
