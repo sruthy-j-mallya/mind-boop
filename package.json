@@ -16,9 +16,10 @@
   },
   "lint-staged": {
     "src/**/*.{ts,tsx}": [
-      "eslint",
-      "prettier --check"
-    ]
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,css,scss,html,yml,yaml}": "prettier --write"
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.2.8",
