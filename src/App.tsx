@@ -1,8 +1,8 @@
 import type { Editor } from "@tiptap/core";
 import { useRef, useState } from "react";
-import Button from "@/components/ui/Button";
 import LiveDateTime from "@/components/LiveDateTime";
 import { MarkdownEditor } from "@/components/MarkdownEditor/MarkdownEditor";
+import SimplifiedTimer from "@/components/SimplifiedTimer";
 import ThemeToggle from "@/components/ThemeToggle";
 import { getMarkdownFromEditor } from "@/utils";
 
@@ -22,6 +22,9 @@ const App = function () {
       </header>
 
       <div className="mx-auto max-w-2xl px-4 py-10 sm:px-6 sm:py-14">
+        <div className="flex flex-row-reverse">
+          <SimplifiedTimer />
+        </div>
         <form
           className="space-y-8"
           onSubmit={(event) => {
@@ -42,12 +45,7 @@ const App = function () {
             aria-label="Task title"
             className="border-border placeholder:text-muted-foreground w-full border-0 border-b bg-transparent px-0 py-2 text-2xl font-semibold tracking-tight shadow-none outline-none focus-visible:ring-0 focus-visible:outline-none"
           />
-
           <MarkdownEditor id="task-description" editorRef={editorRef} />
-
-          <Button type="submit" className="rounded-md px-4 py-2">
-            Start working
-          </Button>
         </form>
       </div>
     </main>
