@@ -2,7 +2,7 @@ import type { Editor } from "@tiptap/core";
 import { useRef, useState } from "react";
 import LiveDateTime from "@/components/LiveDateTime";
 import { MarkdownEditor } from "@/components/MarkdownEditor/MarkdownEditor";
-import SimplifiedTimer from "@/components/SimplifiedTimer";
+import SimplifiedTimer from "@/components/Timer/Timer";
 import ThemeToggle from "@/components/ThemeToggle";
 import { getMarkdownFromEditor } from "@/utils";
 
@@ -23,7 +23,7 @@ const App = function () {
 
       <div className="mx-auto max-w-2xl px-4 py-10 sm:px-6 sm:py-14">
         <div className="flex flex-row-reverse">
-          <SimplifiedTimer />
+          <SimplifiedTimer isEnabled={title.length > 0} />
         </div>
         <form
           className="space-y-8"

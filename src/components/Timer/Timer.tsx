@@ -15,13 +15,11 @@ import {
 } from "@/components/ui/Popover";
 import Input from "@/components/ui/Input";
 
-import { decrementTime, displayTime, incrementTime } from "./utils";
+import { decrementTime, incrementTime } from "../utils";
 import { Play, Pause, Square } from "lucide-react";
+import RunningTime from "./RunningTime";
 
-const timeDisplayClass =
-  "inline-block min-w-[5.5ch] text-center text-2xl tabular-nums";
-
-const SimplifiedTimer = () => {
+const SimplifiedTimer = ({ isEnabled }: { isEnabled: boolean }) => {
   const [mode, setMode] = useState<"timer" | "stopwatch">("stopwatch");
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [hasStarted, setHasStarted] = useState<boolean>(false);
@@ -46,7 +44,7 @@ const SimplifiedTimer = () => {
   return (
     <div className="flex flex-row items-center gap-2">
       <Select
-        disabled={hasStarted}
+        disabled={hasStarted || !isEnabled}
         value={mode}
         onValueChange={(value) => {
           setMode(value as "timer" | "stopwatch");
@@ -70,15 +68,19 @@ const SimplifiedTimer = () => {
         </SelectContent>
       </Select>
       {mode == "stopwatch" ? (
-        <span className={timeDisplayClass}>
-          {displayTime(minutes, seconds)}
-        </span>
+        <RunningTime
+          isEnabled={isEnabled}
+          minutes={minutes}
+          seconds={seconds}
+        />
       ) : (
         <Popover>
-          <PopoverTrigger disabled={isRunning}>
-            <span className={timeDisplayClass}>
-              {displayTime(minutes, seconds)}
-            </span>
+          <PopoverTrigger disabled={isRunning || !isEnabled}>
+            <RunningTime
+              isEnabled={isEnabled}
+              minutes={minutes}
+              seconds={seconds}
+            />
           </PopoverTrigger>
           <PopoverContent className="flex w-full flex-row items-start">
             <Input
@@ -98,6 +100,7 @@ const SimplifiedTimer = () => {
       )}
 
       <Button
+        disabled={!isEnabled}
         type="button"
         variant="ghost"
         onClick={() => {
@@ -109,7 +112,7 @@ const SimplifiedTimer = () => {
       </Button>
 
       <Button
-        disabled={!hasStarted}
+        disabled={!hasStarted || !isEnabled}
         type="button"
         variant="ghost"
         onClick={() => {
