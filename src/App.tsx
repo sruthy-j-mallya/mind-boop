@@ -1,17 +1,10 @@
 import type { Editor } from "@tiptap/core";
 import { useRef, useState } from "react";
 import Button from "@/components/ui/Button";
-import LiveDateTime from "@/LiveDateTime";
+import LiveDateTime from "@/components/LiveDateTime";
 import { MarkdownEditor } from "@/components/MarkdownEditor/MarkdownEditor";
-import ThemeToggle from "@/ThemeToggle";
-
-const getMarkdownFromEditor = (editor: Editor | null): string => {
-  if (!editor) return "";
-  const storage = editor.storage as {
-    markdown?: { getMarkdown: () => string };
-  };
-  return storage.markdown?.getMarkdown() ?? "";
-};
+import ThemeToggle from "@/components/ThemeToggle";
+import { getMarkdownFromEditor } from "@/utils";
 
 const App = function () {
   const [title, setTitle] = useState("");
