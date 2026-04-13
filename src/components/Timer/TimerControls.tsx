@@ -18,14 +18,16 @@ import Input from "@/components/ui/Input";
 import { decrementTime, incrementTime } from "../utils";
 import { Play, Pause, Square } from "lucide-react";
 import RunningTime from "./RunningTime";
+import useTimerStore from "@/stores/useTimer";
 
-const SimplifiedTimer = ({ isEnabled }: { isEnabled: boolean }) => {
+const TimerControls = ({ isEnabled }: { isEnabled: boolean }) => {
   const [mode, setMode] = useState<"timer" | "stopwatch">("stopwatch");
   const [isRunning, setIsRunning] = useState<boolean>(false);
-  const [hasStarted, setHasStarted] = useState<boolean>(false);
   const [timerPreset, setTimerPreset] = useState<number>(25);
   const [minutes, setMinutes] = useState<number>(0);
   const [seconds, setSeconds] = useState<number>(0);
+  const { isActive: isTimerActive, setIsActive: setIsTimerActive } =
+    useTimerStore();
 
   useEffect(() => {
     if (isRunning) {
@@ -44,7 +46,7 @@ const SimplifiedTimer = ({ isEnabled }: { isEnabled: boolean }) => {
   return (
     <div className="flex flex-row items-center gap-2">
       <Select
-        disabled={hasStarted || !isEnabled}
+        disabled={isTimerActive || !isEnabled}
         value={mode}
         onValueChange={(value) => {
           setMode(value as "timer" | "stopwatch");
@@ -105,19 +107,19 @@ const SimplifiedTimer = ({ isEnabled }: { isEnabled: boolean }) => {
         variant="ghost"
         onClick={() => {
           setIsRunning((prev) => !prev);
-          setHasStarted(true);
+          setIsTimerActive(true);
         }}
       >
         {isRunning ? <Pause className="size-5" /> : <Play className="size-5" />}
       </Button>
 
       <Button
-        disabled={!hasStarted || !isEnabled}
+        disabled={!isTimerActive || !isEnabled}
         type="button"
         variant="ghost"
         onClick={() => {
           setIsRunning(false);
-          setHasStarted(false);
+          setIsTimerActive(false);
           if (mode == "timer") {
             setMinutes(timerPreset);
             setSeconds(0);
@@ -133,4 +135,4 @@ const SimplifiedTimer = ({ isEnabled }: { isEnabled: boolean }) => {
   );
 };
 
-export default SimplifiedTimer;
+export default TimerControls;
