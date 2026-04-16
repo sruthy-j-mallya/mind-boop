@@ -8,6 +8,7 @@ import unusedImports from "eslint-plugin-unused-imports";
 import reactHooks from "eslint-plugin-react-hooks";
 import prettierConfig from "eslint-config-prettier";
 import prettierPlugin from "eslint-plugin-prettier";
+import tanstack from "@tanstack/eslint-plugin-query";
 
 export default defineConfig([
   {
@@ -38,6 +39,7 @@ export default defineConfig([
   tseslint.configs.recommended,
   pluginReact.configs.flat.recommended,
   reactHooks.configs.flat["recommended-latest"],
+  tanstack.configs["flat/recommended"],
   prettierConfig,
   {
     files: ["**/*.{tsx,ts}"],
