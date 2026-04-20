@@ -17,10 +17,12 @@ export const MarkdownEditor = ({
   className,
   editorRef,
   id,
+  onMarkdownChange,
 }: {
   className?: string;
   editorRef?: MutableRefObject<Editor | null>;
   id?: string;
+  onMarkdownChange?: (markdown: string) => void;
 }) => {
   const editor = useEditor({
     extensions: [
@@ -47,6 +49,12 @@ export const MarkdownEditor = ({
       attributes: {
         class: "outline-none min-h-[inherit]",
       },
+    },
+    onUpdate: ({ editor: updatedEditor }) => {
+      const storage = updatedEditor.storage as {
+        markdown?: { getMarkdown: () => string };
+      };
+      onMarkdownChange?.(storage.markdown?.getMarkdown() ?? "");
     },
   });
 
