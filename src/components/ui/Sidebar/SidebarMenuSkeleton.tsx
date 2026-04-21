@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { cn } from "@/lib/utils";
 const SidebarMenuSkeleton = ({
   className,
