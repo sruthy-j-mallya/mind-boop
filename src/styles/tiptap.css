@@ -83,7 +83,12 @@
   margin: 0;
 }
 
-.tiptap-editor .ProseMirror ul[data-type="taskList"] li > label input[type="checkbox"] {
+.tiptap-editor
+  .ProseMirror
+  ul[data-type="taskList"]
+  li
+  > label
+  input[type="checkbox"] {
   -webkit-appearance: none;
   appearance: none;
   width: 1rem;
