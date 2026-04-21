@@ -42,7 +42,7 @@ export const useUpdateTask = () =>
   useMutation({
     mutationFn: async ({ id, title, description }: UpdateTaskPayload) =>
       invoke("update_task", {
-        taskId: id,
+        id,
         title,
         description,
       }),
