@@ -6,7 +6,7 @@ import {
   SheetDescription,
   SheetHeader,
   SheetTitle,
-} from "@/components/ui/sheet";
+} from "@/components/ui/Sheet";
 import { cn } from "@/lib/utils";
 
 import { SIDEBAR_WIDTH_MOBILE } from "./constants";
