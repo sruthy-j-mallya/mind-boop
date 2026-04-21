@@ -1,6 +1,6 @@
 import * as React from "react";
 import { PanelLeftIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import Button from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 import useSidebar from "./useSidebar";
 

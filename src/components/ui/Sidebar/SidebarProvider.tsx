@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import { useIsMobile } from "@/hooks/useIsMobile";
+import useIsMobile from "@/hooks/useIsMobile";
 import { cn } from "@/lib/utils";
 
 import {
@@ -11,6 +11,7 @@ import {
   SIDEBAR_WIDTH_ICON,
 } from "./constants";
 import SidebarContext from "./SidebarContext";
+import type { SidebarContextProps } from "./type";
 
 const SidebarProvider = ({
   defaultOpen = true,
@@ -64,7 +65,7 @@ const SidebarProvider = ({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [toggleSidebar]);
 
-  const state = open ? "expanded" : "collapsed";
+  const state: SidebarContextProps["state"] = open ? "expanded" : "collapsed";
 
   const contextValue = React.useMemo(
     () => ({
