@@ -10,7 +10,7 @@ import useTimerStore from "@/stores/useTimer";
 import useDebounce from "@/lib/hooks/useDebounce";
 import { useCreateTask, useUpdateTask } from "@/tanstackQueries/useTaskQueries";
 
-const App = function () {
+const TaskInput = function () {
   const [title, setTitle] = useState("");
   const [noteText, setNoteText] = useState("");
   const [description, setDescription] = useState("");
@@ -98,4 +98,4 @@ const App = function () {
   );
 };
 
-export default App;
+export default TaskInput;
