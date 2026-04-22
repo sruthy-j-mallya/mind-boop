@@ -3,6 +3,8 @@
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/inter";
 @import "react-big-calendar/lib/css/react-big-calendar.css";
+@import "./react-big-calendar.css";
+@import "./tiptap.css";
 
 @custom-variant dark (&:is(.dark *));
 

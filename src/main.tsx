@@ -3,7 +3,6 @@ import ReactDOM from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Home from "./Home";
 import "./styles/index.css";
-import "./styles/tiptap.css";
 import { TooltipProvider } from "@/components/ui/Tooltip";
 
 const queryClient = new QueryClient();

@@ -1,3 +1,43 @@
 .rbc-time-header-cell {
   height: 100px;
 }
+
+.rbc-off-range-bg {
+  background-color: oklch(0.97 0 0);
+}
+
+.rbc-today {
+  background-color: oklch(0.95 0 0);
+}
+
+.dark .rbc-off-range-bg {
+  background-color: oklch(0.205 0 0);
+}
+
+.dark .rbc-today {
+  background-color: oklch(0.269 0 0);
+}
+
+.rbc-timeslot-group {
+  border-color: oklch(0.922 0 0);
+}
+
+.dark .rbc-timeslot-group {
+  border-color: oklch(1 0 0 / 10%);
+}
+
+.rbc-time-slot {
+  border-color: oklch(0.922 0 0);
+}
+
+.dark .rbc-time-slot {
+  border-color: oklch(1 0 0 / 10%);
+}
+
+.rbc-time-slot {
+  border-color: oklch(0.922 0 0);
+}
+
+.dark .rbc-time-slot {
+  border-color: oklch(1 0 0 / 10%);
+}
