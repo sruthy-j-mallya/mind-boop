@@ -22,12 +22,11 @@ const ThemeToggle = () => {
     <Button
       type="button"
       variant="ghost"
-      size="icon-sm"
       onClick={() => setIsDarkMode((value) => !value)}
       aria-label={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
-      className="text-muted-foreground hover:text-foreground"
+      className="text-muted-foreground hover:text-foreground size-12"
     >
-      {isDarkMode ? <Sun /> : <Moon />}
+      {isDarkMode ? <Sun className="size-6" /> : <Moon className="size-6" />}
     </Button>
   );
 };
