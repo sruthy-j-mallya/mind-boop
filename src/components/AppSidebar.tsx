@@ -6,9 +6,9 @@ import {
 } from "@/components/ui/Sidebar";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar";
-import Button from "./ui/Button";
 import { CalendarDays, Inbox } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
+import { Link } from "react-router-dom";
 
 const AppSidebar = () => (
   <Sidebar collapsible="none">
@@ -19,12 +19,12 @@ const AppSidebar = () => (
       </Avatar>
     </SidebarHeader>
     <SidebarContent className="flex flex-col items-center gap-2">
-      <Button className="size-12" type="button" variant="ghost">
-        <CalendarDays className="size-6" strokeWidth={1.5} />
-      </Button>
-      <Button className="size-12" type="button" variant="ghost">
-        <Inbox className="size-6" strokeWidth={1.5} />
-      </Button>
+      <Link to="/">
+        <CalendarDays className="m-4 size-6" strokeWidth={1.5} />
+      </Link>
+      <Link to="/inbox">
+        <Inbox className="m-4 size-6" strokeWidth={1.5} />
+      </Link>
     </SidebarContent>
     <SidebarFooter>
       <ThemeToggle />
