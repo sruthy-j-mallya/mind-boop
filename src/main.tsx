@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import App from "./App";
+import Home from "./Home";
 import "./styles/index.css";
 import "./styles/tiptap.css";
 import { TooltipProvider } from "@/components/ui/Tooltip";
@@ -12,7 +12,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <App />
+        <Home />
       </TooltipProvider>
     </QueryClientProvider>
   </React.StrictMode>,
