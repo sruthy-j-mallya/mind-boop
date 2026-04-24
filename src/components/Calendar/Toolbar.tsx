@@ -18,11 +18,13 @@ const Toolbar = ({
   handleViewChange,
   date,
   setDate,
+  onToggleTaskInput,
 }: {
   view: CalendarView;
   handleViewChange: (view: CalendarView) => void;
   date: Date;
   setDate: (date: Date) => void;
+  onToggleTaskInput: () => void;
 }) => {
   const header = date.toLocaleDateString("en-US", {
     month: "long",
@@ -60,7 +62,7 @@ const Toolbar = ({
       <h1 className="text-2xl font-bold">{header}</h1>
       {view === "day" && <WeekDayHeader date={date} />}
       <div className="flex items-center gap-2">
-        <Button variant="outline">
+        <Button variant="outline" onClick={onToggleTaskInput}>
           <Plus />
         </Button>
         <ButtonGroup>
