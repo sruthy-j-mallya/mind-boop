@@ -84,7 +84,7 @@ export const MarkdownEditor = ({
     <div
       id={id}
       className={cn(
-        "border-border bg-background overflow-hidden rounded-md border shadow-xs",
+        "border-border bg-background flex flex-col overflow-hidden rounded-md border shadow-xs",
         className,
       )}
     >
@@ -92,8 +92,8 @@ export const MarkdownEditor = ({
       <EditorContent
         editor={editor}
         className={cn(
-          "tiptap-editor min-h-[280px] px-3 py-2 text-[15px] leading-relaxed",
-          "[&_.ProseMirror]:min-h-[260px] [&_.ProseMirror]:outline-none",
+          "tiptap-editor min-h-0 flex-1 overflow-y-auto px-3 py-2 text-[15px] leading-relaxed",
+          "[&_.ProseMirror]:min-h-full [&_.ProseMirror]:outline-none",
         )}
       />
     </div>

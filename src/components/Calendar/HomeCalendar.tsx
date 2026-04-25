@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { Calendar } from "react-big-calendar";
-import TaskInput from "@/components/TaskInput";
 import Toolbar from "@/components/Calendar/Toolbar";
 import WeekDayHeader from "@/components/Calendar/WeekDayHeader";
 import { CalendarView } from "@/components/Calendar/types";
 import { calendarLocalizer } from "@/lib/calendarLocalizer";
+import TaskPanel from "../TaskPanel/TaskPanel";
 
 const HomeCalendar = () => {
   const [view, setView] = useState<CalendarView>("month");
@@ -29,9 +29,7 @@ const HomeCalendar = () => {
                 handleViewChange={handleView}
                 date={date}
                 setDate={setDate}
-                onToggleTaskInput={() =>
-                  setIsTaskInputVisible((visible) => !visible)
-                }
+                onAdd={() => setIsTaskInputVisible(true)}
               />
             ),
             week: {
@@ -43,8 +41,8 @@ const HomeCalendar = () => {
         />
       </div>
       {isTaskInputVisible && (
-        <aside className="bg-background h-full w-full max-w-md shrink-0 overflow-y-auto rounded-md border px-4 py-3">
-          <TaskInput />
+        <aside className="bg-background h-11/12 w-full max-w-md shrink-0 overflow-y-auto px-4 py-3">
+          <TaskPanel onClose={() => setIsTaskInputVisible(false)} />
         </aside>
       )}
     </div>
