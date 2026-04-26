@@ -49,7 +49,7 @@ const HomeCalendar = () => {
       {isTaskInputVisible && (
         <>
           <ResizableHandle />
-          <ResizablePanel className="bg-background h-11/12 shrink-0 overflow-y-auto px-2 py-3">
+          <ResizablePanel className="bg-background h-11/12 shrink-0 overflow-y-auto px-6 py-3">
             <TaskPanel onClose={() => setIsTaskInputVisible(false)} />
           </ResizablePanel>
         </>

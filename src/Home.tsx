@@ -5,7 +5,7 @@ import { Route, Routes } from "react-router-dom";
 import Inbox from "./components/Inbox";
 
 const Home = () => (
-  <div className="container flex max-h-screen gap-4 overflow-hidden">
+  <div className="flex max-h-screen gap-4 overflow-hidden">
     <div className="flex">
       <SidebarProvider>
         <AppSidebar />
