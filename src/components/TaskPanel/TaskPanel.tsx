@@ -65,11 +65,11 @@ const TaskPanel = ({ onClose }: { onClose: () => void }) => {
           <CardAction>
             <div className="flex flex-row-reverse gap-2">
               <Button variant="ghost" className="h-6 w-6" onClick={onClose}>
-                <X className="size-4 text-gray-800" />
+                <X className="text-foreground size-4" />
               </Button>
               {/* TODO: Add the logic to maximize the task into a separate window  */}
               <Button variant="ghost" className="h-6 w-6">
-                <Maximize className="size-4 text-gray-800" />
+                <Maximize className="text-foreground size-4" />
               </Button>
             </div>
           </CardAction>
