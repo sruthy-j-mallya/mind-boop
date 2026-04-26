@@ -6,6 +6,12 @@ import { CalendarView } from "@/components/Calendar/types";
 import { calendarLocalizer } from "@/lib/calendarLocalizer";
 import TaskPanel from "../TaskPanel/TaskPanel";
 
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/Resizable";
+
 const HomeCalendar = () => {
   const [view, setView] = useState<CalendarView>("month");
   const [date, setDate] = useState(new Date());
@@ -14,8 +20,8 @@ const HomeCalendar = () => {
   const handleView = (nextView: CalendarView) => setView(nextView);
 
   return (
-    <div className="flex h-full gap-4 overflow-hidden">
-      <div className="min-w-0 flex-1">
+    <ResizablePanelGroup className="flex h-full gap-4 overflow-hidden">
+      <ResizablePanel className="min-w-0 flex-1">
         <Calendar
           className="h-full"
           localizer={calendarLocalizer}
@@ -39,13 +45,16 @@ const HomeCalendar = () => {
             },
           }}
         />
-      </div>
+      </ResizablePanel>
       {isTaskInputVisible && (
-        <aside className="bg-background h-11/12 w-full max-w-md shrink-0 overflow-y-auto px-4 py-3">
-          <TaskPanel onClose={() => setIsTaskInputVisible(false)} />
-        </aside>
+        <>
+          <ResizableHandle />
+          <ResizablePanel className="bg-background h-11/12 w-full max-w-md shrink-0 overflow-y-auto px-4 py-3">
+            <TaskPanel onClose={() => setIsTaskInputVisible(false)} />
+          </ResizablePanel>
+        </>
       )}
-    </div>
+    </ResizablePanelGroup>
   );
 };
 
