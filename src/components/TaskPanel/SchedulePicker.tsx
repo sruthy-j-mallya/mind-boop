@@ -54,7 +54,7 @@ const SchedulePicker = () => {
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-fit">
-            <Tabs value={dueDateTab} className="w-100">
+            <Tabs value={dueDateTab}>
               <TabsList className="w-full">
                 <TabsTrigger onClick={() => setDueDateTab("date")} value="date">
                   Date
@@ -89,8 +89,8 @@ const SchedulePicker = () => {
                   </InputGroup>
                 </Field>
               </TabsContent>
-              <TabsContent value="duration">
-                <div className="flex flex-col gap-3">
+              <TabsContent className="space-y-4" value="duration">
+                <div className="flex flex-col gap-4">
                   <DateTimePicker
                     label="Start"
                     date={startDate}

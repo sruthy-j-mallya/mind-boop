@@ -34,13 +34,13 @@ const DateTimePicker = ({
 
   return (
     <div className="flex items-center gap-2">
-      <span className="shrink-0 text-sm font-medium">{label}</span>
+      <span className="w-10 text-sm font-medium">{label}</span>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
             variant="outline"
             id={`date-picker-${label}`}
-            className="justify-between font-normal"
+            className="w-32 justify-between font-normal"
           >
             <span className="truncate">
               {date ? dayjs(date).format("DD-MM-YYYY") : "Select date"}
