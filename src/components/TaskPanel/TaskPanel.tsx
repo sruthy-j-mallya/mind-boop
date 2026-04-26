@@ -28,13 +28,14 @@ const TaskPanel = ({ onClose }: { onClose: () => void }) => {
   const debouncedTitle = useDebounce(title, 500);
   const debouncedDescription = useDebounce(description, 500);
 
-  const createTask = useCreateTask((createdTaskId: string) => {
+  const createTaskMutation = useCreateTask((createdTaskId: string) => {
     setTaskId(createdTaskId);
-  }).mutate;
+  });
+  const createTask = createTaskMutation.mutate;
   const updateTask = useUpdateTask().mutate;
 
   useEffect(() => {
-    if (!debouncedTitle.trim() || taskId.length == 0) {
+    if (debouncedTitle.trim().length == 0 || taskId.length == 0) {
       return;
     }
 
@@ -46,16 +47,17 @@ const TaskPanel = ({ onClose }: { onClose: () => void }) => {
   }, [debouncedTitle, debouncedDescription, updateTask, taskId]);
 
   const handleCreateTask = () => {
-    if (!debouncedTitle.trim()) {
+    if (
+      debouncedTitle.trim().length == 0 ||
+      taskId.length != 0 ||
+      createTaskMutation.isPending
+    ) {
       return;
     }
 
-    createTask({
-      title: debouncedTitle,
-      description: debouncedDescription,
-    });
+    createTask(debouncedTitle);
 
-    // TODO: focus the description input
+    editorRef.current?.commands.focus();
   };
 
   return (

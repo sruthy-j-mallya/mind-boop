@@ -2,13 +2,13 @@ use rusqlite::{Connection, Result};
 use uuid::Uuid;
 
 #[tauri::command]
-pub async fn create_task(title: String, description: String) -> Result<String, String> {
+pub async fn create_task(title: String) -> Result<String, String> {
     let conn = Connection::open("mind-boop-local.db").unwrap();
     let id = Uuid::new_v4().to_string();
 
     let result = conn.execute(
-        "INSERT INTO tasks (id, title, description) VALUES (?1, ?2, ?3)",
-        (id.clone(), title, description),
+        "INSERT INTO tasks (id, title) VALUES (?1, ?2)",
+        (id.clone(), title),
     ).map_err(|e| e.to_string());
 
     if result.is_err() {
