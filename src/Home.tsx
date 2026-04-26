@@ -11,7 +11,7 @@ const Home = () => (
         <AppSidebar />
       </SidebarProvider>
     </div>
-    <div className="mt-4 h-dvh w-screen">
+    <div className="h-dvh w-screen">
       <Routes>
         <Route path="/" Component={HomeCalendar} />
         <Route path="/inbox" Component={Inbox} />

@@ -63,7 +63,7 @@ const TaskPanel = ({ onClose }: { onClose: () => void }) => {
       <CardHeader>
         <CardTitle>
           <CardAction>
-            <div className="mb-4 flex flex-row-reverse gap-2">
+            <div className="flex flex-row-reverse gap-2">
               <Button variant="ghost" className="h-6 w-6" onClick={onClose}>
                 <X className="size-4 text-gray-800" />
               </Button>

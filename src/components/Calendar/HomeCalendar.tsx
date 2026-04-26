@@ -21,7 +21,7 @@ const HomeCalendar = () => {
 
   return (
     <ResizablePanelGroup className="flex h-full gap-4 overflow-hidden">
-      <ResizablePanel className="min-w-0 flex-1">
+      <ResizablePanel className="mt-6 flex-1">
         <Calendar
           className="h-full"
           localizer={calendarLocalizer}
@@ -49,7 +49,7 @@ const HomeCalendar = () => {
       {isTaskInputVisible && (
         <>
           <ResizableHandle />
-          <ResizablePanel className="bg-background h-11/12 w-full max-w-md shrink-0 overflow-y-auto px-4 py-3">
+          <ResizablePanel className="bg-background h-11/12 shrink-0 overflow-y-auto px-2 py-3">
             <TaskPanel onClose={() => setIsTaskInputVisible(false)} />
           </ResizablePanel>
         </>
