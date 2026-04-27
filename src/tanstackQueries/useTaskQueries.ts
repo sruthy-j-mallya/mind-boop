@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { invoke } from "@tauri-apps/api/core";
 
 export type Task = {
@@ -21,16 +21,19 @@ export const useListTasks = () =>
     queryFn: () => invoke<Task[]>("list_tasks"),
   });
 
-export const useCreateTask = (onSuccess?: CreateTaskSuccessCallback) =>
-  useMutation<string, Error, string>({
+export const useCreateTask = (onSuccess?: CreateTaskSuccessCallback) => {
+  const queryClient = useQueryClient();
+  return useMutation<string, Error, string>({
     mutationFn: async (title) =>
       invoke<string>("create_task", {
         title,
       }),
     onSuccess: (taskId) => {
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
       onSuccess?.(taskId);
     },
   });
+};
 
 export const useUpdateTask = () =>
   useMutation({
