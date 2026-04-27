@@ -4,7 +4,7 @@ mod tasks;
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![tasks::create_task, tasks::update_task, tasks::list_tasks])
+        .invoke_handler(tauri::generate_handler![tasks::create_task, tasks::update_task, tasks::list_tasks, tasks::show_task])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

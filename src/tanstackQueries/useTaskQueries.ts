@@ -35,12 +35,25 @@ export const useCreateTask = (onSuccess?: CreateTaskSuccessCallback) => {
   });
 };
 
-export const useUpdateTask = () =>
-  useMutation({
+export const useShowTask = (id: string) =>
+  useQuery<Task>({
+    queryKey: ["tasks", id],
+    queryFn: () => invoke<Task>("show_task", { id }),
+    enabled: !!id,
+  });
+
+export const useUpdateTask = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
     mutationFn: async ({ id, title, description }: UpdateTaskPayload) =>
       invoke("update_task", {
         id,
         title,
         description,
       }),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["tasks", id] });
+    },
   });
+};

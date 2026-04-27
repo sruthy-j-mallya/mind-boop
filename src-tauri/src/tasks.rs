@@ -49,6 +49,23 @@ pub async fn create_task(title: String) -> Result<String, String> {
 }
 
 #[tauri::command]
+pub async fn show_task(id: String) -> Result<Task, String> {
+    let conn = Connection::open("mind-boop-local.db").map_err(|e| e.to_string())?;
+    let mut stmt = conn
+        .prepare("SELECT id, title, description FROM tasks WHERE id = ?1")
+        .map_err(|e| e.to_string())?;
+
+    stmt.query_row([id], |row| {
+        Ok(Task {
+            id: row.get(0)?,
+            title: row.get(1)?,
+            description: row.get(2)?,
+        })
+    })
+    .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
 pub async fn update_task(id: String, title: String, description: String) -> Result<String, String> {
     let conn = Connection::open("mind-boop-local.db").unwrap();
     let result = conn.execute(
