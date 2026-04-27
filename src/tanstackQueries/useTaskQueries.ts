@@ -1,4 +1,4 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { invoke } from "@tauri-apps/api/core";
 
 export type Task = {
@@ -14,6 +14,12 @@ type UpdateTaskPayload = {
   title: string;
   description: string;
 };
+
+export const useListTasks = () =>
+  useQuery<Task[]>({
+    queryKey: ["tasks"],
+    queryFn: () => invoke<Task[]>("list_tasks"),
+  });
 
 export const useCreateTask = (onSuccess?: CreateTaskSuccessCallback) =>
   useMutation<string, Error, string>({
