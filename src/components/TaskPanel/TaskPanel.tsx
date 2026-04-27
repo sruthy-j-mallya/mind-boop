@@ -15,7 +15,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/Card";
-import EstimationInput from "./Estimation";
+import EstimationInput from "./EstimationInput";
 import SchedulePicker from "./SchedulePicker";
 
 const TaskPanel = ({ onClose }: { onClose: () => void }) => {
