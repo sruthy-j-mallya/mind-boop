@@ -9,9 +9,10 @@ pub fn run() {
         .manage(db::init_db())
         .invoke_handler(tauri::generate_handler![
             tasks::create_task,
-            tasks::update_task,
+            tasks::update_task_title_and_description,
             tasks::list_tasks,
             tasks::show_task,
+            tasks::set_estimated_minutes,
             time_logs::create_time_log,
         ])
         .run(tauri::generate_context!())

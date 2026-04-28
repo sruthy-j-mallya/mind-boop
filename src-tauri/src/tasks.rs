@@ -9,13 +9,14 @@ pub struct Task {
     pub id: String,
     pub title: String,
     pub description: Option<String>,
+    pub estimated_minutes: u16,
 }
 
 #[tauri::command]
 pub async fn list_tasks(state: State<'_, DbState>) -> Result<Vec<Task>, String> {
     let conn = state.0.lock().map_err(|e| e.to_string())?;
     let mut stmt = conn
-        .prepare("SELECT id, title, description FROM tasks")
+        .prepare("SELECT id, title, description, estimated_minutes FROM tasks")
         .map_err(|e| e.to_string())?;
 
     let tasks = stmt
@@ -24,6 +25,7 @@ pub async fn list_tasks(state: State<'_, DbState>) -> Result<Vec<Task>, String> 
                 id: row.get(0)?,
                 title: row.get(1)?,
                 description: row.get(2)?,
+                estimated_minutes: row.get(3)?,
             })
         })
         .map_err(|e| e.to_string())?
@@ -50,7 +52,7 @@ pub async fn create_task(title: String, state: State<'_, DbState>) -> Result<Str
 pub async fn show_task(id: String, state: State<'_, DbState>) -> Result<Task, String> {
     let conn = state.0.lock().map_err(|e| e.to_string())?;
     let mut stmt = conn
-        .prepare("SELECT id, title, description FROM tasks WHERE id = ?1")
+        .prepare("SELECT id, title, description, estimated_minutes FROM tasks WHERE id = ?1")
         .map_err(|e| e.to_string())?;
 
     stmt.query_row([id], |row| {
@@ -58,13 +60,14 @@ pub async fn show_task(id: String, state: State<'_, DbState>) -> Result<Task, St
             id: row.get(0)?,
             title: row.get(1)?,
             description: row.get(2)?,
+            estimated_minutes: row.get(3)?,
         })
     })
     .map_err(|e| e.to_string())
 }
 
 #[tauri::command]
-pub async fn update_task(id: String, title: String, description: String, state: State<'_, DbState>) -> Result<String, String> {
+pub async fn update_task_title_and_description(id: String, title: String, description: String, state: State<'_, DbState>) -> Result<String, String> {
     let conn = state.0.lock().map_err(|e| e.to_string())?;
     let result = conn.execute(
         "UPDATE tasks SET title = ?1, description = ?2, updated_at = datetime('now') WHERE id = ?3",
@@ -75,5 +78,20 @@ pub async fn update_task(id: String, title: String, description: String, state: 
         return Err(result.err().unwrap().to_string());
     }
 
-    Ok(result.unwrap().to_string())
+    Ok("Task updated successfully".to_string())
+}
+
+#[tauri::command]
+pub async fn set_estimated_minutes(id: String, estimated_minutes: u16, state: State<'_, DbState>) -> Result<String, String> {
+    let conn = state.0.lock().map_err(|e| e.to_string())?;
+    let result = conn.execute(
+        "UPDATE tasks SET estimated_minutes = ?1,  updated_at = datetime('now') WHERE id = ?2",
+        (estimated_minutes, id),
+    ).map_err(|e| e.to_string());
+
+    if result.is_err() {
+        return Err(result.err().unwrap().to_string());
+    }
+
+    Ok("Estimation updated successfully".to_string())
 }

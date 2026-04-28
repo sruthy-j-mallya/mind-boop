@@ -22,17 +22,16 @@ const TaskPanel = ({ onClose }: { onClose: () => void }) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [taskId, setTaskId] = useState("");
-  const [estimateHours, setEstimateHours] = useState(0);
-  const [estimateMinutes, setEstimateMinutes] = useState(0);
   const editorRef = useRef<Editor | null>(null);
   const debouncedTitle = useDebounce(title, 500);
   const debouncedDescription = useDebounce(description, 500);
 
-  const createTaskMutation = useCreateTask((createdTaskId: string) => {
-    setTaskId(createdTaskId);
-  });
-  const createTask = createTaskMutation.mutate;
-  const updateTask = useUpdateTask().mutate;
+  const { mutate: createTask, isPending: isCreateTaskPending } = useCreateTask(
+    (createdTaskId: string) => {
+      setTaskId(createdTaskId);
+    },
+  );
+  const { mutate: updateTask } = useUpdateTask();
 
   useEffect(() => {
     if (debouncedTitle.trim().length == 0 || taskId.length == 0) {
@@ -50,7 +49,7 @@ const TaskPanel = ({ onClose }: { onClose: () => void }) => {
     if (
       debouncedTitle.trim().length == 0 ||
       taskId.length != 0 ||
-      createTaskMutation.isPending
+      isCreateTaskPending
     ) {
       return;
     }
@@ -102,12 +101,7 @@ const TaskPanel = ({ onClose }: { onClose: () => void }) => {
         />
       </CardContent>
       <CardFooter className="flex flex-row justify-between">
-        <EstimationInput
-          estimatedHours={estimateHours}
-          estimatedMinutes={estimateMinutes}
-          setEstimatedHours={setEstimateHours}
-          setEstimatedMinutes={setEstimateMinutes}
-        />
+        <EstimationInput taskId={taskId} />
         <SchedulePicker />
       </CardFooter>
     </Card>

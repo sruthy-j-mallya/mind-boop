@@ -5,6 +5,7 @@ export type Task = {
   id: string;
   title: string;
   description: string;
+  estimatedMinutes: number;
 };
 
 type CreateTaskSuccessCallback = (taskId: string) => void;
@@ -39,14 +40,29 @@ export const useShowTask = (id: string) =>
   useQuery<Task>({
     queryKey: ["tasks", id],
     queryFn: () => invoke<Task>("show_task", { id }),
-    enabled: !!id,
   });
+
+export const useSetEstimatedMinutes = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      id,
+      estimatedMinutes,
+    }: {
+      id: string;
+      estimatedMinutes: number;
+    }) => invoke("set_estimated_minutes", { id, estimatedMinutes }),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: ["tasks", id] });
+    },
+  });
+};
 
 export const useUpdateTask = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, title, description }: UpdateTaskPayload) =>
-      invoke("update_task", {
+      invoke("update_task_title_and_description", {
         id,
         title,
         description,
