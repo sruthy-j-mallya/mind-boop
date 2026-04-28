@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e \"const r = require\\('/Users/sruthyjmallya/Desktop/dev/hobby/mind-boop/node_modules/radix-ui'\\); console.log\\(Object.keys\\(r\\).filter\\(k => k.toLowerCase\\(\\).includes\\('switch'\\) || k.toLowerCase\\(\\).includes\\('toggle'\\) || k.toLowerCase\\(\\).includes\\('checkbox'\\)\\)\\)\")",
+      "Bash(npx eslint *)",
+      "Bash(npx tsc *)",
+      "Bash(node -e \"const rdp = require\\('/Users/sruthyjmallya/Desktop/dev/hobby/mind-boop/node_modules/react-day-picker'\\); console.log\\(Object.keys\\(rdp\\).filter\\(k => k.match\\(/Root|Chevron|Components|CustomComponents/\\)\\)\\)\")",
+      "Bash(node -e \"const r = require\\('radix-ui'\\); console.log\\(Object.keys\\(r\\).filter\\(k => k.toLowerCase\\(\\).includes\\('label'\\)\\)\\)\")",
+      "Bash(node -e \"const r = require\\('radix-ui'\\); console.log\\(typeof r.Label, Object.keys\\(r.Label || {}\\)\\)\")",
+      "Bash(npm run *)",
+      "Bash(ln -s ../.cursor/commands /Users/sruthyjmallya/Desktop/dev/hobby/mind-boop/.claude/commands)",
+      "Bash(cargo build *)",
+      "Bash(cp /Users/sruthyjmallya/Desktop/dev/hobby/mind-boop/.claude/settings.local.json /tmp/claude_settings_backup.json)",
+      "Read(//tmp/**)"
+    ]
+  }
+}
