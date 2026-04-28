@@ -67,20 +67,26 @@ const EstimationInput = ({ taskId }: { taskId: string }) => {
 
   return (
     <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-      <div className="flex flex-row items-center">
-        <PopoverTrigger asChild>
-          <Button disabled={taskId == ""} type="button" variant="ghost">
-            {estimatedHours == 0 && estimatedMinutes == 0
-              ? "No Estimate"
-              : humanizedEstimationLabel()}
-          </Button>
-        </PopoverTrigger>
-        {!(taskId == "") && !(estimatedHours == 0 && estimatedMinutes == 0) && (
-          <Button type="reset" variant="ghost" onClick={handleClear}>
-            <X className="h-4 w-4" />
-          </Button>
-        )}
-      </div>
+      <PopoverTrigger asChild>
+        <Button disabled={taskId == ""} type="button" variant="ghost">
+          {estimatedHours == 0 && estimatedMinutes == 0
+            ? "No Estimate"
+            : humanizedEstimationLabel()}
+          {!(taskId == "") &&
+            !(estimatedHours == 0 && estimatedMinutes == 0) && (
+              <span
+                role="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleClear();
+                }}
+                className="ml-1 rounded-full p-0.5 hover:bg-amber-800"
+              >
+                <X className="h-3 w-3" />
+              </span>
+            )}
+        </Button>
+      </PopoverTrigger>
       <PopoverContent onBlur={handleSubmit} className="w-48">
         <PopoverHeader>
           <PopoverTitle>Estimate</PopoverTitle>
