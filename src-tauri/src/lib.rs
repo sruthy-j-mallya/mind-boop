@@ -13,6 +13,7 @@ pub fn run() {
             tasks::list_tasks,
             tasks::show_task,
             tasks::set_estimated_minutes,
+            tasks::set_task_schedule,
             time_logs::create_time_log,
         ])
         .run(tauri::generate_context!())

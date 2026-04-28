@@ -95,3 +95,22 @@ pub async fn set_estimated_minutes(id: String, estimated_minutes: u16, state: St
 
     Ok("Estimation updated successfully".to_string())
 }
+
+#[tauri::command]
+pub async fn set_task_schedule(
+    id: String,
+    is_duration: bool,
+    is_all_day: bool,
+    starts_at: Option<String>,
+    starts_on: Option<String>,
+    ends_at: Option<String>,
+    ends_on: Option<String>,
+    state: State<'_, DbState>,
+) -> Result<String, String> {
+    let conn = state.0.lock().map_err(|e| e.to_string())?;
+    conn.execute(
+        "UPDATE tasks SET is_duration = ?1, is_all_day = ?2, starts_at = ?3, starts_on = ?4, ends_at = ?5, ends_on = ?6, updated_at = datetime('now') WHERE id = ?7",
+        (is_duration as i32, is_all_day as i32, starts_at, starts_on, ends_at, ends_on, id),
+    ).map_err(|e| e.to_string())?;
+    Ok("Schedule updated successfully".to_string())
+}

@@ -102,7 +102,7 @@ const TaskPanel = ({ onClose }: { onClose: () => void }) => {
       </CardContent>
       <CardFooter className="flex flex-row justify-between">
         <EstimationInput taskId={taskId} />
-        <SchedulePicker />
+        <SchedulePicker taskId={taskId} />
       </CardFooter>
     </Card>
   );

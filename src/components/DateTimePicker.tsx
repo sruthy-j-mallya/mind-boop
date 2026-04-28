@@ -17,7 +17,7 @@ interface DateTimePickerProps {
   label: string;
   date: Date | undefined;
   onDateChange: (date: Date | undefined) => void;
-  time: string;
+  time: string | undefined;
   onTimeChange: (time: string) => void;
   allDay?: boolean;
 }

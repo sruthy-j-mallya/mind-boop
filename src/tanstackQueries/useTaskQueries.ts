@@ -58,6 +58,43 @@ export const useSetEstimatedMinutes = () => {
   });
 };
 
+type SetTaskSchedulePayload = {
+  id: string;
+  isDuration: boolean;
+  isAllDay: boolean;
+  startsAt?: string;
+  startsOn?: string;
+  endsAt?: string;
+  endsOn?: string;
+};
+
+export const useSetTaskSchedule = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      id,
+      isDuration,
+      isAllDay,
+      startsAt,
+      startsOn,
+      endsAt,
+      endsOn,
+    }: SetTaskSchedulePayload) =>
+      invoke("set_task_schedule", {
+        id,
+        isDuration,
+        isAllDay,
+        startsAt: startsAt ?? null,
+        startsOn: startsOn ?? null,
+        endsAt: endsAt ?? null,
+        endsOn: endsOn ?? null,
+      }),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: ["tasks", id] });
+    },
+  });
+};
+
 export const useUpdateTask = () => {
   const queryClient = useQueryClient();
   return useMutation({
