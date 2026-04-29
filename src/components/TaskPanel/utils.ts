@@ -4,6 +4,7 @@ const toDateString = (date: Date) => dayjs(date).format("DD-MM-YYYY");
 
 type CommittedSchedule = {
   isDuration: boolean;
+  isAllDay: boolean;
   startsOn?: Date;
   startsAt?: string;
   endsOn?: Date;
@@ -19,7 +20,7 @@ const getDayLabel = (date: dayjs.Dayjs): string => {
 };
 
 const formatScheduleLabel = (schedule: CommittedSchedule): string => {
-  const { isDuration, startsOn, startsAt, endsOn, endsAt } = schedule;
+  const { isDuration, isAllDay, startsOn, startsAt, endsOn, endsAt } = schedule;
 
   if (!startsOn) return "Due Date";
 
@@ -59,5 +60,13 @@ const getNearestHour = () => {
   };
 };
 
-export { toDateString, getNearestHour, formatScheduleLabel };
+const hourEndsAt = (startsOn: Date, startsAt: string) => {
+  const [hours, minutes] = startsAt.split(":").map(Number);
+  const endDateTime = dayjs(startsOn)
+    .hour(hours + 1)
+    .minute(minutes);
+  return { endsOn: endDateTime.toDate(), endsAt: endDateTime.format("HH:mm") };
+};
+
+export { toDateString, getNearestHour, formatScheduleLabel, hourEndsAt };
 export type { CommittedSchedule };

@@ -20,28 +20,32 @@ import { useSetTaskSchedule } from "@/tanstackQueries/useTaskQueries";
 import TimerControlDialog from "@/components/Timer/TimerControlDialog";
 import {
   toDateString,
-  getNearestHour,
   formatScheduleLabel,
   type CommittedSchedule,
 } from "./utils";
+import useScheduleStore from "@/stores/useScheduleStore";
 
 type Props = { taskId: string };
 
 const SchedulePicker = ({ taskId }: Props) => {
   const {
-    startsOn: initialStartsOn,
-    startsAt: initialStartsAt,
-    endsOn: initialEndsOn,
-    endsAt: initialEndsAt,
-  } = getNearestHour();
+    scheduleType,
+    isAllDay,
+    startsOn,
+    startsAt,
+    endsOn,
+    endsAt,
+    setStartsOn,
+    setStartsAt,
+    setEndsOn,
+    setEndsAt,
+    initStartsAt,
+    toggleIsAllDay,
+    changeScheduleType,
+    resetSelections,
+  } = useScheduleStore();
 
   const [taskUrgency, setTaskUrgency] = useState<"now" | "later">("now");
-  const [scheduleType, setScheduleType] = useState<"date" | "duration">("date");
-  const [isAllDay, setIsAllDay] = useState(false);
-  const [startsOn, setStartsOn] = useState<Date | undefined>(undefined);
-  const [startsAt, setStartsAt] = useState<string | undefined>(undefined);
-  const [endsOn, setEndsOn] = useState<Date | undefined>(initialEndsOn);
-  const [endsAt, setEndsAt] = useState<string | undefined>(initialEndsAt);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isTimerDialogOpen, setIsTimerDialogOpen] = useState(false);
   const [committedSchedule, setCommittedSchedule] =
@@ -50,11 +54,7 @@ const SchedulePicker = ({ taskId }: Props) => {
   const { mutate: setTaskSchedule } = useSetTaskSchedule();
 
   const handleClearSchedule = () => {
-    // TODO: Better state management
-    setStartsAt(undefined);
-    setStartsOn(undefined);
-    setEndsOn(initialEndsOn);
-    setEndsAt(initialEndsAt);
+    resetSelections();
     setCommittedSchedule(null);
     setTaskSchedule({
       id: taskId,
@@ -68,45 +68,23 @@ const SchedulePicker = ({ taskId }: Props) => {
 
     const isDuration = scheduleType == "duration";
 
-    if (!isDuration) {
-      setTaskSchedule({
-        id: taskId,
-        isDuration,
-        isAllDay,
-        startsOn: startsOn ? toDateString(startsOn) : startsOn,
-        startsAt,
-      });
-      setCommittedSchedule({ isDuration, startsOn, startsAt });
-      setIsPopoverOpen(false);
-      return;
-    }
-
-    if (isAllDay) {
-      setTaskSchedule({
-        id: taskId,
-        isDuration,
-        isAllDay,
-        startsOn: startsOn ? toDateString(startsOn) : startsOn,
-        endsOn: endsOn ? toDateString(endsOn) : endsOn,
-      });
-    } else {
-      setTaskSchedule({
-        id: taskId,
-        isDuration,
-        isAllDay,
-        startsOn: startsOn ? toDateString(startsOn) : startsOn,
-        startsAt,
-        endsOn: endsOn ? toDateString(endsOn) : endsOn,
-        endsAt,
-      });
-    }
+    setTaskSchedule({
+      id: taskId,
+      isDuration,
+      isAllDay,
+      startsOn: startsOn ? toDateString(startsOn) : startsOn,
+      startsAt,
+      endsOn: endsOn ? toDateString(endsOn) : endsOn,
+      endsAt,
+    });
 
     setCommittedSchedule({
       isDuration,
+      isAllDay,
       startsOn,
       startsAt,
       endsOn,
-      endsAt: isAllDay ? undefined : endsAt,
+      endsAt,
     });
     setIsPopoverOpen(false);
   };
@@ -148,17 +126,13 @@ const SchedulePicker = ({ taskId }: Props) => {
               <Tabs value={scheduleType}>
                 <TabsList className="w-full">
                   <TabsTrigger
-                    onClick={() => setScheduleType("date")}
+                    onClick={() => changeScheduleType("date")}
                     value="date"
                   >
                     Date
                   </TabsTrigger>
                   <TabsTrigger
-                    onClick={() => {
-                      setScheduleType("duration");
-                      if (!startsOn) setStartsOn(initialStartsOn);
-                      if (!startsAt) setStartsAt(initialStartsAt);
-                    }}
+                    onClick={() => changeScheduleType("duration")}
                     value="duration"
                   >
                     Duration
@@ -177,7 +151,7 @@ const SchedulePicker = ({ taskId }: Props) => {
                       <Button
                         type="button"
                         variant="outline"
-                        onClick={() => setStartsAt(initialStartsAt)}
+                        onClick={initStartsAt}
                         className="text-muted-foreground hover:text-foreground flex items-center gap-1.5 text-sm"
                       >
                         <Clock2Icon className="h-4 w-4" />
@@ -234,7 +208,7 @@ const SchedulePicker = ({ taskId }: Props) => {
                   <Field orientation="horizontal">
                     <Switch
                       checked={isAllDay}
-                      onCheckedChange={setIsAllDay}
+                      onCheckedChange={toggleIsAllDay}
                       id="all-day"
                       size="sm"
                     />
