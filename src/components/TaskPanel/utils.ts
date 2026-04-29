@@ -22,27 +22,38 @@ const getDayLabel = (date: dayjs.Dayjs): string => {
 const formatScheduleLabel = (schedule: CommittedSchedule): string => {
   const { isDuration, isAllDay, startsOn, startsAt, endsOn, endsAt } = schedule;
 
-  if (!startsOn) return "Due Date";
-
-  const start = dayjs(startsOn);
-  const startDateLabel = `${getDayLabel(start)}, ${start.format("MMM D")}`;
-
-  if (!startsAt) return startDateLabel;
-
-  const startTime = dayjs(`2000-01-01T${startsAt}`).format("h:mmA");
-
-  if (!isDuration || !endsAt) return `${startDateLabel}, ${startTime}`;
-
-  const end = endsOn ? dayjs(endsOn) : start;
-  const isSameDay = end.isSame(start, "day");
-  const endTime = dayjs(`2000-01-01T${endsAt}`).format("h:mmA");
-
-  if (isSameDay) {
-    return `${startDateLabel}, ${startTime}-${endTime}`;
+  if (!startsOn) {
+    return "Due Date";
   }
 
-  const endDateLabel = `${getDayLabel(end)}, ${end.format("MMM D")}`;
-  return `${startDateLabel}, ${startTime} - ${endDateLabel}, ${endTime}`;
+  const start = dayjs(startsOn);
+  const dayLabel = getDayLabel(start);
+  const monthDay = start.format("MMM D");
+  const formatTime = (date: Date, time: string) => {
+    const [hours, minutes] = time.split(":").map(Number);
+    return dayjs(date).hour(hours).minute(minutes).format("h:mmA");
+  };
+
+  if (!isDuration) {
+    if (startsAt) {
+      return `${dayLabel}, ${monthDay}, ${formatTime(startsOn, startsAt)}`;
+    } else {
+      return `${dayLabel}, ${monthDay}`;
+    }
+  }
+
+  if (isAllDay) {
+    if (!endsOn || dayjs(endsOn).isSame(start, "day")) {
+      return `${dayLabel}, ${monthDay}`;
+    }
+    return `${monthDay} - ${dayjs(endsOn).format("MMM D")}`;
+  } else {
+    const startPart = `${monthDay}, ${startsAt ? formatTime(startsOn, startsAt) : ""}`;
+    const endPart = endsOn
+      ? `${dayjs(endsOn).format("MMM D")}, ${endsAt ? formatTime(endsOn, endsAt) : ""}`
+      : "";
+    return `${startPart} - ${endPart}`;
+  }
 };
 
 const getNearestHour = () => {
