@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CalendarDays, Clock2Icon } from "lucide-react";
+import { CalendarDays, Clock2Icon, X } from "lucide-react";
 import { Calendar } from "@/components/ui/Calendar";
 import Button from "../ui/Button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/Tabs";
@@ -18,7 +18,12 @@ import { FieldLabel, Field } from "@/components/ui/Field";
 import Switch from "../ui/Switch";
 import { useSetTaskSchedule } from "@/tanstackQueries/useTaskQueries";
 import TimerControlDialog from "@/components/Timer/TimerControlDialog";
-import { toDateString, getNearestHour } from "./utils";
+import {
+  toDateString,
+  getNearestHour,
+  formatScheduleLabel,
+  type CommittedSchedule,
+} from "./utils";
 
 type Props = { taskId: string };
 
@@ -33,22 +38,24 @@ const SchedulePicker = ({ taskId }: Props) => {
   const [taskUrgency, setTaskUrgency] = useState<"now" | "later">("now");
   const [scheduleType, setScheduleType] = useState<"date" | "duration">("date");
   const [isAllDay, setIsAllDay] = useState(false);
-  const [startsOn, setStartsOn] = useState<Date | undefined>(initialStartsOn);
-  const [startsAt, setStartsAt] = useState<string | undefined>(initialStartsAt);
+  const [startsOn, setStartsOn] = useState<Date | undefined>(undefined);
+  const [startsAt, setStartsAt] = useState<string | undefined>(undefined);
   const [endsOn, setEndsOn] = useState<Date | undefined>(initialEndsOn);
   const [endsAt, setEndsAt] = useState<string | undefined>(initialEndsAt);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isTimerDialogOpen, setIsTimerDialogOpen] = useState(false);
+  const [committedSchedule, setCommittedSchedule] =
+    useState<CommittedSchedule | null>(null);
 
   const { mutate: setTaskSchedule } = useSetTaskSchedule();
 
   const handleClearSchedule = () => {
     // TODO: Better state management
-    // A better indicator when time is undefined in UI
     setStartsAt(undefined);
     setStartsOn(undefined);
-    setEndsOn(undefined);
-    setEndsAt(undefined);
+    setEndsOn(initialEndsOn);
+    setEndsAt(initialEndsAt);
+    setCommittedSchedule(null);
     setTaskSchedule({
       id: taskId,
       isDuration: false,
@@ -69,6 +76,8 @@ const SchedulePicker = ({ taskId }: Props) => {
         startsOn: startsOn ? toDateString(startsOn) : startsOn,
         startsAt,
       });
+      setCommittedSchedule({ isDuration, startsOn, startsAt });
+      setIsPopoverOpen(false);
       return;
     }
 
@@ -92,12 +101,19 @@ const SchedulePicker = ({ taskId }: Props) => {
       });
     }
 
+    setCommittedSchedule({
+      isDuration,
+      startsOn,
+      startsAt,
+      endsOn,
+      endsAt: isAllDay ? undefined : endsAt,
+    });
     setIsPopoverOpen(false);
   };
 
   return (
     <>
-      <div className="flex w-46 flex-row gap-2">
+      <div className="flex min-w-0 flex-row gap-2">
         <Select
           value={taskUrgency}
           onValueChange={(value) => setTaskUrgency(value as "now" | "later")}
@@ -119,11 +135,13 @@ const SchedulePicker = ({ taskId }: Props) => {
         ) : (
           <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
             <PopoverTrigger>
-              <Button variant="outline">
-                <CalendarDays />
-                Due Date
-                {/* TODO: Show Due date text when no date/duration is selected,
-                else show the selected values in Readable format */}
+              <Button variant="outline" className="min-w-0 overflow-hidden">
+                <CalendarDays className="shrink-0" />
+                <span className="truncate">
+                  {committedSchedule
+                    ? formatScheduleLabel(committedSchedule)
+                    : "Due Date"}
+                </span>
               </Button>
             </PopoverTrigger>
             <PopoverContent className="mx-4 w-fit">
@@ -136,7 +154,11 @@ const SchedulePicker = ({ taskId }: Props) => {
                     Date
                   </TabsTrigger>
                   <TabsTrigger
-                    onClick={() => setScheduleType("duration")}
+                    onClick={() => {
+                      setScheduleType("duration");
+                      if (!startsOn) setStartsOn(initialStartsOn);
+                      if (!startsAt) setStartsAt(initialStartsAt);
+                    }}
                     value="duration"
                   >
                     Duration
@@ -150,21 +172,44 @@ const SchedulePicker = ({ taskId }: Props) => {
                     className="p-0"
                     fixedWeeks
                   />
-                  <Field className="min-w-0">
-                    <FieldLabel htmlFor="time">Time</FieldLabel>
-                    <InputGroup>
-                      <InputGroupInput
-                        id="time"
-                        type="time"
-                        step="60"
-                        value={startsAt}
-                        onChange={(e) => setStartsAt(e.target.value)}
-                        className="appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
-                      />
-                      <InputGroupAddon>
-                        <Clock2Icon className="text-muted-foreground" />
-                      </InputGroupAddon>
-                    </InputGroup>
+                  <Field className="mt-4 min-w-0">
+                    {startsAt === undefined ? (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setStartsAt(initialStartsAt)}
+                        className="text-muted-foreground hover:text-foreground flex items-center gap-1.5 text-sm"
+                      >
+                        <Clock2Icon className="h-4 w-4" />
+                        <span>Time</span>
+                      </Button>
+                    ) : (
+                      <>
+                        <div className="flex items-center gap-1">
+                          <InputGroup>
+                            <InputGroupInput
+                              id="time"
+                              type="time"
+                              step="60"
+                              value={startsAt}
+                              onChange={(e) => setStartsAt(e.target.value)}
+                              className="appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
+                            />
+                            <InputGroupAddon>
+                              <Clock2Icon className="text-muted-foreground" />
+                            </InputGroupAddon>
+                          </InputGroup>
+                          <Button
+                            variant="ghost"
+                            type="button"
+                            onClick={() => setStartsAt(undefined)}
+                            className="text-muted-foreground hover:text-foreground"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </>
+                    )}
                   </Field>
                 </TabsContent>
                 <TabsContent className="space-y-4" value="duration">
