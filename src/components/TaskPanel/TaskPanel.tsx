@@ -17,11 +17,13 @@ import {
 } from "@/components/ui/Card";
 import EstimationInput from "./EstimationInput";
 import SchedulePicker from "./SchedulePicker";
+import TimerControlDialog from "@/components/Timer/TimerControlDialog";
 
 const TaskPanel = ({ onClose }: { onClose: () => void }) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [taskId, setTaskId] = useState("");
+  const [isTimerDialogOpen, setIsTimerDialogOpen] = useState(false);
   const editorRef = useRef<Editor | null>(null);
   const debouncedTitle = useDebounce(title, 500);
   const debouncedDescription = useDebounce(description, 500);
@@ -63,14 +65,14 @@ const TaskPanel = ({ onClose }: { onClose: () => void }) => {
     <Card className="h-full">
       <CardHeader>
         <CardTitle>
-          <CardAction>
-            <div className="flex flex-row-reverse gap-2">
-              <Button variant="ghost" className="h-6 w-6" onClick={onClose}>
-                <X className="text-foreground size-4" />
-              </Button>
-              {/* TODO: Add the logic to maximize the task into a separate window  */}
+          <CardAction className="flex flex-row justify-between">
+            <SchedulePicker taskId={taskId} />
+            <div className="flex items-center gap-2">
               <Button variant="ghost" className="h-6 w-6">
                 <Maximize className="text-foreground size-4" />
+              </Button>
+              <Button variant="ghost" className="h-6 w-6" onClick={onClose}>
+                <X className="text-foreground size-4" />
               </Button>
             </div>
           </CardAction>
@@ -88,7 +90,7 @@ const TaskPanel = ({ onClose }: { onClose: () => void }) => {
             placeholder="What are you working on?"
             aria-label="Task title"
             autoFocus
-            className="border-border placeholder:text-muted-foreground w-full rounded-none border-0 border-b bg-transparent px-0 py-2 text-2xl font-semibold tracking-tight shadow-none outline-none focus-visible:ring-0 focus-visible:outline-none"
+            className="border-border placeholder:text-muted-foreground w-full rounded-none border-0 border-b bg-transparent px-0 py-2 font-normal shadow-none outline-none focus-visible:ring-0 focus-visible:outline-none"
           />
         </CardTitle>
       </CardHeader>
@@ -102,8 +104,14 @@ const TaskPanel = ({ onClose }: { onClose: () => void }) => {
       </CardContent>
       <CardFooter className="flex flex-row justify-between">
         <EstimationInput taskId={taskId} />
-        <SchedulePicker taskId={taskId} />
+        <Button onClick={() => setIsTimerDialogOpen(true)} disabled={!taskId}>
+          Start now
+        </Button>
       </CardFooter>
+      <TimerControlDialog
+        open={isTimerDialogOpen}
+        onOpenChange={setIsTimerDialogOpen}
+      />
     </Card>
   );
 };

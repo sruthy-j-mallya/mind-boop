@@ -65,15 +65,25 @@ const EstimationInput = ({ taskId }: { taskId: string }) => {
     });
   };
 
+  const hasEstimation = !(estimatedHours === 0 && estimatedMinutes === 0);
+
   return (
     <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
       <PopoverTrigger asChild>
-        <Button disabled={taskId == ""} type="button" variant="ghost">
-          {estimatedHours == 0 && estimatedMinutes == 0
-            ? "No Estimate"
-            : humanizedEstimationLabel()}
-          {!(taskId == "") &&
-            !(estimatedHours == 0 && estimatedMinutes == 0) && (
+        <div className="flex flex-col">
+          {hasEstimation && (
+            <span className="text-muted-foreground text-xs">Effort</span>
+          )}
+          <div className="flex items-center">
+            <Button
+              className="p-0"
+              disabled={taskId == ""}
+              type="button"
+              variant="link"
+            >
+              {hasEstimation ? humanizedEstimationLabel() : "No Estimate"}
+            </Button>
+            {!(taskId == "") && hasEstimation && (
               <span
                 role="button"
                 onClick={(e) => {
@@ -85,7 +95,8 @@ const EstimationInput = ({ taskId }: { taskId: string }) => {
                 <X className="h-3 w-3" />
               </span>
             )}
-        </Button>
+          </div>
+        </div>
       </PopoverTrigger>
       <PopoverContent onBlur={handleSubmit} className="w-48">
         <PopoverHeader>
@@ -97,6 +108,7 @@ const EstimationInput = ({ taskId }: { taskId: string }) => {
               <Input
                 type="number"
                 min={0}
+                value={estimatedHours}
                 onChange={(e) => {
                   const hours = Math.max(0, Number(e.target.value));
                   setEstimatedHours(hours);
@@ -109,6 +121,7 @@ const EstimationInput = ({ taskId }: { taskId: string }) => {
                 type="number"
                 min={0}
                 max={59}
+                value={estimatedMinutes}
                 onChange={(e) => {
                   const minutes = Math.min(
                     59,
