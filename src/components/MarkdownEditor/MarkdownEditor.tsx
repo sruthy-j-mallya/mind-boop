@@ -7,7 +7,8 @@ import TaskList from "@tiptap/extension-task-list";
 import Underline from "@tiptap/extension-underline";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import { useEffect, type MutableRefObject } from "react";
+import { Type } from "lucide-react";
+import React, { useEffect, useState } from "react";
 import { Markdown } from "tiptap-markdown";
 
 import { MarkdownEditorToolbar } from "@/components/MarkdownEditor/ToolBar/MarkdownEditorToolbar";
@@ -20,10 +21,12 @@ export const MarkdownEditor = ({
   onMarkdownChange,
 }: {
   className?: string;
-  editorRef?: MutableRefObject<Editor | null>;
+  editorRef?: React.MutableRefObject<Editor | null>;
   id?: string;
   onMarkdownChange?: (markdown: string) => void;
 }) => {
+  const [showToolbar, setShowToolbar] = useState(false);
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -39,8 +42,7 @@ export const MarkdownEditor = ({
       TaskList,
       TaskItem.configure({ nested: true }),
       Placeholder.configure({
-        placeholder:
-          "Describe the task… Type **markdown** or use the toolbar — headings, lists, links, code, and more.",
+        placeholder: "Describe the task",
       }),
       Markdown,
     ],
@@ -83,19 +85,29 @@ export const MarkdownEditor = ({
   return (
     <div
       id={id}
-      className={cn(
-        "border-border bg-background flex flex-col overflow-hidden rounded-md border shadow-xs",
-        className,
-      )}
+      className={cn("bg-background flex flex-col overflow-hidden", className)}
     >
-      <MarkdownEditorToolbar editor={editor} />
       <EditorContent
         editor={editor}
         className={cn(
-          "tiptap-editor min-h-0 flex-1 overflow-y-auto px-3 py-2 text-[15px] leading-relaxed",
+          "tiptap-editor min-h-0 flex-1 overflow-y-auto text-[15px] leading-relaxed",
           "[&_.ProseMirror]:min-h-full [&_.ProseMirror]:outline-none",
         )}
       />
+      {showToolbar && <MarkdownEditorToolbar editor={editor} />}
+      <div className="flex items-center justify-end px-2 py-1">
+        <button
+          type="button"
+          onClick={() => setShowToolbar((prev) => !prev)}
+          className={cn(
+            "text-muted-foreground hover:text-foreground flex items-center gap-1.5 rounded px-2 py-1 text-xs transition-colors",
+            showToolbar && "text-foreground bg-muted",
+          )}
+        >
+          <Type className="h-3.5 w-3.5" />
+          Text Format
+        </button>
+      </div>
     </div>
   );
 };

@@ -27,7 +27,7 @@ export const MarkdownEditorToolbar = ({ editor }: { editor: Editor }) => (
   <div
     role="toolbar"
     aria-label="Text formatting"
-    className="border-border flex flex-wrap items-center gap-0.5 border-b px-1 py-1"
+    className="border-border flex flex-wrap items-center gap-0.5 border-t px-1 py-1"
   >
     <ToolbarButton
       title="Undo (⌘Z)"
