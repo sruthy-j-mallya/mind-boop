@@ -3,7 +3,7 @@ import dayjs from "@/lib/dayjs";
 const toDateString = (date: Date) => dayjs(date).format("DD-MM-YYYY");
 
 type CommittedSchedule = {
-  isDuration: boolean;
+  scheduleType: "date" | "duration";
   isAllDay: boolean;
   startsOn?: Date;
   startsAt?: string;
@@ -20,7 +20,10 @@ const getDayLabel = (date: dayjs.Dayjs): string => {
 };
 
 const formatScheduleLabel = (schedule: CommittedSchedule): string => {
-  const { isDuration, isAllDay, startsOn, startsAt, endsOn, endsAt } = schedule;
+  const { scheduleType, isAllDay, startsOn, startsAt, endsOn, endsAt } =
+    schedule;
+
+  const isDuration = scheduleType == "duration";
 
   if (!startsOn) {
     return "Due Date";

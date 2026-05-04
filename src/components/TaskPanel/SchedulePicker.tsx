@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CalendarDays, Clock2Icon, X } from "lucide-react";
 import { Calendar } from "@/components/ui/Calendar";
 import Button from "../ui/Button";
@@ -20,12 +20,7 @@ type Props = { taskId: string };
 
 const SchedulePicker = ({ taskId }: Props) => {
   const {
-    scheduleType,
-    isAllDay,
-    startsOn,
-    startsAt,
-    endsOn,
-    endsAt,
+    schedule,
     setStartsOn,
     setStartsAt,
     setEndsOn,
@@ -38,13 +33,18 @@ const SchedulePicker = ({ taskId }: Props) => {
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [committedSchedule, setCommittedSchedule] =
-    useState<CommittedSchedule | null>(null);
+    useState<CommittedSchedule | null>(schedule);
 
   const { mutate: setTaskSchedule } = useSetTaskSchedule();
+
+  const { scheduleType, isAllDay, startsOn, startsAt, endsOn, endsAt } =
+    schedule;
 
   const handleClearSchedule = () => {
     resetSelections();
     setCommittedSchedule(null);
+
+    if (!taskId) return;
     setTaskSchedule({
       id: taskId,
       isDuration: false,
@@ -53,8 +53,26 @@ const SchedulePicker = ({ taskId }: Props) => {
   };
 
   const handleSetSchedule = () => {
-    if (!taskId) return;
+    setCommittedSchedule(schedule);
 
+    if (taskId) {
+      const isDuration = scheduleType == "duration";
+
+      setTaskSchedule({
+        id: taskId,
+        isDuration,
+        isAllDay,
+        startsOn: startsOn ? toDateString(startsOn) : startsOn,
+        startsAt,
+        endsOn: endsOn ? toDateString(endsOn) : endsOn,
+        endsAt,
+      });
+    }
+
+    setIsPopoverOpen(false);
+  };
+
+  useEffect(() => {
     const isDuration = scheduleType == "duration";
 
     setTaskSchedule({
@@ -66,27 +84,26 @@ const SchedulePicker = ({ taskId }: Props) => {
       endsOn: endsOn ? toDateString(endsOn) : endsOn,
       endsAt,
     });
-
-    setCommittedSchedule({
-      isDuration,
-      isAllDay,
-      startsOn,
-      startsAt,
-      endsOn,
-      endsAt,
-    });
-    setIsPopoverOpen(false);
-  };
+  }, [
+    taskId,
+    scheduleType,
+    isAllDay,
+    startsOn,
+    startsAt,
+    endsOn,
+    endsAt,
+    setTaskSchedule,
+  ]);
 
   return (
     <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
       <PopoverTrigger>
         <Button
           variant="link"
-          className="min-w-0 overflow-hidden p-0 text-xs font-normal text-gray-500"
+          className="min-w-0 overflow-hidden p-0 text-xs font-normal text-blue-500"
         >
           <CalendarDays className="shrink-0" />
-          <span className="truncate">
+          <span>
             {committedSchedule
               ? formatScheduleLabel(committedSchedule)
               : "Due Date"}
@@ -190,15 +207,10 @@ const SchedulePicker = ({ taskId }: Props) => {
             className="mt-3"
             variant="secondary"
             onClick={handleClearSchedule}
-            disabled={!taskId}
           >
             Clear
           </Button>
-          <Button
-            className="mt-3"
-            onClick={handleSetSchedule}
-            disabled={!taskId}
-          >
+          <Button className="mt-3" onClick={handleSetSchedule}>
             OK
           </Button>
         </div>

@@ -1,13 +1,17 @@
 import { create } from "zustand";
 import { getNearestHour, hourEndsAt } from "@/components/TaskPanel/utils";
 
-interface ScheduleStore {
+export interface Schedule {
   scheduleType: "date" | "duration";
   isAllDay: boolean;
   startsOn: Date | undefined;
   startsAt: string | undefined;
   endsOn: Date | undefined;
   endsAt: string | undefined;
+}
+
+interface ScheduleStore {
+  schedule: Schedule;
   setStartsOn: (startsOn: Date | undefined) => void;
   setEndsOn: (endsOn: Date | undefined) => void;
   setStartsAt: (startsAt: string | undefined) => void;
@@ -27,25 +31,48 @@ const useScheduleStore = create<ScheduleStore>((set) => {
   } = getNearestHour();
 
   return {
-    scheduleType: "date",
-    isAllDay: false,
-    startsOn: undefined,
-    startsAt: undefined,
-    endsOn: undefined,
-    endsAt: undefined,
+    schedule: {
+      scheduleType: "date",
+      isAllDay: false,
+      startsOn: initialStartsOn,
+      startsAt: undefined,
+      endsOn: undefined,
+      endsAt: undefined,
+    },
 
-    setStartsOn: (startsOn) => set({ startsOn }),
-    setEndsOn: (endsOn) => set({ endsOn }),
-    setStartsAt: (startsAt) => set({ startsAt }),
-    setEndsAt: (endsAt) => set({ endsAt }),
+    setStartsOn: (startsOn) =>
+      set((state) => ({ schedule: { ...state.schedule, startsOn } })),
+    setEndsOn: (endsOn) =>
+      set((state) => ({ schedule: { ...state.schedule, endsOn } })),
+    setStartsAt: (startsAt) =>
+      set((state) => ({ schedule: { ...state.schedule, startsAt } })),
+    setEndsAt: (endsAt) =>
+      set((state) => ({ schedule: { ...state.schedule, endsAt } })),
 
-    initStartsAt: () => set({ startsAt: initialStartsAt }),
+    initStartsAt: () =>
+      set((state) => ({
+        schedule: { ...state.schedule, startsAt: initialStartsAt },
+      })),
 
     toggleIsAllDay: (isAllDay) => {
       if (isAllDay) {
-        set({ isAllDay, startsAt: undefined, endsAt: undefined });
+        set((state) => ({
+          schedule: {
+            ...state.schedule,
+            isAllDay,
+            startsAt: undefined,
+            endsAt: undefined,
+          },
+        }));
       } else {
-        set({ isAllDay, startsAt: initialStartsAt, endsAt: initialEndsAt });
+        set((state) => ({
+          schedule: {
+            ...state.schedule,
+            isAllDay,
+            startsAt: initialStartsAt,
+            endsAt: initialEndsAt,
+          },
+        }));
       }
     },
 
@@ -53,29 +80,35 @@ const useScheduleStore = create<ScheduleStore>((set) => {
       switch (scheduleType) {
         case "date": {
           set((state) => ({
-            scheduleType,
-            isAllDay: false,
-            startsOn: state.startsOn ?? initialStartsOn,
-            startsAt: state.startsAt ?? initialStartsAt,
-            endsOn: undefined,
-            endsAt: undefined,
+            schedule: {
+              ...state.schedule,
+              scheduleType,
+              isAllDay: false,
+              startsOn: state.schedule.startsOn ?? initialStartsOn,
+              startsAt: state.schedule.startsAt ?? initialStartsAt,
+              endsOn: undefined,
+              endsAt: undefined,
+            },
           }));
           break;
         }
         case "duration": {
           set((state) => {
             const { endsOn, endsAt } =
-              state.startsOn && state.startsAt
-                ? hourEndsAt(state.startsOn, state.startsAt)
+              state.schedule.startsOn && state.schedule.startsAt
+                ? hourEndsAt(state.schedule.startsOn, state.schedule.startsAt)
                 : { endsOn: initialEndsOn, endsAt: initialEndsAt };
 
             return {
-              scheduleType,
-              isAllDay: false,
-              startsOn: state.startsOn ?? initialStartsOn,
-              startsAt: state.startsAt ?? initialStartsAt,
-              endsOn,
-              endsAt,
+              schedule: {
+                ...state.schedule,
+                scheduleType,
+                isAllDay: false,
+                startsOn: state.schedule.startsOn ?? initialStartsOn,
+                startsAt: state.schedule.startsAt ?? initialStartsAt,
+                endsOn,
+                endsAt,
+              },
             };
           });
           break;
@@ -85,12 +118,14 @@ const useScheduleStore = create<ScheduleStore>((set) => {
 
     resetSelections: () => {
       set({
-        scheduleType: "date",
-        isAllDay: false,
-        startsOn: undefined,
-        startsAt: undefined,
-        endsOn: undefined,
-        endsAt: undefined,
+        schedule: {
+          scheduleType: "date",
+          isAllDay: false,
+          startsOn: undefined,
+          startsAt: undefined,
+          endsOn: undefined,
+          endsAt: undefined,
+        },
       });
     },
   };

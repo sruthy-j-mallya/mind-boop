@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Popover,
   PopoverContent,
@@ -55,9 +55,18 @@ const EstimationInput = ({ taskId }: { taskId: string }) => {
     <Skeleton className="w-16" />;
   }
 
+  useEffect(() => {
+    updateEstimatedMinutes({
+      id: taskId,
+      estimatedMinutes: estimatedHours * 60 + estimatedMinutes,
+    });
+  }, [taskId, estimatedHours, estimatedMinutes, updateEstimatedMinutes]);
+
   return (
     <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-      <PopoverTrigger>{humanizedEstimationLabel()}</PopoverTrigger>
+      <PopoverTrigger className="text-blue-500">
+        {humanizedEstimationLabel()}
+      </PopoverTrigger>
       <PopoverContent onBlur={handleSubmit} className="w-48">
         <PopoverHeader>
           <PopoverTitle>Estimate</PopoverTitle>
