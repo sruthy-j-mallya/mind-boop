@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Hourglass } from "lucide-react";
 import {
   Popover,
   PopoverContent,
@@ -64,7 +65,8 @@ const EstimationInput = ({ taskId }: { taskId: string }) => {
 
   return (
     <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-      <PopoverTrigger className="text-blue-500">
+      <PopoverTrigger className="flex items-center gap-1.5 text-blue-500">
+        <Hourglass className="h-3.5 w-3.5" />
         {humanizedEstimationLabel()}
       </PopoverTrigger>
       <PopoverContent onBlur={handleSubmit} className="w-48">
