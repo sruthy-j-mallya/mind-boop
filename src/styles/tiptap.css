@@ -37,6 +37,10 @@
   margin: 0.35rem 0;
 }
 
+.tiptap-editor .ProseMirror p[data-placeholder] {
+  font-size: small;
+}
+
 .tiptap-editor .ProseMirror ul:not([data-type="taskList"]),
 .tiptap-editor .ProseMirror ol {
   margin: 0.35rem 0;

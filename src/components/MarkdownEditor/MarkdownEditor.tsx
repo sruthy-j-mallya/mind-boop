@@ -10,6 +10,7 @@ import StarterKit from "@tiptap/starter-kit";
 import { Type } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { Markdown } from "tiptap-markdown";
+import Button from "@/components/ui/Button";
 
 import { MarkdownEditorToolbar } from "@/components/MarkdownEditor/ToolBar/MarkdownEditorToolbar";
 import { cn } from "@/lib/utils";
@@ -96,8 +97,9 @@ export const MarkdownEditor = ({
       />
       {showToolbar && <MarkdownEditorToolbar editor={editor} />}
       <div className="flex items-center justify-end px-2 py-1">
-        <button
+        <Button
           type="button"
+          variant="ghost"
           onClick={() => setShowToolbar((prev) => !prev)}
           className={cn(
             "text-muted-foreground hover:text-foreground flex items-center gap-1.5 rounded px-2 py-1 text-xs transition-colors",
@@ -106,7 +108,7 @@ export const MarkdownEditor = ({
         >
           <Type className="h-3.5 w-3.5" />
           Text Format
-        </button>
+        </Button>
       </div>
     </div>
   );
