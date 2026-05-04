@@ -8,6 +8,8 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/Resizable";
 
+import { ItemGroup, Item, ItemTitle, ItemContent } from "@/components/ui/Item";
+
 const Inbox = () => {
   const { data: tasks, isLoading, isError } = useListTasks();
   const [isTaskPanelOpen, setIsTaskPanelOpen] = useState(false);
@@ -19,16 +21,23 @@ const Inbox = () => {
 
   return (
     <ResizablePanelGroup className="flex h-full gap-4 overflow-hidden">
-      <ResizablePanel className="flex-1">
+      <ResizablePanel className="flex flex-col overflow-y-auto">
+        <h1 className="m-4 text-2xl font-semibold">Inbox</h1>
         {hasTasks ? (
-          <ul>
+          <ItemGroup className="max-w-2xl">
             {tasks.map((task) => (
-              <li key={task.id}>
-                <span>{task.title}</span>
-                {task.description && <p>{task.description}</p>}
-              </li>
+              <Item
+                key={task.id}
+                variant="default"
+                size="xs"
+                className="border-b-muted"
+              >
+                <ItemContent>
+                  <ItemTitle className="truncate">{task.title}</ItemTitle>
+                </ItemContent>
+              </Item>
             ))}
-          </ul>
+          </ItemGroup>
         ) : (
           <NoTasksPage onAddTask={() => setIsTaskPanelOpen(true)} />
         )}
