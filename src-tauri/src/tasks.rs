@@ -5,6 +5,7 @@ use uuid::Uuid;
 use crate::db::DbState;
 
 #[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Task {
     pub id: String,
     pub title: String,
