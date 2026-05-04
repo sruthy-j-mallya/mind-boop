@@ -14,7 +14,14 @@
       "Read(//tmp/**)",
       "Bash(node -e \"const pkg = require\\('/Users/sruthyjmallya/Desktop/dev/hobby/mind-boop/node_modules/radix-ui/package.json'\\); console.log\\(Object.keys\\(pkg.exports || {}\\).filter\\(k => k.includes\\('dialog'\\)\\)\\)\")",
       "Bash(node -e \"const r = require\\('/Users/sruthyjmallya/Desktop/dev/hobby/mind-boop/node_modules/radix-ui'\\); console.log\\(Object.keys\\(r\\).filter\\(k => k.toLowerCase\\(\\).includes\\('dialog'\\)\\)\\)\")",
-      "Bash(node -e \"const { Dialog } = require\\('/Users/sruthyjmallya/Desktop/dev/hobby/mind-boop/node_modules/radix-ui'\\); console.log\\(Object.keys\\(Dialog\\)\\)\")"
+      "Bash(node -e \"const { Dialog } = require\\('/Users/sruthyjmallya/Desktop/dev/hobby/mind-boop/node_modules/radix-ui'\\); console.log\\(Object.keys\\(Dialog\\)\\)\")",
+      "Bash(pnpm dlx *)",
+      "Bash(pnpm tsc *)",
+      "Bash(pnpm eslint *)",
+      "Bash(pnpm tauri *)"
+    ],
+    "additionalDirectories": [
+      "/Users/sruthyjmallya/Desktop/dev/hobby/mind-boop/src/components/ui"
     ]
   }
 }
