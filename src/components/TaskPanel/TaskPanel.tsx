@@ -109,6 +109,7 @@ const TaskPanel = ({ onClose }: { onClose: () => void }) => {
         </Button>
       </CardFooter>
       <TimerControlDialog
+        taskId={taskId}
         open={isTimerDialogOpen}
         onOpenChange={setIsTimerDialogOpen}
       />

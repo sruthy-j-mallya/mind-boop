@@ -14,7 +14,7 @@ import {
   useShowTask,
   useSetEstimatedMinutes,
 } from "@/tanstackQueries/useTaskQueries";
-import { Skeleton } from "../ui/Skeleton";
+import Skeleton from "../ui/Skeleton";
 
 const EstimationInput = ({ taskId }: { taskId: string }) => {
   const {

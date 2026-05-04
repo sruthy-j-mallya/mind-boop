@@ -8,4 +8,4 @@ const Skeleton = ({ className, ...props }: React.ComponentProps<"div">) => (
   />
 );
 
-export { Skeleton };
+export default Skeleton;

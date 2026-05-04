@@ -19,12 +19,29 @@ import { decrementTime, incrementTime } from "../utils";
 import { Play, Pause, Square } from "lucide-react";
 import RunningTime from "./RunningTime";
 import useTimerStore from "@/stores/useTimer";
+import { useShowTask } from "@/tanstackQueries/useTaskQueries";
+import Skeleton from "../ui/Skeleton";
 
-const TimerControls = ({ isEnabled }: { isEnabled: boolean }) => {
-  const [mode, setMode] = useState<"timer" | "stopwatch">("stopwatch");
+const TimerControls = ({
+  taskId,
+  isEnabled,
+}: {
+  taskId: string;
+  isEnabled: boolean;
+}) => {
+  const { data: { estimatedMinutes = 5 } = {}, isLoading } =
+    useShowTask(taskId);
+
+  const [mode, setMode] = useState<"timer" | "stopwatch">(() =>
+    estimatedMinutes <= 30 ? "timer" : "stopwatch",
+  );
   const [isRunning, setIsRunning] = useState<boolean>(false);
-  const [timerPreset, setTimerPreset] = useState<number>(25);
-  const [minutes, setMinutes] = useState<number>(0);
+  const [timerPreset, setTimerPreset] = useState<number>(() =>
+    estimatedMinutes <= 30 ? estimatedMinutes : 30,
+  );
+  const [minutes, setMinutes] = useState<number>(() =>
+    estimatedMinutes <= 30 ? estimatedMinutes : 0,
+  );
   const [seconds, setSeconds] = useState<number>(0);
   const { isActive: isTimerActive, setIsActive: setIsTimerActive } =
     useTimerStore();
@@ -42,6 +59,10 @@ const TimerControls = ({ isEnabled }: { isEnabled: boolean }) => {
       return () => clearInterval(interval);
     }
   }, [isRunning, mode, minutes, seconds]);
+
+  if (isLoading) {
+    <Skeleton className="w-16" />;
+  }
 
   return (
     <div className="flex flex-row items-center gap-2">

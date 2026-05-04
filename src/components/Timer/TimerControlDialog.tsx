@@ -7,17 +7,18 @@ import {
 import TimerControls from "./TimerControls";
 
 type Props = {
+  taskId: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 };
 
-const TimerControlDialog = ({ open, onOpenChange }: Props) => (
+const TimerControlDialog = ({ taskId, open, onOpenChange }: Props) => (
   <Dialog open={open} onOpenChange={onOpenChange}>
     <DialogContent className="max-w-fit">
       <DialogHeader>
         <DialogTitle>Start timer</DialogTitle>
       </DialogHeader>
-      <TimerControls isEnabled={true} />
+      <TimerControls taskId={taskId} isEnabled={true} />
     </DialogContent>
   </Dialog>
 );
