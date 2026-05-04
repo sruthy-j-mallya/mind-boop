@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useListTasks } from "@/tanstackQueries/useTaskQueries";
 import NoTasksPage from "@/components/NoTasksPage";
 import TaskPanel from "@/components/TaskPanel/TaskPanel";
+import AddTaskBar from "@/components/AddTaskBar";
 import {
   ResizableHandle,
   ResizablePanel,
@@ -23,6 +24,9 @@ const Inbox = () => {
     <ResizablePanelGroup className="flex h-full gap-4 overflow-hidden">
       <ResizablePanel className="flex flex-col overflow-y-auto">
         <h1 className="m-4 text-2xl font-semibold">Inbox</h1>
+        <div className="mb-2">
+          <AddTaskBar />
+        </div>
         {hasTasks ? (
           <ItemGroup className="max-w-2xl">
             {tasks.map((task) => (
