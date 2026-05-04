@@ -81,7 +81,10 @@ const SchedulePicker = ({ taskId }: Props) => {
   return (
     <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
       <PopoverTrigger>
-        <Button variant="link" className="min-w-0 overflow-hidden p-0">
+        <Button
+          variant="link"
+          className="min-w-0 overflow-hidden p-0 text-xs font-normal text-gray-500"
+        >
           <CalendarDays className="shrink-0" />
           <span className="truncate">
             {committedSchedule
