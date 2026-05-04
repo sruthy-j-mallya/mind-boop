@@ -50,6 +50,7 @@ export default defineConfig([
       "arrow-body-style": ["error", "as-needed"],
       "func-style": ["error", "expression", { allowArrowFunctions: true }],
       "react/react-in-jsx-scope": "off",
+      "no-console": "error",
     },
   },
 ]);
