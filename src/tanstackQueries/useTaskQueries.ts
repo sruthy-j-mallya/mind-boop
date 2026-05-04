@@ -40,6 +40,7 @@ export const useShowTask = (id: string) =>
   useQuery<Task>({
     queryKey: ["tasks", id],
     queryFn: () => invoke<Task>("show_task", { id }),
+    enabled: !!id,
   });
 
 export const useSetEstimatedMinutes = () => {

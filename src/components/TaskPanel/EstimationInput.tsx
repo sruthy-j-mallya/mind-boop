@@ -8,7 +8,6 @@ import {
 } from "../ui/Popover";
 
 import Input from "@/components/ui/Input";
-import Button from "@/components/ui/Button";
 
 import { FieldGroup, FieldLabel, Field } from "@/components/ui/Field";
 import {
@@ -16,12 +15,11 @@ import {
   useSetEstimatedMinutes,
 } from "@/tanstackQueries/useTaskQueries";
 import { Skeleton } from "../ui/Skeleton";
-import { X } from "lucide-react";
 
 const EstimationInput = ({ taskId }: { taskId: string }) => {
   const {
     data: { estimatedMinutes: totalEstimationInMinutes } = {
-      estimatedMinutes: 0,
+      estimatedMinutes: 5,
     },
     isLoading,
   } = useShowTask(taskId);
@@ -33,29 +31,17 @@ const EstimationInput = ({ taskId }: { taskId: string }) => {
   const [estimatedMinutes, setEstimatedMinutes] = useState(
     totalEstimationInMinutes % 60,
   );
+
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const humanizedEstimationLabel = () => {
     if (estimatedHours == 0) {
-      return `${estimatedMinutes} minutes`;
+      return `${estimatedMinutes} mins`;
     } else if (estimatedMinutes == 0) {
-      return `${estimatedHours} hours`;
+      return `${estimatedHours} hrs`;
     } else {
-      return `${estimatedHours} hours ${estimatedMinutes} minutes`;
+      return `${estimatedHours} hrs ${estimatedMinutes} mins`;
     }
-  };
-
-  if (isLoading) {
-    <Skeleton className="w-16" />;
-  }
-
-  const handleClear = () => {
-    setEstimatedHours(0);
-    setEstimatedMinutes(0);
-    updateEstimatedMinutes({
-      id: taskId,
-      estimatedMinutes: 0,
-    });
   };
 
   const handleSubmit = () => {
@@ -65,39 +51,13 @@ const EstimationInput = ({ taskId }: { taskId: string }) => {
     });
   };
 
-  const hasEstimation = !(estimatedHours === 0 && estimatedMinutes === 0);
+  if (isLoading) {
+    <Skeleton className="w-16" />;
+  }
 
   return (
     <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-      <PopoverTrigger asChild>
-        <div className="flex flex-col">
-          {hasEstimation && (
-            <span className="text-muted-foreground text-xs">Effort</span>
-          )}
-          <div className="flex items-center">
-            <Button
-              className="p-0"
-              disabled={taskId == ""}
-              type="button"
-              variant="link"
-            >
-              {hasEstimation ? humanizedEstimationLabel() : "No Estimate"}
-            </Button>
-            {!(taskId == "") && hasEstimation && (
-              <span
-                role="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleClear();
-                }}
-                className="ml-1 rounded-full p-0.5 hover:bg-amber-800"
-              >
-                <X className="h-3 w-3" />
-              </span>
-            )}
-          </div>
-        </div>
-      </PopoverTrigger>
+      <PopoverTrigger>{humanizedEstimationLabel()}</PopoverTrigger>
       <PopoverContent onBlur={handleSubmit} className="w-48">
         <PopoverHeader>
           <PopoverTitle>Estimate</PopoverTitle>
