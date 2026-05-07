@@ -3,6 +3,7 @@ import { SidebarProvider } from "@/components/ui/Sidebar";
 import HomeCalendar from "@/components/Calendar/HomeCalendar";
 import { Route, Routes } from "react-router-dom";
 import Inbox from "./components/Inbox";
+import FocusSession from "./components/Timer/FocusSession";
 
 const Home = () => (
   <div className="flex max-h-screen gap-4 overflow-hidden">
@@ -15,6 +16,8 @@ const Home = () => (
       <Routes>
         <Route path="/" Component={HomeCalendar} />
         <Route path="/inbox" Component={Inbox} />
+        <Route path="/timer/tasks/:id" Component={FocusSession} />
+        <Route path="/timer" Component={FocusSession} />
       </Routes>
     </div>
   </div>

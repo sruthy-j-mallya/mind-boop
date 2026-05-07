@@ -16,10 +16,10 @@ type UpdateTaskPayload = {
   description: string;
 };
 
-export const useListTasks = () =>
+export const useListTasks = (searchString = "") =>
   useQuery<Task[]>({
-    queryKey: ["tasks"],
-    queryFn: () => invoke<Task[]>("list_tasks"),
+    queryKey: ["tasks", { searchString }],
+    queryFn: () => invoke<Task[]>("list_tasks", { searchString }),
   });
 
 export const useCreateTask = (onSuccess?: CreateTaskSuccessCallback) => {

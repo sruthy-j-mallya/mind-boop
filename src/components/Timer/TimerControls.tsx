@@ -14,10 +14,10 @@ import {
   PopoverContent,
 } from "@/components/ui/Popover";
 import Input from "@/components/ui/Input";
+import { cn } from "@/lib/utils";
 
-import { decrementTime, incrementTime } from "../utils";
+import { decrementTime, incrementTime, displayTime } from "../utils";
 import { Play, Pause, Square } from "lucide-react";
-import RunningTime from "./RunningTime";
 import useTimerStore from "@/stores/useTimer";
 import { useShowTask } from "@/tanstackQueries/useTaskQueries";
 import Skeleton from "../ui/Skeleton";
@@ -91,19 +91,29 @@ const TimerControls = ({
         </SelectContent>
       </Select>
       {mode == "stopwatch" ? (
-        <RunningTime
-          isEnabled={isEnabled}
-          minutes={minutes}
-          seconds={seconds}
-        />
+        <span
+          className={cn(
+            "inline-block min-w-[5.5ch] text-center text-2xl tabular-nums",
+            {
+              "opacity-50": !isEnabled,
+            },
+          )}
+        >
+          {displayTime(minutes, seconds)}
+        </span>
       ) : (
         <Popover>
           <PopoverTrigger disabled={isRunning || !isEnabled}>
-            <RunningTime
-              isEnabled={isEnabled}
-              minutes={minutes}
-              seconds={seconds}
-            />
+            <span
+              className={cn(
+                "inline-block min-w-[5.5ch] text-center text-2xl tabular-nums",
+                {
+                  "opacity-50": !isEnabled,
+                },
+              )}
+            >
+              {displayTime(minutes, seconds)}
+            </span>
           </PopoverTrigger>
           <PopoverContent className="flex w-full flex-row items-start">
             <Input

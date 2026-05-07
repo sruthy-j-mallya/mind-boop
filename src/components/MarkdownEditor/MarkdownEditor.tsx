@@ -20,11 +20,13 @@ export const MarkdownEditor = ({
   editorRef,
   id,
   onMarkdownChange,
+  initialContent = "",
 }: {
   className?: string;
   editorRef?: React.MutableRefObject<Editor | null>;
   id?: string;
   onMarkdownChange?: (markdown: string) => void;
+  initialContent?: string;
 }) => {
   const [showToolbar, setShowToolbar] = useState(false);
 
@@ -68,6 +70,12 @@ export const MarkdownEditor = ({
       editorRef.current = null;
     };
   }, [editor, editorRef]);
+
+  useEffect(() => {
+    if (editor?.isEmpty && initialContent) {
+      editor.commands.setContent(initialContent);
+    }
+  }, [editor, initialContent]);
 
   if (!editor) {
     return (

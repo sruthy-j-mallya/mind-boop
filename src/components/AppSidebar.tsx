@@ -6,7 +6,7 @@ import {
 } from "@/components/ui/Sidebar";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar";
-import { CalendarDays, Inbox } from "lucide-react";
+import { CalendarDays, Inbox, Timer } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
 import { Link } from "react-router-dom";
 
@@ -24,6 +24,9 @@ const AppSidebar = () => (
       </Link>
       <Link to="/inbox">
         <Inbox className="m-4 size-6" strokeWidth={1.5} />
+      </Link>
+      <Link to="/timer">
+        <Timer className="m-4 size-6" strokeWidth={1.5} />
       </Link>
     </SidebarContent>
     <SidebarFooter>

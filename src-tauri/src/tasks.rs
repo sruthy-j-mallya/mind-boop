@@ -14,14 +14,15 @@ pub struct Task {
 }
 
 #[tauri::command]
-pub async fn list_tasks(state: State<'_, DbState>) -> Result<Vec<Task>, String> {
+pub async fn list_tasks(search_string: String, state: State<'_, DbState>) -> Result<Vec<Task>, String> {
     let conn = state.0.lock().map_err(|e| e.to_string())?;
+    let pattern = format!("%{}%", search_string);
     let mut stmt = conn
-        .prepare("SELECT id, title, description, estimated_minutes FROM tasks")
+        .prepare("SELECT id, title, description, estimated_minutes FROM tasks WHERE title LIKE ?1 OR description LIKE ?1 ORDER BY starts_on IS NULL, starts_on, starts_at IS NULL, starts_at")
         .map_err(|e| e.to_string())?;
 
     let tasks = stmt
-        .query_map([], |row| {
+        .query_map([&pattern], |row| {
             Ok(Task {
                 id: row.get(0)?,
                 title: row.get(1)?,

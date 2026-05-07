@@ -1,0 +1,232 @@
+import { useState, useEffect } from "react";
+import { useParams, useLocation } from "react-router-dom";
+
+import {
+  ResizablePanelGroup,
+  ResizablePanel,
+  ResizableHandle,
+} from "@/components/ui/Resizable";
+
+import {
+  Card,
+  CardHeader,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/Card";
+
+import Button from "@/components/ui/Button";
+import Textarea from "@/components/ui/TextArea";
+
+import {
+  Combobox,
+  ComboboxInput,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxList,
+  ComboboxItem,
+} from "@/components/ui/Combobox";
+
+import { MapPin, Notebook, Play, Pause, Square } from "lucide-react";
+
+import useTimerStore from "@/stores/useTimer";
+import {
+  useListTasks,
+  useShowTask,
+  Task,
+} from "@/tanstackQueries/useTaskQueries";
+import { incrementTime, decrementTime, displayTime } from "../utils";
+import { cn } from "@/lib/utils";
+import TaskPanel from "../TaskPanel/TaskPanel";
+
+type TimerLocationState = {
+  mode: "timer" | "stopwatch";
+  minutes: number;
+  autoStart?: boolean;
+} | null;
+
+import { VISIBLE_TASK_COUNT } from "./constants";
+
+const FocusSession = () => {
+  const { id: taskId } = useParams<{ id?: string }>();
+  const { state } = useLocation() as { state: TimerLocationState };
+  const { isActive: isTimerActive, setIsActive: setIsTimerActive } =
+    useTimerStore();
+
+  const [selectedTaskId, setSelectedTaskId] = useState(taskId ?? "");
+  const [searchString, setSearchString] = useState("");
+  const [showAll, setShowAll] = useState(false);
+  const { data: tasks = [] } = useListTasks(searchString);
+  const { data: task } = useShowTask(selectedTaskId);
+
+  const visibleTasks = showAll ? tasks : tasks.slice(0, VISIBLE_TASK_COUNT);
+  const hiddenCount = tasks.length - VISIBLE_TASK_COUNT;
+  const hasMore = !showAll && hiddenCount > 0;
+
+  const initialMode = state?.mode ?? "timer";
+  const initialMinutes = state?.minutes ?? 5;
+
+  const [mode] = useState<"timer" | "stopwatch">(initialMode);
+  const [timerPreset] = useState<number>(initialMinutes);
+  const [minutes, setMinutes] = useState<number>(
+    initialMode === "timer" ? initialMinutes : 0,
+  );
+  const [seconds, setSeconds] = useState<number>(0);
+  const [isRunning, setIsRunning] = useState<boolean>(
+    () => state?.autoStart ?? false,
+  );
+
+  useEffect(() => {
+    if (state?.autoStart) setIsTimerActive(true);
+  }, [state?.autoStart, setIsTimerActive]);
+  const [isTaskPanelOpen, setIsTaskPanelOpen] = useState(false);
+  const [isDistractionLogOpen, setIsDistractionLogOpen] = useState(false);
+  const [noteText, setNoteText] = useState("");
+
+  useEffect(() => {
+    if (!isRunning) return;
+    const interval = setInterval(() => {
+      const { nextMinutes, nextSeconds } =
+        mode === "stopwatch"
+          ? incrementTime(minutes, seconds)
+          : decrementTime(minutes, seconds);
+      setMinutes(nextMinutes);
+      setSeconds(nextSeconds);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [isRunning, mode, minutes, seconds]);
+
+  const handleStop = () => {
+    setIsRunning(false);
+    setIsTimerActive(false);
+    setMinutes(mode === "timer" ? timerPreset : 0);
+    setSeconds(0);
+  };
+
+  return (
+    <ResizablePanelGroup className="flex h-full gap-4 overflow-hidden">
+      {isTaskPanelOpen && (
+        <>
+          <ResizablePanel className="flex flex-col overflow-y-auto">
+            <div className="mx-2 my-10 h-full">
+              <TaskPanel
+                hideStartButton
+                selectedTaskId={selectedTaskId}
+                onClose={() => setIsTaskPanelOpen(false)}
+              />
+            </div>
+          </ResizablePanel>
+          <ResizableHandle />
+        </>
+      )}
+      <ResizablePanel className="flex flex-col overflow-y-auto">
+        <Card className="mx-4 mt-10 h-8/12">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => setIsTaskPanelOpen((prev) => !prev)}
+            >
+              <MapPin />
+            </Button>
+            <Combobox
+              items={visibleTasks}
+              value={task}
+              itemToStringLabel={(task: Task) => task.title}
+              itemToStringValue={(task: Task) => task.id}
+              onValueChange={(value: Task | null) => {
+                if (value) setSelectedTaskId(value.id);
+              }}
+              onInputValueChange={(inputValue: string) => {
+                setSearchString(inputValue);
+                setShowAll(false);
+              }}
+            >
+              <ComboboxInput placeholder="Select task" />
+              <ComboboxContent>
+                <ComboboxEmpty>No tasks found.</ComboboxEmpty>
+                <ComboboxList>
+                  {visibleTasks.map((task: Task) => (
+                    <ComboboxItem key={task.id} value={task}>
+                      {task.title}
+                    </ComboboxItem>
+                  ))}
+                  {hasMore && (
+                    <Button
+                      type="button"
+                      className="text-muted-foreground hover:bg-accent w-full px-2 py-1.5 text-left text-sm"
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        setShowAll(true);
+                      }}
+                    >
+                      View {hiddenCount} more
+                    </Button>
+                  )}
+                </ComboboxList>
+              </ComboboxContent>
+            </Combobox>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => setIsDistractionLogOpen((prev) => !prev)}
+            >
+              <Notebook />
+            </Button>
+          </CardHeader>
+          <CardContent className="flex flex-col items-center gap-4">
+            <span
+              className={cn(
+                "inline-block min-w-[5.5ch] text-center text-5xl tabular-nums",
+                { "opacity-50": !isTimerActive },
+              )}
+            >
+              {displayTime(minutes, seconds)}
+            </span>
+          </CardContent>
+          <CardFooter className="flex justify-center gap-2">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => {
+                setIsRunning((prev) => !prev);
+                setIsTimerActive(true);
+              }}
+            >
+              {isRunning ? (
+                <Pause className="size-5" />
+              ) : (
+                <Play className="size-5" />
+              )}
+            </Button>
+            <Button
+              disabled={!isTimerActive}
+              type="button"
+              variant="ghost"
+              onClick={handleStop}
+            >
+              <Square className="size-5" />
+            </Button>
+          </CardFooter>
+        </Card>
+      </ResizablePanel>
+      {isDistractionLogOpen && (
+        <>
+          <ResizableHandle />
+          <ResizablePanel className="flex flex-col overflow-y-auto">
+            <div className="mt-10 flex min-h-0 flex-1 flex-col px-4 pb-8">
+              <Textarea
+                value={noteText}
+                onChange={(e) => setNoteText(e.target.value)}
+                placeholder="Jot something down…"
+                aria-label="Session note"
+                className="min-h-[min(55vh,22rem)] flex-1 resize-y text-base leading-relaxed"
+              />
+            </div>
+          </ResizablePanel>
+        </>
+      )}
+    </ResizablePanelGroup>
+  );
+};
+
+export default FocusSession;

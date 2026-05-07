@@ -2,7 +2,11 @@ import type { Editor } from "@tiptap/core";
 import { useRef, useState, useEffect } from "react";
 import { MarkdownEditor } from "@/components/MarkdownEditor/MarkdownEditor";
 import useDebounce from "@/lib/hooks/useDebounce";
-import { useCreateTask, useUpdateTask } from "@/tanstackQueries/useTaskQueries";
+import {
+  useCreateTask,
+  useShowTask,
+  useUpdateTask,
+} from "@/tanstackQueries/useTaskQueries";
 import { Maximize, X } from "lucide-react";
 import Button from "../ui/Button";
 import Input from "@/components/ui/Input";
@@ -17,12 +21,24 @@ import {
 } from "@/components/ui/Card";
 import EstimationInput from "./EstimationInput";
 import SchedulePicker from "./SchedulePicker";
-import TimerControlDialog from "@/components/Timer/TimerControlDialog";
+import TimerOptionsDialog from "@/components/Timer/TimerOptionsDialog";
 
-const TaskPanel = ({ onClose }: { onClose: () => void }) => {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [taskId, setTaskId] = useState("");
+const TaskPanel = ({
+  hideStartButton = false,
+  onClose,
+  selectedTaskId = "",
+}: {
+  hideStartButton?: boolean;
+  onClose: () => void;
+  selectedTaskId?: string;
+}) => {
+  const {
+    data: { title: savedTitle = "", description: savedDescription = "" } = {},
+  } = useShowTask(selectedTaskId);
+  const [taskId, setTaskId] = useState(selectedTaskId);
+  const [title, setTitle] = useState(savedTitle);
+  const [description, setDescription] = useState(savedDescription);
+  const [hasUserEdited, setHasUserEdited] = useState(false);
   const [isTimerDialogOpen, setIsTimerDialogOpen] = useState(false);
   const editorRef = useRef<Editor | null>(null);
   const debouncedTitle = useDebounce(title, 500);
@@ -36,16 +52,19 @@ const TaskPanel = ({ onClose }: { onClose: () => void }) => {
   const { mutate: updateTask } = useUpdateTask();
 
   useEffect(() => {
-    if (debouncedTitle.trim().length == 0 || taskId.length == 0) {
+    if (
+      !hasUserEdited ||
+      debouncedTitle.trim().length == 0 ||
+      taskId.length == 0
+    ) {
       return;
     }
-
     updateTask({
       id: taskId,
       title: debouncedTitle,
       description: debouncedDescription,
     });
-  }, [debouncedTitle, debouncedDescription, updateTask, taskId]);
+  }, [hasUserEdited, debouncedTitle, debouncedDescription, updateTask, taskId]);
 
   const handleCreateTask = () => {
     if (
@@ -79,8 +98,11 @@ const TaskPanel = ({ onClose }: { onClose: () => void }) => {
           <Input
             id="task-title"
             name="title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            value={savedTitle || title}
+            onChange={(e) => {
+              setHasUserEdited(true);
+              setTitle(e.target.value);
+            }}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
                 handleCreateTask();
@@ -98,17 +120,24 @@ const TaskPanel = ({ onClose }: { onClose: () => void }) => {
         <MarkdownEditor
           id="task-description"
           editorRef={editorRef}
-          onMarkdownChange={setDescription}
+          onMarkdownChange={(md) => {
+            setHasUserEdited(true);
+            setDescription(md);
+          }}
+          initialContent={savedDescription || description}
           className="min-h-0 flex-1"
         />
       </CardContent>
       <CardFooter className="flex flex-row justify-between">
         <EstimationInput taskId={taskId} />
-        <Button onClick={() => setIsTimerDialogOpen(true)} disabled={!taskId}>
-          Start now
-        </Button>
+        {!hideStartButton && (
+          <Button onClick={() => setIsTimerDialogOpen(true)} disabled={!taskId}>
+            Start now
+          </Button>
+        )}
       </CardFooter>
-      <TimerControlDialog
+      {/* TODO: Pass estimated minutes and set the pomodoro timer to that time if less than 30 minutes*/}
+      <TimerOptionsDialog
         taskId={taskId}
         open={isTimerDialogOpen}
         onOpenChange={setIsTimerDialogOpen}

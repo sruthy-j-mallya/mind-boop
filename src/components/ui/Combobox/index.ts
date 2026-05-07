@@ -14,9 +14,10 @@ import ComboboxList from "./ComboboxList";
 import ComboboxSeparator from "./ComboboxSeparator";
 import ComboboxTrigger from "./ComboboxTrigger";
 import ComboboxValue from "./ComboboxValue";
-export { useComboboxAnchor } from "./useComboboxAnchor";
+import useComboboxAnchor from "./useComboboxAnchor";
 
 export {
+  useComboboxAnchor,
   Combobox,
   ComboboxChip,
   ComboboxChips,
