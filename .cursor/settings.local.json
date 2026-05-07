@@ -18,7 +18,8 @@
       "Bash(pnpm dlx *)",
       "Bash(pnpm tsc *)",
       "Bash(pnpm eslint *)",
-      "Bash(pnpm tauri *)"
+      "Bash(pnpm tauri *)",
+      "Bash(xargs cat)"
     ],
     "additionalDirectories": [
       "/Users/sruthyjmallya/Desktop/dev/hobby/mind-boop/src/components/ui"
