@@ -149,43 +149,47 @@ const FocusSession = () => {
             >
               <MapPin />
             </Button>
-            <Combobox
-              items={visibleTasks}
-              value={task}
-              itemToStringLabel={(task: Task) => task.title}
-              itemToStringValue={(task: Task) => task.id}
-              onValueChange={(value: Task | null) => {
-                if (value) setSelectedTaskId(value.id);
-              }}
-              onInputValueChange={(inputValue: string) => {
-                setSearchString(inputValue);
-                setShowAll(false);
-              }}
-            >
-              <ComboboxInput placeholder="Select task" />
-              <ComboboxContent>
-                <ComboboxEmpty>No tasks found.</ComboboxEmpty>
-                <ComboboxList>
-                  {visibleTasks.map((task: Task) => (
-                    <ComboboxItem key={task.id} value={task}>
-                      {task.title}
-                    </ComboboxItem>
-                  ))}
-                  {hasMore && (
-                    <Button
-                      type="button"
-                      className="text-muted-foreground hover:bg-accent w-full px-2 py-1.5 text-left text-sm"
-                      onMouseDown={(e) => {
-                        e.preventDefault();
-                        setShowAll(true);
-                      }}
-                    >
-                      View {hiddenCount} more
-                    </Button>
-                  )}
-                </ComboboxList>
-              </ComboboxContent>
-            </Combobox>
+            {isTimerActive ? (
+              <span className="text-sm font-medium">{task?.title}</span>
+            ) : (
+              <Combobox
+                items={visibleTasks}
+                value={task}
+                itemToStringLabel={(task: Task) => task.title}
+                itemToStringValue={(task: Task) => task.id}
+                onValueChange={(value: Task | null) => {
+                  if (value) setSelectedTaskId(value.id);
+                }}
+                onInputValueChange={(inputValue: string) => {
+                  setSearchString(inputValue);
+                  setShowAll(false);
+                }}
+              >
+                <ComboboxInput placeholder="Select task" />
+                <ComboboxContent>
+                  <ComboboxEmpty>No tasks found.</ComboboxEmpty>
+                  <ComboboxList>
+                    {visibleTasks.map((task: Task) => (
+                      <ComboboxItem key={task.id} value={task}>
+                        {task.title}
+                      </ComboboxItem>
+                    ))}
+                    {hasMore && (
+                      <Button
+                        type="button"
+                        className="text-muted-foreground hover:bg-accent w-full px-2 py-1.5 text-left text-sm"
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          setShowAll(true);
+                        }}
+                      >
+                        View {hiddenCount} more
+                      </Button>
+                    )}
+                  </ComboboxList>
+                </ComboboxContent>
+              </Combobox>
+            )}
             <Button
               type="button"
               variant="ghost"
