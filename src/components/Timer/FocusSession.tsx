@@ -28,6 +28,13 @@ import {
 
 import { MapPin, Notebook, Play, Pause, Square } from "lucide-react";
 
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/Popover";
+import Input from "@/components/ui/Input";
+
 import useTimerStore from "@/stores/useTimer";
 import {
   useListTasks,
@@ -66,13 +73,17 @@ const FocusSession = () => {
   const initialMinutes = state?.minutes ?? 5;
 
   const [mode] = useState<"timer" | "stopwatch">(initialMode);
-  const [timerPreset] = useState<number>(initialMinutes);
+  const [timerPreset, setTimerPreset] = useState<number>(initialMinutes);
   const [minutes, setMinutes] = useState<number>(
     initialMode === "timer" ? initialMinutes : 0,
   );
   const [seconds, setSeconds] = useState<number>(0);
   const [isRunning, setIsRunning] = useState<boolean>(
     () => state?.autoStart ?? false,
+  );
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [editMinutes, setEditMinutes] = useState<string>(
+    String(initialMinutes),
   );
 
   useEffect(() => {
@@ -100,6 +111,16 @@ const FocusSession = () => {
     setIsTimerActive(false);
     setMinutes(mode === "timer" ? timerPreset : 0);
     setSeconds(0);
+  };
+
+  const handleApplyEdit = () => {
+    const parsed = parseInt(editMinutes, 10);
+    if (!isNaN(parsed) && parsed > 0) {
+      setMinutes(parsed);
+      setSeconds(0);
+      setTimerPreset(parsed);
+    }
+    setIsEditOpen(false);
   };
 
   return (
@@ -174,14 +195,48 @@ const FocusSession = () => {
             </Button>
           </CardHeader>
           <CardContent className="flex flex-col items-center gap-4">
-            <span
-              className={cn(
-                "inline-block min-w-[5.5ch] text-center text-5xl tabular-nums",
-                { "opacity-50": !isTimerActive },
-              )}
+            <Popover
+              open={isEditOpen}
+              onOpenChange={(open) => {
+                if (open && isTimerActive) return;
+                if (open) setEditMinutes(String(minutes));
+                setIsEditOpen(open);
+              }}
             >
-              {displayTime(minutes, seconds)}
-            </span>
+              <PopoverTrigger asChild>
+                <span
+                  className={cn(
+                    "inline-block min-w-[5.5ch] text-center text-5xl tabular-nums",
+                    {
+                      "opacity-50": isTimerActive,
+                      "cursor-pointer hover:opacity-70": !isTimerActive,
+                    },
+                  )}
+                >
+                  {displayTime(minutes, seconds)}
+                </span>
+              </PopoverTrigger>
+              <PopoverContent className="w-48">
+                <div className="flex flex-col gap-3">
+                  <label className="text-sm font-medium">
+                    Duration (minutes)
+                  </label>
+                  <Input
+                    type="number"
+                    min={1}
+                    value={editMinutes}
+                    onChange={(e) => setEditMinutes(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") handleApplyEdit();
+                    }}
+                    autoFocus
+                  />
+                  <Button type="button" onClick={handleApplyEdit}>
+                    Apply
+                  </Button>
+                </div>
+              </PopoverContent>
+            </Popover>
           </CardContent>
           <CardFooter className="flex justify-center gap-2">
             <Button
