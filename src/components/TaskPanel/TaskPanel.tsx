@@ -136,7 +136,6 @@ const TaskPanel = ({
           </Button>
         )}
       </CardFooter>
-      {/* TODO: Pass estimated minutes and set the pomodoro timer to that time if less than 30 minutes*/}
       <TimerOptionsDialog
         taskId={taskId}
         open={isTimerDialogOpen}
