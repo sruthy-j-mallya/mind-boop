@@ -11,8 +11,12 @@ import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import { displayTime } from "../utils";
 import { cn } from "@/lib/utils";
+import { useShowTask } from "@/tanstackQueries/useTaskQueries";
+
+import * as R from "ramda";
 
 import { PRESETS } from "./constants";
+import Skeleton from "../ui/Skeleton";
 
 type Props = {
   taskId: string;
@@ -22,8 +26,17 @@ type Props = {
 
 const TimerOptionsDialog = ({ taskId, open, onOpenChange }: Props) => {
   const navigate = useNavigate();
-  const [isPreset, setIsPreset] = useState(true);
-  const [timerDuration, setTimerDuration] = useState(5);
+  const { data: { estimatedMinutes } = {}, isFetching } = useShowTask(taskId);
+
+  const [selectedDuration, setSelectedDuration] = useState<number | null>(null);
+  const [selectedIsPreset, setSelectedIsPreset] = useState<boolean | null>(
+    null,
+  );
+
+  const defaultDuration =
+    estimatedMinutes && estimatedMinutes <= 30 ? estimatedMinutes : 5;
+  const timerDuration = selectedDuration ?? defaultDuration;
+  const isPreset = selectedIsPreset ?? R.includes(timerDuration, PRESETS);
 
   const handleStart = (mode: "timer" | "stopwatch") => {
     onOpenChange(false);
@@ -53,48 +66,56 @@ const TimerOptionsDialog = ({ taskId, open, onOpenChange }: Props) => {
           </TabsList>
 
           <TabsContent value="timer" className="flex flex-col gap-4 pt-2">
-            <div className="grid w-fit grid-cols-4 gap-1">
-              {PRESETS.map((preset) => (
-                <Button
-                  key={preset}
-                  type="button"
-                  variant={
-                    isPreset && timerDuration === preset ? "default" : "outline"
-                  }
-                  onClick={() => {
-                    setIsPreset(true);
-                    setTimerDuration(preset);
-                  }}
-                  className="w-10"
-                >
-                  {preset}
-                </Button>
-              ))}
-              {!isPreset ? (
-                <Input
-                  type="number"
-                  min={1}
-                  max={480}
-                  value={timerDuration}
-                  onChange={(e) => setTimerDuration(Number(e.target.value))}
-                  placeholder="Minutes"
-                  className="border-foreground col-span-2 border-2"
-                  autoFocus
-                />
-              ) : (
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => {
-                    setIsPreset(false);
-                    setTimerDuration(25);
-                  }}
-                  className="col-span-2 w-auto px-3"
-                >
-                  Custom
-                </Button>
-              )}
-            </div>
+            {isFetching ? (
+              <Skeleton className="h-48 w-48" />
+            ) : (
+              <div className="grid w-fit grid-cols-4 gap-1">
+                {PRESETS.map((preset) => (
+                  <Button
+                    key={preset}
+                    type="button"
+                    variant={
+                      isPreset && timerDuration === preset
+                        ? "default"
+                        : "outline"
+                    }
+                    onClick={() => {
+                      setSelectedIsPreset(true);
+                      setSelectedDuration(preset);
+                    }}
+                    className="w-10"
+                  >
+                    {preset}
+                  </Button>
+                ))}
+                {!isPreset ? (
+                  <Input
+                    type="number"
+                    min={1}
+                    max={480}
+                    value={timerDuration}
+                    onChange={(e) =>
+                      setSelectedDuration(Number(e.target.value))
+                    }
+                    placeholder="Minutes"
+                    className="border-foreground col-span-2 border-2"
+                    autoFocus
+                  />
+                ) : (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      setSelectedIsPreset(false);
+                      setSelectedDuration(25);
+                    }}
+                    className="col-span-2 w-auto px-3"
+                  >
+                    Custom
+                  </Button>
+                )}
+              </div>
+            )}
 
             <Button type="button" onClick={() => handleStart("timer")}>
               Start
