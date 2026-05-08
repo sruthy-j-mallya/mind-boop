@@ -22,18 +22,15 @@ type Props = {
 
 const TimerOptionsDialog = ({ taskId, open, onOpenChange }: Props) => {
   const navigate = useNavigate();
-  const [selectedPreset, setSelectedPreset] = useState<number | "custom">(5);
-  const [customMinutes, setCustomMinutes] = useState<number>(25);
-
-  const resolvedMinutes =
-    selectedPreset === "custom" ? customMinutes : selectedPreset;
+  const [isPreset, setIsPreset] = useState(true);
+  const [timerDuration, setTimerDuration] = useState(5);
 
   const handleStart = (mode: "timer" | "stopwatch") => {
     onOpenChange(false);
     navigate(`/timer/tasks/${taskId}`, {
       state: {
         mode,
-        minutes: mode === "timer" ? resolvedMinutes : 0,
+        minutes: mode === "timer" ? timerDuration : 0,
         autoStart: true,
       },
     });
@@ -61,20 +58,25 @@ const TimerOptionsDialog = ({ taskId, open, onOpenChange }: Props) => {
                 <Button
                   key={preset}
                   type="button"
-                  variant={selectedPreset === preset ? "default" : "outline"}
-                  onClick={() => setSelectedPreset(preset)}
+                  variant={
+                    isPreset && timerDuration === preset ? "default" : "outline"
+                  }
+                  onClick={() => {
+                    setIsPreset(true);
+                    setTimerDuration(preset);
+                  }}
                   className="w-10"
                 >
                   {preset}
                 </Button>
               ))}
-              {selectedPreset === "custom" ? (
+              {!isPreset ? (
                 <Input
                   type="number"
                   min={1}
                   max={480}
-                  value={customMinutes}
-                  onChange={(e) => setCustomMinutes(Number(e.target.value))}
+                  value={timerDuration}
+                  onChange={(e) => setTimerDuration(Number(e.target.value))}
                   placeholder="Minutes"
                   className="border-foreground col-span-2 border-2"
                   autoFocus
@@ -83,7 +85,10 @@ const TimerOptionsDialog = ({ taskId, open, onOpenChange }: Props) => {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => setSelectedPreset("custom")}
+                  onClick={() => {
+                    setIsPreset(false);
+                    setTimerDuration(25);
+                  }}
                   className="col-span-2 w-auto px-3"
                 >
                   Custom
