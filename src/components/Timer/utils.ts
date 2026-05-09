@@ -1,3 +1,19 @@
+import { TimerDisplayState } from "./types";
+
+const taskTimerMinutes = (estimatedMinutes: number, fallback: number) =>
+  estimatedMinutes > 0 && estimatedMinutes <= 30 ? estimatedMinutes : fallback;
+
+const buildTimerState = (
+  mode: "timer" | "stopwatch",
+  minutes: number,
+): TimerDisplayState => ({
+  mode,
+  timerPreset: minutes,
+  minutes: mode === "timer" ? minutes : 0,
+  seconds: 0,
+  minutesInput: String(minutes),
+});
+
 const displayTime = (minutes: number, seconds: number) =>
   [minutes, seconds]
     .map((value) => value.toString().padStart(2, "0"))
@@ -23,4 +39,10 @@ const decrementTime = (
   return { nextMinutes: minutes, nextSeconds: seconds - 1 };
 };
 
-export { displayTime, incrementTime, decrementTime };
+export {
+  taskTimerMinutes,
+  buildTimerState,
+  displayTime,
+  incrementTime,
+  decrementTime,
+};
