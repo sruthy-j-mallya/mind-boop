@@ -27,6 +27,7 @@ const FocusSession = () => {
         <ResizablePanelGroup orientation="vertical">
           <ResizablePanel className="overflow-y-auto">
             <Timer
+              setIsTaskPanelOpen={setIsTaskPanelOpen}
               setIsDistractionLogOpen={setIsDistractionLogOpen}
               selectedTaskId={selectedTaskId}
               setSelectedTaskId={setSelectedTaskId}

@@ -11,16 +11,7 @@ import {
 
 import Button from "@/components/ui/Button";
 
-import {
-  Combobox,
-  ComboboxInput,
-  ComboboxContent,
-  ComboboxEmpty,
-  ComboboxList,
-  ComboboxItem,
-} from "@/components/ui/Combobox";
-
-import { Play, Pause, Square } from "lucide-react";
+import { Play, Pause, Square, ChevronDown } from "lucide-react";
 
 import {
   Popover,
@@ -30,13 +21,8 @@ import {
 import Input from "@/components/ui/Input";
 
 import useTimerStore from "@/stores/useTimer";
-import {
-  useListTasks,
-  Task,
-  useShowTask,
-} from "@/tanstackQueries/useTaskQueries";
+import { Task, useShowTask } from "@/tanstackQueries/useTaskQueries";
 import { cn } from "@/lib/utils";
-import { VISIBLE_TASK_COUNT } from "./constants";
 
 import { TimerDisplayState, TimerLocationState } from "./types";
 
@@ -48,20 +34,23 @@ import {
   displayTime,
 } from "./utils";
 
+import TaskPicker from "./TaskPicker";
+
 const Timer = ({
   setIsDistractionLogOpen,
+  setIsTaskPanelOpen,
   selectedTaskId,
   setSelectedTaskId,
 }: {
   setIsDistractionLogOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsTaskPanelOpen: React.Dispatch<React.SetStateAction<boolean>>;
   selectedTaskId: string;
   setSelectedTaskId: React.Dispatch<React.SetStateAction<string>>;
 }) => {
   const { state } = useLocation() as { state: TimerLocationState };
 
-  const [showAll, setShowAll] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
-  const [searchString, setSearchString] = useState("");
+  const [isTaskSelectOpen, setIsTaskSelectOpen] = useState(false);
   const [isRunning, setIsRunning] = useState(state?.autoStart ?? false);
 
   const initialMode = state?.mode ?? "timer";
@@ -73,12 +62,20 @@ const Timer = ({
   const { isActive: isTimerActive, setIsActive: setIsTimerActive } =
     useTimerStore();
 
-  const { data: tasks = [] } = useListTasks(searchString);
   const { data: task } = useShowTask(selectedTaskId);
 
-  const visibleTasks = showAll ? tasks : tasks.slice(0, VISIBLE_TASK_COUNT);
-  const hiddenCount = tasks.length - VISIBLE_TASK_COUNT;
-  const hasMore = !showAll && hiddenCount > 0;
+  const handleTaskSelect = (selected: Task) => {
+    setSelectedTaskId(selected.id);
+    if (selected.estimatedMinutes && selected.estimatedMinutes <= 30) {
+      setTimer(
+        buildTimerState(
+          "timer",
+          taskTimerMinutes(selected.estimatedMinutes, initialMinutes),
+        ),
+      );
+    }
+    setIsTaskSelectOpen(false);
+  };
 
   const handleStop = () => {
     setIsRunning(false);
@@ -124,57 +121,36 @@ const Timer = ({
   }, [state?.autoStart, setIsTimerActive]);
 
   return (
-    <Card className="mx-4 mt-10 h-10/12">
-      <CardHeader className="flex flex-row items-center justify-between">
+    <Card className="mx-4 mt-10 flex h-10/12 flex-col items-center">
+      <CardHeader className="w-full">
         {isTimerActive ? (
-          <span className="text-sm font-medium">{task?.title}</span>
-        ) : (
-          <Combobox
-            items={visibleTasks}
-            value={task}
-            itemToStringLabel={(task: Task) => task.title}
-            itemToStringValue={(task: Task) => task.id}
-            onValueChange={(value: Task | null) => {
-              if (!value) return;
-              setSelectedTaskId(value.id);
-              if (value.estimatedMinutes && value.estimatedMinutes <= 30) {
-                setTimer(
-                  buildTimerState(
-                    "timer",
-                    taskTimerMinutes(value.estimatedMinutes, initialMinutes),
-                  ),
-                );
-              }
-            }}
-            onInputValueChange={(inputValue: string) => {
-              setSearchString(inputValue);
-              setShowAll(false);
-            }}
+          <Button
+            type="button"
+            variant="link"
+            className="flex items-center gap-1 text-sm font-medium"
+            onClick={() => setIsTaskPanelOpen(true)}
           >
-            <ComboboxInput placeholder="Select task" />
-            <ComboboxContent>
-              <ComboboxEmpty>No tasks found.</ComboboxEmpty>
-              <ComboboxList>
-                {visibleTasks.map((task: Task) => (
-                  <ComboboxItem key={task.id} value={task}>
-                    {task.title}
-                  </ComboboxItem>
-                ))}
-                {hasMore && (
-                  <Button
-                    type="button"
-                    className="text-muted-foreground hover:bg-accent w-full px-2 py-1.5 text-left text-sm"
-                    onMouseDown={(e) => {
-                      e.preventDefault();
-                      setShowAll(true);
-                    }}
-                  >
-                    View more
-                  </Button>
-                )}
-              </ComboboxList>
-            </ComboboxContent>
-          </Combobox>
+            {task?.title}
+          </Button>
+        ) : (
+          <Popover open={isTaskSelectOpen} onOpenChange={setIsTaskSelectOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                type="button"
+                variant="link"
+                className="flex items-center gap-1 text-sm font-medium"
+              >
+                <span>{task?.title ?? "Select task"}</span>
+                <ChevronDown className="size-4" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-64 p-0">
+              <TaskPicker
+                selectedTaskId={selectedTaskId}
+                onSelect={handleTaskSelect}
+              />
+            </PopoverContent>
+          </Popover>
         )}
       </CardHeader>
       <CardContent className="flex flex-col items-center gap-4">
