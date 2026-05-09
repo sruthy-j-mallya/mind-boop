@@ -229,21 +229,30 @@ const Timer = ({
         </Popover>
       </CardContent>
       <CardFooter className="flex justify-center gap-2">
-        <Button
-          type="button"
-          variant="ghost"
-          onClick={() => {
-            setIsRunning((prev) => !prev);
-            setIsTimerActive(true);
-            setIsDistractionLogOpen((prev) => !prev);
-          }}
-        >
-          {isRunning ? (
+        {isRunning ? (
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() => {
+              setIsRunning(false);
+              setIsDistractionLogOpen(true);
+            }}
+          >
             <Pause className="size-5" />
-          ) : (
+          </Button>
+        ) : (
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() => {
+              setIsRunning(true);
+              setIsTimerActive(true);
+              setIsDistractionLogOpen(false);
+            }}
+          >
             <Play className="size-5" />
-          )}
-        </Button>
+          </Button>
+        )}
         <Button
           disabled={!isTimerActive}
           type="button"
