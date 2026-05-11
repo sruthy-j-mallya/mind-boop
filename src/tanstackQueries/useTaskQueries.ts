@@ -8,6 +8,7 @@ export type Task = {
   estimatedMinutes: number;
   isDuration: boolean;
   isAllDay: boolean;
+  isCompleted: boolean;
   startsOn: string | null;
   startsAt: string | null;
   endsOn: string | null;
@@ -116,6 +117,18 @@ export const useSetTaskSchedule = () => {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["calendarTasks"] });
+    },
+  });
+};
+
+export const useCompleteTask = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => invoke("complete_task", { id }),
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["tasks", id] });
       queryClient.invalidateQueries({ queryKey: ["calendarTasks"] });
     },
   });

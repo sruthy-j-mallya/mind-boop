@@ -15,6 +15,7 @@ pub fn run() {
             tasks::show_task,
             tasks::set_estimated_minutes,
             tasks::set_task_schedule,
+            tasks::complete_task,
             time_logs::create_time_log,
             time_logs::list_time_logs,
         ])

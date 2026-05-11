@@ -13,6 +13,7 @@ pub struct Task {
     pub estimated_minutes: u16,
     pub is_duration: bool,
     pub is_all_day: bool,
+    pub is_completed: bool,
     pub starts_on: Option<String>,
     pub starts_at: Option<String>,
     pub ends_on: Option<String>,
@@ -37,7 +38,7 @@ pub async fn list_tasks(search_string: String, state: State<'_, DbState>) -> Res
     let conn = state.0.lock().map_err(|e| e.to_string())?;
     let pattern = format!("%{}%", search_string);
     let mut stmt = conn
-        .prepare("SELECT id, title, description, estimated_minutes, is_duration, is_all_day, starts_on, starts_at, ends_on, ends_at FROM tasks WHERE title LIKE ?1 OR description LIKE ?1 ORDER BY starts_on IS NULL, starts_on, starts_at IS NULL, starts_at")
+        .prepare("SELECT id, title, description, estimated_minutes, is_duration, is_all_day, is_completed, starts_on, starts_at, ends_on, ends_at FROM tasks WHERE is_completed = 0 AND (title LIKE ?1 OR description LIKE ?1) ORDER BY starts_on IS NULL, starts_on, starts_at IS NULL, starts_at")
         .map_err(|e| e.to_string())?;
 
     let tasks = stmt
@@ -49,10 +50,11 @@ pub async fn list_tasks(search_string: String, state: State<'_, DbState>) -> Res
                 estimated_minutes: row.get(3)?,
                 is_duration: row.get::<_, i32>(4)? != 0,
                 is_all_day: row.get::<_, i32>(5)? != 0,
-                starts_on: row.get(6)?,
-                starts_at: row.get(7)?,
-                ends_on: row.get(8)?,
-                ends_at: row.get(9)?,
+                is_completed: row.get::<_, i32>(6)? != 0,
+                starts_on: row.get(7)?,
+                starts_at: row.get(8)?,
+                ends_on: row.get(9)?,
+                ends_at: row.get(10)?,
             })
         })
         .map_err(|e| e.to_string())?
@@ -79,7 +81,7 @@ pub async fn create_task(title: String, state: State<'_, DbState>) -> Result<Str
 pub async fn show_task(id: String, state: State<'_, DbState>) -> Result<Task, String> {
     let conn = state.0.lock().map_err(|e| e.to_string())?;
     let mut stmt = conn
-        .prepare("SELECT id, title, description, estimated_minutes, is_duration, is_all_day, starts_on, starts_at, ends_on, ends_at FROM tasks WHERE id = ?1")
+        .prepare("SELECT id, title, description, estimated_minutes, is_duration, is_all_day, is_completed, starts_on, starts_at, ends_on, ends_at FROM tasks WHERE id = ?1")
         .map_err(|e| e.to_string())?;
 
     stmt.query_row([id], |row| {
@@ -90,10 +92,11 @@ pub async fn show_task(id: String, state: State<'_, DbState>) -> Result<Task, St
             estimated_minutes: row.get(3)?,
             is_duration: row.get::<_, i32>(4)? != 0,
             is_all_day: row.get::<_, i32>(5)? != 0,
-            starts_on: row.get(6)?,
-            starts_at: row.get(7)?,
-            ends_on: row.get(8)?,
-            ends_at: row.get(9)?,
+            is_completed: row.get::<_, i32>(6)? != 0,
+            starts_on: row.get(7)?,
+            starts_at: row.get(8)?,
+            ends_on: row.get(9)?,
+            ends_at: row.get(10)?,
         })
     })
     .map_err(|e| e.to_string())
@@ -133,7 +136,7 @@ pub async fn set_estimated_minutes(id: String, estimated_minutes: u16, state: St
 pub async fn list_calendar_tasks(state: State<'_, DbState>) -> Result<Vec<CalendarTask>, String> {
     let conn = state.0.lock().map_err(|e| e.to_string())?;
     let mut stmt = conn
-        .prepare("SELECT id, title, is_duration, is_all_day, starts_on, starts_at, ends_on, ends_at FROM tasks WHERE starts_on IS NOT NULL AND deleted_at IS NULL ORDER BY starts_on, starts_at IS NULL, starts_at")
+        .prepare("SELECT id, title, is_duration, is_all_day, starts_on, starts_at, ends_on, ends_at FROM tasks WHERE starts_on IS NOT NULL AND is_completed = 0 AND deleted_at IS NULL ORDER BY starts_on, starts_at IS NULL, starts_at")
         .map_err(|e| e.to_string())?;
 
     let tasks: Vec<CalendarTask> = stmt
@@ -154,6 +157,16 @@ pub async fn list_calendar_tasks(state: State<'_, DbState>) -> Result<Vec<Calend
         .map_err(|e| e.to_string())?;
 
     Ok(tasks)
+}
+
+#[tauri::command]
+pub async fn complete_task(id: String, state: State<'_, DbState>) -> Result<String, String> {
+    let conn = state.0.lock().map_err(|e| e.to_string())?;
+    conn.execute(
+        "UPDATE tasks SET is_completed = 1, updated_at = datetime('now') WHERE id = ?1",
+        [id],
+    ).map_err(|e| e.to_string())?;
+    Ok("Task completed".to_string())
 }
 
 #[tauri::command]

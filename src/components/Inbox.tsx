@@ -1,5 +1,8 @@
 import { useState } from "react";
-import { useListTasks } from "@/tanstackQueries/useTaskQueries";
+import {
+  useListTasks,
+  useCompleteTask,
+} from "@/tanstackQueries/useTaskQueries";
 import NoTasksPage from "@/components/NoTasksPage";
 import TaskPanel from "@/components/TaskPanel/TaskPanel";
 import AddTaskBar from "@/components/AddTaskBar";
@@ -11,9 +14,12 @@ import {
 import { ItemGroup, Item, ItemTitle, ItemContent } from "@/components/ui/Item";
 import SchedulePicker from "@/components/TaskPanel/SchedulePicker";
 import { taskToCommittedSchedule } from "@/components/TaskPanel/utils";
+import Checkbox from "./ui/checkbox";
+import { playCompletionSound } from "./utils";
 
 const Inbox = () => {
   const { data: tasks, isLoading, isError } = useListTasks();
+  const { mutate: completeTask } = useCompleteTask();
   const [isTaskPanelOpen, setIsTaskPanelOpen] = useState(false);
 
   if (isLoading) return <div>Loading...</div>;
@@ -39,8 +45,18 @@ const Inbox = () => {
                   size="xs"
                   className="border-b-muted rounded-b-none"
                 >
-                  <ItemContent>
-                    <ItemTitle className="truncate">{task.title}</ItemTitle>
+                  <ItemContent className="flex flex-row items-center justify-between">
+                    <div className="flex flex-row items-center gap-2">
+                      <Checkbox
+                        id={task.id}
+                        name="task-completion"
+                        onCheckedChange={() => {
+                          playCompletionSound();
+                          completeTask(task.id);
+                        }}
+                      />
+                      <ItemTitle className="truncate">{task.title}</ItemTitle>
+                    </div>
                     {schedule !== null && (
                       <SchedulePicker
                         taskId={task.id}
