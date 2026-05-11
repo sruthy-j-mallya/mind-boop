@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 import { useLocation } from "react-router-dom";
 
@@ -22,6 +22,7 @@ import Input from "@/components/ui/Input";
 
 import useTimerStore from "@/stores/useTimer";
 import { Task, useShowTask } from "@/tanstackQueries/useTaskQueries";
+import { useCreateTimeLog } from "@/tanstackQueries/useTimeLogQueries";
 import { cn } from "@/lib/utils";
 
 import { TimerDisplayState, TimerLocationState } from "./types";
@@ -63,6 +64,13 @@ const Timer = ({
     useTimerStore();
 
   const { data: task } = useShowTask(selectedTaskId);
+  const { mutate: createTimeLog } = useCreateTimeLog();
+  const startTimeRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (isRunning && startTimeRef.current == null)
+      startTimeRef.current = new Date().toISOString();
+  }, [isRunning]);
 
   const handleTaskSelect = (selected: Task) => {
     setSelectedTaskId(selected.id);
@@ -78,6 +86,21 @@ const Timer = ({
   };
 
   const handleStop = () => {
+    if (isTimerActive && selectedTaskId && startTimeRef.current) {
+      const endTime = new Date().toISOString();
+      const duration = Math.round(
+        (new Date(endTime).getTime() -
+          new Date(startTimeRef.current).getTime()) /
+          1000,
+      );
+      createTimeLog({
+        taskId: selectedTaskId,
+        startTime: startTimeRef.current,
+        endTime,
+        duration,
+      });
+    }
+    startTimeRef.current = null;
     setIsRunning(false);
     setIsTimerActive(false);
     setTimer((prev) => ({
@@ -107,6 +130,27 @@ const Timer = ({
         timer.mode === "stopwatch"
           ? incrementTime(timer.minutes, timer.seconds)
           : decrementTime(timer.minutes, timer.seconds);
+
+      if (timer.mode === "timer" && nextMinutes === 0 && nextSeconds === 0) {
+        const endTime = new Date().toISOString();
+        if (selectedTaskId && startTimeRef.current) {
+          const duration = Math.round(
+            (new Date(endTime).getTime() -
+              new Date(startTimeRef.current).getTime()) /
+              1000,
+          );
+          createTimeLog({
+            taskId: selectedTaskId,
+            startTime: startTimeRef.current,
+            endTime,
+            duration,
+          });
+        }
+        startTimeRef.current = null;
+        setIsRunning(false);
+        setIsTimerActive(false);
+      }
+
       setTimer((prev) => ({
         ...prev,
         minutes: nextMinutes,
@@ -114,7 +158,15 @@ const Timer = ({
       }));
     }, 1000);
     return () => clearInterval(interval);
-  }, [isRunning, timer.mode, timer.minutes, timer.seconds]);
+  }, [
+    isRunning,
+    timer.mode,
+    timer.minutes,
+    timer.seconds,
+    selectedTaskId,
+    createTimeLog,
+    setIsTimerActive,
+  ]);
 
   useEffect(() => {
     if (state?.autoStart) setIsTimerActive(true);

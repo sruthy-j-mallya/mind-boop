@@ -5,14 +5,16 @@ type CreateTimeLogPayload = {
   taskId: string;
   startTime: string;
   endTime: string;
+  duration: number;
 };
 
-export const useCreateTimeLog = (taskId: string) =>
+export const useCreateTimeLog = () =>
   useMutation<string, Error, CreateTimeLogPayload>({
-    mutationFn: async ({ startTime, endTime }: CreateTimeLogPayload) =>
+    mutationFn: async ({ taskId, startTime, endTime, duration }) =>
       invoke<string>("create_time_log", {
         taskId,
         startTime,
         endTime,
+        duration,
       }),
   });
