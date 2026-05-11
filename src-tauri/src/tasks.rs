@@ -11,6 +11,25 @@ pub struct Task {
     pub title: String,
     pub description: Option<String>,
     pub estimated_minutes: u16,
+    pub is_duration: bool,
+    pub is_all_day: bool,
+    pub starts_on: Option<String>,
+    pub starts_at: Option<String>,
+    pub ends_on: Option<String>,
+    pub ends_at: Option<String>,
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CalendarTask {
+    pub id: String,
+    pub title: String,
+    pub is_duration: bool,
+    pub is_all_day: bool,
+    pub starts_on: Option<String>,
+    pub starts_at: Option<String>,
+    pub ends_on: Option<String>,
+    pub ends_at: Option<String>,
 }
 
 #[tauri::command]
@@ -18,7 +37,7 @@ pub async fn list_tasks(search_string: String, state: State<'_, DbState>) -> Res
     let conn = state.0.lock().map_err(|e| e.to_string())?;
     let pattern = format!("%{}%", search_string);
     let mut stmt = conn
-        .prepare("SELECT id, title, description, estimated_minutes FROM tasks WHERE title LIKE ?1 OR description LIKE ?1 ORDER BY starts_on IS NULL, starts_on, starts_at IS NULL, starts_at")
+        .prepare("SELECT id, title, description, estimated_minutes, is_duration, is_all_day, starts_on, starts_at, ends_on, ends_at FROM tasks WHERE title LIKE ?1 OR description LIKE ?1 ORDER BY starts_on IS NULL, starts_on, starts_at IS NULL, starts_at")
         .map_err(|e| e.to_string())?;
 
     let tasks = stmt
@@ -28,6 +47,12 @@ pub async fn list_tasks(search_string: String, state: State<'_, DbState>) -> Res
                 title: row.get(1)?,
                 description: row.get(2)?,
                 estimated_minutes: row.get(3)?,
+                is_duration: row.get::<_, i32>(4)? != 0,
+                is_all_day: row.get::<_, i32>(5)? != 0,
+                starts_on: row.get(6)?,
+                starts_at: row.get(7)?,
+                ends_on: row.get(8)?,
+                ends_at: row.get(9)?,
             })
         })
         .map_err(|e| e.to_string())?
@@ -54,7 +79,7 @@ pub async fn create_task(title: String, state: State<'_, DbState>) -> Result<Str
 pub async fn show_task(id: String, state: State<'_, DbState>) -> Result<Task, String> {
     let conn = state.0.lock().map_err(|e| e.to_string())?;
     let mut stmt = conn
-        .prepare("SELECT id, title, description, estimated_minutes FROM tasks WHERE id = ?1")
+        .prepare("SELECT id, title, description, estimated_minutes, is_duration, is_all_day, starts_on, starts_at, ends_on, ends_at FROM tasks WHERE id = ?1")
         .map_err(|e| e.to_string())?;
 
     stmt.query_row([id], |row| {
@@ -63,6 +88,12 @@ pub async fn show_task(id: String, state: State<'_, DbState>) -> Result<Task, St
             title: row.get(1)?,
             description: row.get(2)?,
             estimated_minutes: row.get(3)?,
+            is_duration: row.get::<_, i32>(4)? != 0,
+            is_all_day: row.get::<_, i32>(5)? != 0,
+            starts_on: row.get(6)?,
+            starts_at: row.get(7)?,
+            ends_on: row.get(8)?,
+            ends_at: row.get(9)?,
         })
     })
     .map_err(|e| e.to_string())
@@ -96,6 +127,33 @@ pub async fn set_estimated_minutes(id: String, estimated_minutes: u16, state: St
     }
 
     Ok("Estimation updated successfully".to_string())
+}
+
+#[tauri::command]
+pub async fn list_calendar_tasks(state: State<'_, DbState>) -> Result<Vec<CalendarTask>, String> {
+    let conn = state.0.lock().map_err(|e| e.to_string())?;
+    let mut stmt = conn
+        .prepare("SELECT id, title, is_duration, is_all_day, starts_on, starts_at, ends_on, ends_at FROM tasks WHERE starts_on IS NOT NULL AND deleted_at IS NULL ORDER BY starts_on, starts_at IS NULL, starts_at")
+        .map_err(|e| e.to_string())?;
+
+    let tasks: Vec<CalendarTask> = stmt
+        .query_map([], |row| {
+            Ok(CalendarTask {
+                id: row.get(0)?,
+                title: row.get(1)?,
+                is_duration: row.get::<_, i32>(2)? != 0,
+                is_all_day: row.get::<_, i32>(3)? != 0,
+                starts_on: row.get(4)?,
+                starts_at: row.get(5)?,
+                ends_on: row.get(6)?,
+                ends_at: row.get(7)?,
+            })
+        })
+        .map_err(|e| e.to_string())?
+        .collect::<Result<Vec<CalendarTask>, _>>()
+        .map_err(|e| e.to_string())?;
+
+    Ok(tasks)
 }
 
 #[tauri::command]
