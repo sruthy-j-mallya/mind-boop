@@ -41,8 +41,8 @@ const FocusSession = () => {
                   <Textarea
                     value={noteText}
                     onChange={(e) => setNoteText(e.target.value)}
-                    placeholder="Jot something down…"
-                    aria-label="Session note"
+                    placeholder="Parking lot for your thoughts ..."
+                    aria-label="Parking lot"
                     className="min-h-[min(55vh,22rem)] flex-1 resize-y text-base leading-relaxed"
                   />
                 </div>
