@@ -82,5 +82,30 @@ const hourEndsAt = (startsOn: Date, startsAt: string) => {
   return { endsOn: endDateTime.toDate(), endsAt: endDateTime.format("HH:mm") };
 };
 
-export { toDateString, getNearestHour, formatScheduleLabel, hourEndsAt };
+const taskToCommittedSchedule = (task: {
+  isDuration: boolean;
+  isAllDay: boolean;
+  startsOn: string | null;
+  startsAt: string | null;
+  endsOn: string | null;
+  endsAt: string | null;
+}): CommittedSchedule | null => {
+  if (!task.startsOn) return null;
+  return {
+    scheduleType: task.isDuration ? "duration" : "date",
+    isAllDay: task.isAllDay,
+    startsOn: dayjs(task.startsOn, "DD-MM-YYYY").toDate(),
+    startsAt: task.startsAt ?? undefined,
+    endsOn: task.endsOn ? dayjs(task.endsOn, "DD-MM-YYYY").toDate() : undefined,
+    endsAt: task.endsAt ?? undefined,
+  };
+};
+
+export {
+  toDateString,
+  getNearestHour,
+  formatScheduleLabel,
+  hourEndsAt,
+  taskToCommittedSchedule,
+};
 export type { CommittedSchedule };

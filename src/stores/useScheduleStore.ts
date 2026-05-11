@@ -20,6 +20,7 @@ interface ScheduleStore {
   toggleIsAllDay: (isAllDay: boolean) => void;
   changeScheduleType: (type: "date" | "duration") => void;
   resetSelections: () => void;
+  loadSchedule: (schedule: Partial<Schedule>) => void;
 }
 
 const useScheduleStore = create<ScheduleStore>((set) => {
@@ -128,6 +129,9 @@ const useScheduleStore = create<ScheduleStore>((set) => {
         },
       });
     },
+
+    loadSchedule: (partial) =>
+      set((state) => ({ schedule: { ...state.schedule, ...partial } })),
   };
 });
 

@@ -8,8 +8,9 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/Resizable";
-
 import { ItemGroup, Item, ItemTitle, ItemContent } from "@/components/ui/Item";
+import SchedulePicker from "@/components/TaskPanel/SchedulePicker";
+import { taskToCommittedSchedule } from "@/components/TaskPanel/utils";
 
 const Inbox = () => {
   const { data: tasks, isLoading, isError } = useListTasks();
@@ -29,18 +30,27 @@ const Inbox = () => {
         </div>
         {hasTasks ? (
           <ItemGroup className="max-w-2xl">
-            {tasks.map((task) => (
-              <Item
-                key={task.id}
-                variant="default"
-                size="xs"
-                className="border-b-muted"
-              >
-                <ItemContent>
-                  <ItemTitle className="truncate">{task.title}</ItemTitle>
-                </ItemContent>
-              </Item>
-            ))}
+            {tasks.map((task) => {
+              const schedule = taskToCommittedSchedule(task);
+              return (
+                <Item
+                  key={task.id}
+                  variant="default"
+                  size="xs"
+                  className="border-b-muted rounded-b-none"
+                >
+                  <ItemContent>
+                    <ItemTitle className="truncate">{task.title}</ItemTitle>
+                    {schedule !== null && (
+                      <SchedulePicker
+                        taskId={task.id}
+                        initialSchedule={schedule}
+                      />
+                    )}
+                  </ItemContent>
+                </Item>
+              );
+            })}
           </ItemGroup>
         ) : (
           <NoTasksPage onAddTask={() => setIsTaskPanelOpen(true)} />

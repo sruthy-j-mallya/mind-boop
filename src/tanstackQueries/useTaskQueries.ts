@@ -6,6 +6,23 @@ export type Task = {
   title: string;
   description: string;
   estimatedMinutes: number;
+  isDuration: boolean;
+  isAllDay: boolean;
+  startsOn: string | null;
+  startsAt: string | null;
+  endsOn: string | null;
+  endsAt: string | null;
+};
+
+export type CalendarTask = {
+  id: string;
+  title: string;
+  isDuration: boolean;
+  isAllDay: boolean;
+  startsOn: string | null;
+  startsAt: string | null;
+  endsOn: string | null;
+  endsAt: string | null;
 };
 
 type CreateTaskSuccessCallback = (taskId: string) => void;
@@ -20,6 +37,12 @@ export const useListTasks = (searchString = "") =>
   useQuery<Task[]>({
     queryKey: ["tasks", { searchString }],
     queryFn: () => invoke<Task[]>("list_tasks", { searchString }),
+  });
+
+export const useListCalendarTasks = () =>
+  useQuery<CalendarTask[]>({
+    queryKey: ["calendarTasks"],
+    queryFn: () => invoke<CalendarTask[]>("list_calendar_tasks"),
   });
 
 export const useCreateTask = (onSuccess?: CreateTaskSuccessCallback) => {
@@ -90,8 +113,9 @@ export const useSetTaskSchedule = () => {
         endsAt: endsAt ?? null,
         endsOn: endsOn ?? null,
       }),
-    onSuccess: (_, { id }) => {
-      queryClient.invalidateQueries({ queryKey: ["tasks", id] });
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["calendarTasks"] });
     },
   });
 };

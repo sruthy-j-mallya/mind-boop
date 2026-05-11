@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { CalendarDays, Clock2Icon, X } from "lucide-react";
 import { Calendar } from "@/components/ui/Calendar";
 import Button from "../ui/Button";
@@ -16,9 +16,9 @@ import {
 } from "./utils";
 import useScheduleStore from "@/stores/useScheduleStore";
 
-type Props = { taskId: string };
+type Props = { taskId: string; initialSchedule?: CommittedSchedule | null };
 
-const SchedulePicker = ({ taskId }: Props) => {
+const SchedulePicker = ({ taskId, initialSchedule }: Props) => {
   const {
     schedule,
     setStartsOn,
@@ -29,11 +29,14 @@ const SchedulePicker = ({ taskId }: Props) => {
     toggleIsAllDay,
     changeScheduleType,
     resetSelections,
+    loadSchedule,
   } = useScheduleStore();
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [committedSchedule, setCommittedSchedule] =
-    useState<CommittedSchedule | null>(schedule);
+    useState<CommittedSchedule | null>(
+      initialSchedule !== undefined ? initialSchedule : schedule,
+    );
 
   const { mutate: setTaskSchedule } = useSetTaskSchedule();
 
@@ -72,31 +75,26 @@ const SchedulePicker = ({ taskId }: Props) => {
     setIsPopoverOpen(false);
   };
 
-  useEffect(() => {
-    const isDuration = scheduleType == "duration";
-
-    setTaskSchedule({
-      id: taskId,
-      isDuration,
-      isAllDay,
-      startsOn: startsOn ? toDateString(startsOn) : startsOn,
-      startsAt,
-      endsOn: endsOn ? toDateString(endsOn) : endsOn,
-      endsAt,
-    });
-  }, [
-    taskId,
-    scheduleType,
-    isAllDay,
-    startsOn,
-    startsAt,
-    endsOn,
-    endsAt,
-    setTaskSchedule,
-  ]);
+  const handleOpenChange = (open: boolean) => {
+    if (open && initialSchedule !== undefined) {
+      if (initialSchedule) {
+        loadSchedule({
+          scheduleType: initialSchedule.scheduleType,
+          isAllDay: initialSchedule.isAllDay,
+          startsOn: initialSchedule.startsOn,
+          startsAt: initialSchedule.startsAt,
+          endsOn: initialSchedule.endsOn,
+          endsAt: initialSchedule.endsAt,
+        });
+      } else {
+        resetSelections();
+      }
+    }
+    setIsPopoverOpen(open);
+  };
 
   return (
-    <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
+    <Popover open={isPopoverOpen} onOpenChange={handleOpenChange}>
       <PopoverTrigger>
         <Button
           variant="link"
