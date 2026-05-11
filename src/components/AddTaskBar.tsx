@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { CalendarDays, Hourglass, Plus } from "lucide-react";
 import { Calendar } from "@/components/ui/Calendar";
 import {
@@ -16,6 +16,7 @@ import {
 } from "@/tanstackQueries/useTaskQueries";
 import { toDateString } from "@/components/TaskPanel/utils";
 import dayjs from "dayjs";
+import useClickOutside from "@/components/hooks/useClickOutside";
 
 const AddTaskBar = () => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -26,6 +27,10 @@ const AddTaskBar = () => {
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [isEstimateOpen, setIsEstimateOpen] = useState(false);
 
+  const containerRef = useRef<HTMLDivElement>(null);
+  const calendarPopoverRef = useRef<HTMLDivElement>(null);
+  const estimatePopoverRef = useRef<HTMLDivElement>(null);
+
   const reset = () => {
     setTitle("");
     setDueDate(undefined);
@@ -33,6 +38,11 @@ const AddTaskBar = () => {
     setEstimatedMinutes(0);
     setIsExpanded(false);
   };
+
+  useClickOutside(containerRef, reset, [
+    calendarPopoverRef,
+    estimatePopoverRef,
+  ]);
 
   const { mutate: setTaskSchedule } = useSetTaskSchedule();
   const { mutate: updateEstimatedMinutes } = useSetEstimatedMinutes();
@@ -84,10 +94,8 @@ const AddTaskBar = () => {
 
   return (
     <div
+      ref={containerRef}
       className="flex w-full max-w-2xl flex-col gap-2 rounded-md border p-3"
-      onBlur={(e) => {
-        if (!e.currentTarget.contains(e.relatedTarget)) reset();
-      }}
     >
       <Input
         autoFocus
@@ -112,7 +120,7 @@ const AddTaskBar = () => {
                 {dueDateLabel ?? "Due date"}
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-fit p-2">
+            <PopoverContent ref={calendarPopoverRef} className="w-fit p-2">
               <Calendar
                 mode="single"
                 selected={dueDate}
@@ -135,7 +143,7 @@ const AddTaskBar = () => {
                 {estimateLabel ?? "Estimate"}
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-48">
+            <PopoverContent ref={estimatePopoverRef} className="w-48">
               <FieldGroup className="flex flex-row gap-2">
                 <Field className="flex w-16 flex-col gap-2">
                   <Input
