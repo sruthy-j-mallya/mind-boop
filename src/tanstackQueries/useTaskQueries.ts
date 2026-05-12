@@ -80,6 +80,8 @@ export const useSetEstimatedMinutes = () => {
     }) => invoke("set_estimated_minutes", { id, estimatedMinutes }),
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: ["tasks", id] });
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["calendarTasks"] });
     },
   });
 };
@@ -115,7 +117,8 @@ export const useSetTaskSchedule = () => {
         endsAt: endsAt ?? null,
         endsOn: endsOn ?? null,
       }),
-    onSuccess: () => {
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: ["tasks", id] });
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
       queryClient.invalidateQueries({ queryKey: ["calendarTasks"] });
     },

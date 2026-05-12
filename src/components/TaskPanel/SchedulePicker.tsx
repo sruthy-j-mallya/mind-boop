@@ -8,17 +8,21 @@ import { InputGroup, InputGroupInput, InputGroupAddon } from "../ui/InputGroup";
 import DateTimePicker from "../DateTimePicker";
 import { FieldLabel, Field } from "@/components/ui/Field";
 import Switch from "../ui/Switch";
-import { useSetTaskSchedule } from "@/tanstackQueries/useTaskQueries";
+import {
+  useSetTaskSchedule,
+  useShowTask,
+} from "@/tanstackQueries/useTaskQueries";
 import {
   toDateString,
   formatScheduleLabel,
+  taskToCommittedSchedule,
   type CommittedSchedule,
 } from "./utils";
 import useScheduleStore from "@/stores/useScheduleStore";
 
-type Props = { taskId: string; initialSchedule?: CommittedSchedule | null };
+type Props = { taskId: string };
 
-const SchedulePicker = ({ taskId, initialSchedule }: Props) => {
+const SchedulePicker = ({ taskId }: Props) => {
   const {
     schedule,
     setStartsOn,
@@ -33,9 +37,11 @@ const SchedulePicker = ({ taskId, initialSchedule }: Props) => {
   } = useScheduleStore();
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  const { data: task } = useShowTask(taskId);
   const [committedSchedule, setCommittedSchedule] =
     useState<CommittedSchedule | null>(
-      initialSchedule !== undefined ? initialSchedule : schedule,
+      task !== undefined ? taskToCommittedSchedule(task) : schedule,
     );
 
   const { mutate: setTaskSchedule } = useSetTaskSchedule();
@@ -76,15 +82,15 @@ const SchedulePicker = ({ taskId, initialSchedule }: Props) => {
   };
 
   const handleOpenChange = (open: boolean) => {
-    if (open && initialSchedule !== undefined) {
-      if (initialSchedule) {
+    if (open && committedSchedule !== undefined) {
+      if (committedSchedule) {
         loadSchedule({
-          scheduleType: initialSchedule.scheduleType,
-          isAllDay: initialSchedule.isAllDay,
-          startsOn: initialSchedule.startsOn,
-          startsAt: initialSchedule.startsAt,
-          endsOn: initialSchedule.endsOn,
-          endsAt: initialSchedule.endsAt,
+          scheduleType: committedSchedule.scheduleType,
+          isAllDay: committedSchedule.isAllDay,
+          startsOn: committedSchedule.startsOn,
+          startsAt: committedSchedule.startsAt,
+          endsOn: committedSchedule.endsOn,
+          endsAt: committedSchedule.endsAt,
         });
       } else {
         resetSelections();

@@ -21,6 +21,14 @@ const Inbox = () => {
   const { data: tasks, isLoading, isError } = useListTasks();
   const { mutate: completeTask } = useCompleteTask();
   const [isTaskPanelOpen, setIsTaskPanelOpen] = useState(false);
+  const [selectedTaskId, setSelectedTaskId] = useState<string | undefined>(
+    undefined,
+  );
+
+  const openTask = (taskId: string) => {
+    setSelectedTaskId(taskId);
+    setIsTaskPanelOpen(true);
+  };
 
   if (isLoading) return <div>Loading...</div>;
   if (isError) return <div>Failed to load tasks.</div>;
@@ -43,7 +51,8 @@ const Inbox = () => {
                   key={task.id}
                   variant="default"
                   size="xs"
-                  className="border-b-muted rounded-b-none"
+                  className="border-b-muted cursor-pointer rounded-b-none"
+                  onClick={() => openTask(task.id)}
                 >
                   <ItemContent className="flex flex-row items-center justify-between">
                     <div className="flex flex-row items-center gap-2">
@@ -57,11 +66,8 @@ const Inbox = () => {
                       />
                       <ItemTitle className="truncate">{task.title}</ItemTitle>
                     </div>
-                    {schedule !== null && (
-                      <SchedulePicker
-                        taskId={task.id}
-                        initialSchedule={schedule}
-                      />
+                    {schedule && (
+                      <SchedulePicker key={task.id} taskId={task.id} />
                     )}
                   </ItemContent>
                 </Item>
@@ -69,14 +75,18 @@ const Inbox = () => {
             })}
           </ItemGroup>
         ) : (
-          <NoTasksPage onAddTask={() => setIsTaskPanelOpen(true)} />
+          <NoTasksPage />
         )}
       </ResizablePanel>
       {isTaskPanelOpen && (
         <>
           <ResizableHandle />
           <ResizablePanel className="bg-background h-11/12 shrink-0 overflow-y-auto px-6 py-3">
-            <TaskPanel onClose={() => setIsTaskPanelOpen(false)} />
+            <TaskPanel
+              key={selectedTaskId}
+              onClose={() => setIsTaskPanelOpen(false)}
+              selectedTaskId={selectedTaskId}
+            />
           </ResizablePanel>
         </>
       )}

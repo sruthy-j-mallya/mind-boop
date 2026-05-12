@@ -85,7 +85,7 @@ const TaskPanel = ({
       <CardHeader>
         <CardTitle>
           <CardAction className="flex flex-row justify-between">
-            <SchedulePicker taskId={taskId} />
+            {selectedTaskId && <SchedulePicker taskId={taskId} />}
             <div className="flex items-center gap-2">
               <Button variant="ghost" className="h-6 w-6">
                 <Maximize className="text-foreground size-4" />
