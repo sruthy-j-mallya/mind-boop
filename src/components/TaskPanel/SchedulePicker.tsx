@@ -16,7 +16,6 @@ import {
   toDateString,
   formatScheduleLabel,
   taskToCommittedSchedule,
-  type CommittedSchedule,
 } from "./utils";
 import useScheduleStore from "@/stores/useScheduleStore";
 
@@ -39,10 +38,7 @@ const SchedulePicker = ({ taskId }: Props) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const { data: task } = useShowTask(taskId);
-  const [committedSchedule, setCommittedSchedule] =
-    useState<CommittedSchedule | null>(
-      task !== undefined ? taskToCommittedSchedule(task) : schedule,
-    );
+  const committedSchedule = task ? taskToCommittedSchedule(task) : null;
 
   const { mutate: setTaskSchedule } = useSetTaskSchedule();
 
@@ -51,7 +47,6 @@ const SchedulePicker = ({ taskId }: Props) => {
 
   const handleClearSchedule = () => {
     resetSelections();
-    setCommittedSchedule(null);
 
     if (!taskId) return;
     setTaskSchedule({
@@ -62,8 +57,6 @@ const SchedulePicker = ({ taskId }: Props) => {
   };
 
   const handleSetSchedule = () => {
-    setCommittedSchedule(schedule);
-
     if (taskId) {
       const isDuration = scheduleType == "duration";
 

@@ -85,7 +85,7 @@ const TaskPanel = ({
       <CardHeader>
         <CardTitle>
           <CardAction className="flex flex-row justify-between">
-            {selectedTaskId && <SchedulePicker taskId={taskId} />}
+            {selectedTaskId && <SchedulePicker key={taskId} taskId={taskId} />}
             <div className="flex items-center gap-2">
               <Button variant="ghost" className="h-6 w-6">
                 <Maximize className="text-foreground size-4" />
@@ -98,7 +98,7 @@ const TaskPanel = ({
           <Input
             id="task-title"
             name="title"
-            value={savedTitle || title}
+            value={hasUserEdited ? title : savedTitle || title}
             onChange={(e) => {
               setHasUserEdited(true);
               setTitle(e.target.value);
@@ -119,6 +119,7 @@ const TaskPanel = ({
       <CardContent className="flex min-h-0 flex-1 flex-col overflow-hidden">
         <MarkdownEditor
           id="task-description"
+          key={taskId}
           editorRef={editorRef}
           onMarkdownChange={(md) => {
             setHasUserEdited(true);
@@ -129,7 +130,7 @@ const TaskPanel = ({
         />
       </CardContent>
       <CardFooter className="flex flex-row justify-between">
-        <EstimationInput taskId={taskId} />
+        <EstimationInput key={taskId} taskId={taskId} />
         {!hideStartButton && (
           <Button onClick={() => setIsTimerDialogOpen(true)} disabled={!taskId}>
             Start now
