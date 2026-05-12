@@ -14,7 +14,7 @@ import {
 import { ItemGroup, Item, ItemTitle, ItemContent } from "@/components/ui/Item";
 import SchedulePicker from "@/components/TaskPanel/SchedulePicker";
 import { taskToCommittedSchedule } from "@/components/TaskPanel/utils";
-import Checkbox from "./ui/checkbox";
+import Checkbox from "@/components/ui/Checkbox";
 import { playCompletionSound } from "./utils";
 
 const Inbox = () => {
