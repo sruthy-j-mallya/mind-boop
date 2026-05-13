@@ -9,7 +9,7 @@ import {
 
 import Textarea from "@/components/ui/TextArea";
 
-import TaskPanel from "../TaskPanel/TaskPanel";
+import TaskPanel from "../TaskPanel";
 import Timer from "./Timer";
 
 const FocusSession = () => {

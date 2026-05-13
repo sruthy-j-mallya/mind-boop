@@ -8,7 +8,7 @@ import {
   useUpdateTask,
 } from "@/tanstackQueries/useTaskQueries";
 import { Maximize, X } from "lucide-react";
-import Button from "../ui/Button";
+import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 
 import {
@@ -19,8 +19,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/Card";
-import EstimationInput from "./EstimationInput";
-import SchedulePicker from "./SchedulePicker";
+import EstimationInput from "@common/EstimationInput";
+import SchedulePicker from "@common/SchedulePicker";
 import TimerOptionsDialog from "@/components/Timer/TimerOptionsDialog";
 
 const TaskPanel = ({

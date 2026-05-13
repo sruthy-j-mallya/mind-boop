@@ -16,7 +16,7 @@ import {
   toDateString,
   formatScheduleLabel,
   taskToCommittedSchedule,
-} from "./utils";
+} from "../utils";
 import useScheduleStore from "@/stores/useScheduleStore";
 
 type Props = { taskId: string };

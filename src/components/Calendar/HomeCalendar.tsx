@@ -4,7 +4,7 @@ import Toolbar from "@/components/Calendar/Toolbar";
 import WeekDayHeader from "@/components/Calendar/WeekDayHeader";
 import { CalendarView } from "@/components/Calendar/types";
 import { calendarLocalizer } from "@/lib/calendarLocalizer";
-import TaskPanel from "../TaskPanel/TaskPanel";
+import TaskPanel from "../TaskPanel";
 import { useListCalendarTasks } from "@/tanstackQueries/useTaskQueries";
 import { useListTimeLogs } from "@/tanstackQueries/useTimeLogQueries";
 

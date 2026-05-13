@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { getNearestHour, hourEndsAt } from "@/components/TaskPanel/utils";
+import { getNearestHour, hourEndsAt } from "@/components/utils";
 
 export interface Schedule {
   scheduleType: "date" | "duration";

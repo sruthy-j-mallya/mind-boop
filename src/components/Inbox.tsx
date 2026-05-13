@@ -4,7 +4,7 @@ import {
   useCompleteTask,
 } from "@/tanstackQueries/useTaskQueries";
 import NoTasksPage from "@/components/NoTasksPage";
-import TaskPanel from "@/components/TaskPanel/TaskPanel";
+import TaskPanel from "@/components/TaskPanel";
 import AddTaskBar from "@/components/AddTaskBar";
 import {
   ResizableHandle,
@@ -12,10 +12,12 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/Resizable";
 import { ItemGroup, Item, ItemTitle, ItemContent } from "@/components/ui/Item";
-import SchedulePicker from "@/components/TaskPanel/SchedulePicker";
-import { taskToCommittedSchedule } from "@/components/TaskPanel/utils";
+import SchedulePicker from "@common/SchedulePicker";
+import {
+  taskToCommittedSchedule,
+  playCompletionSound,
+} from "@/components/utils";
 import Checkbox from "@/components/ui/Checkbox";
-import { playCompletionSound } from "./utils";
 
 const Inbox = () => {
   const { data: tasks, isLoading, isError } = useListTasks();

@@ -14,7 +14,7 @@ import {
   useSetEstimatedMinutes,
   useSetTaskSchedule,
 } from "@/tanstackQueries/useTaskQueries";
-import { toDateString } from "@/components/TaskPanel/utils";
+import { toDateString } from "@/components/utils";
 import dayjs from "dayjs";
 import useClickOutside from "@/components/hooks/useClickOutside";
 
