@@ -1,8 +1,8 @@
 const NoTasksPage = () => (
-  <div className="flex h-full flex-col items-center justify-center gap-6">
+  <div className="flex h-full flex-col items-center justify-center">
     <img
-      src="/relax.jpg"
-      alt="Person meditating"
+      src="/no-task-illustration.png"
+      alt="A small window with a cup of tea"
       className="w-72 select-none"
       draggable={false}
     />
