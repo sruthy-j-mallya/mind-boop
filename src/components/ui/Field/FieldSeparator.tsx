@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import { Separator } from "@/components/ui/separator";
+import { Separator } from "@/components/ui/Separator";
 import { cn } from "@/lib/utils";
 
 const FieldSeparator = ({
