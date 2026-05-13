@@ -31,6 +31,37 @@ export type { CommittedSchedule } from "./schedule";
 export { toDateString, getNearestHour, hourEndsAt } from "./datetime";
 ```
 
+## Path Aliases
+
+Prefer path aliases over relative imports whenever a file is outside its own folder. Relative imports (e.g. `../`, `../../`) are only acceptable when importing from a file in the same directory.
+
+**Good**
+```ts
+// importing from another folder — use the alias
+import SchedulePicker from "@common/SchedulePicker";
+import { useListTasks } from "@/tanstackQueries/useTaskQueries";
+
+// importing from the same folder — relative is fine
+import { formatDuration } from "./utils";
+```
+
+**Bad**
+```ts
+// crossing folder boundaries with relative paths
+import SchedulePicker from "../../components/common/SchedulePicker";
+import { useListTasks } from "../tanstackQueries/useTaskQueries";
+import SchedulePicker from "@/components/common/SchedulePicker"; // use @common instead
+```
+
+Available aliases (defined in `vite.config.ts` and `tsconfig.json`):
+
+| Alias | Resolves to |
+|---|---|
+| `@/*` | `src/*` |
+| `@common/*` | `src/components/common/*` |
+
+When adding a new alias, update both `vite.config.ts` (`resolve.alias`) and `tsconfig.json` (`compilerOptions.paths`) so TypeScript and the bundler stay in sync.
+
 ## types.ts
 
 Each folder can have a `types.ts` file for TypeScript type and interface definitions. Place types in the `types.ts` file nearest to where they are used.
