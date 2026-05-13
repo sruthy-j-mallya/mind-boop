@@ -7,18 +7,18 @@ Each folder can have a `utils.ts` file for plain JavaScript/TypeScript functions
 **Good**
 ```ts
 // src/components/Calendar/utils.ts
-export function formatDuration(minutes: number): string {
+export const formatDuration = (minutes: number): string => {
   const h = Math.floor(minutes / 60);
   const m = minutes % 60;
   return h > 0 ? `${h}h ${m}m` : `${m}m`;
-}
+};
 ```
 
 **Bad**
 ```ts
 // Defining a pure utility function inside a component file or a hook file
 // src/components/Calendar/HomeCalendar.tsx
-function formatDuration(minutes: number): string { ... }
+const formatDuration = (minutes: number): string => { ... };
 ```
 
 If a `utils.ts` file contains too many functions, they can be split into separate files in a `utils` folder and then re-export from an `index.ts` within that folder:
