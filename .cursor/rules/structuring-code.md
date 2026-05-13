@@ -21,6 +21,16 @@ export function formatDuration(minutes: number): string {
 function formatDuration(minutes: number): string { ... }
 ```
 
+If a `utils.ts` file contains too many functions, they can be split into separate files in a `utils` folder and then re-export from an `index.ts` within that folder:
+
+```ts
+// utils/index.ts
+export { playCompletionSound } from "./completionSound";
+export { formatScheduleLabel, taskToCommittedSchedule } from "./schedule";
+export type { CommittedSchedule } from "./schedule";
+export { toDateString, getNearestHour, hourEndsAt } from "./datetime";
+```
+
 ## types.ts
 
 Each folder can have a `types.ts` file for TypeScript type and interface definitions. Place types in the `types.ts` file nearest to where they are used.
