@@ -23,7 +23,7 @@ export const MarkdownEditor = ({
   initialContent = "",
 }: {
   className?: string;
-  editorRef?: React.MutableRefObject<Editor | null>;
+  editorRef?: React.RefObject<Editor | null>;
   id?: string;
   onMarkdownChange?: (markdown: string) => void;
   initialContent?: string;
@@ -34,6 +34,8 @@ export const MarkdownEditor = ({
     extensions: [
       StarterKit.configure({
         heading: { levels: [1, 2, 3] },
+        link: false,
+        underline: false,
       }),
       Underline,
       Link.configure({
