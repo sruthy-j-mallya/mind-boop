@@ -24,5 +24,8 @@ dist-ssr
 *.sw?
 
 # Agent local permissions
-.cursor/settings.local.json
-.claude/settings.local.json
+.agents/settings.local.json
+
+# .cursor and .claude are symlinks to .agents for editor compatibility
+.cursor
+.claude
