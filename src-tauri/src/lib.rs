@@ -1,6 +1,6 @@
-mod db;
-mod tasks;
-mod time_logs;
+pub mod db;
+pub mod tasks;
+pub mod time_logs;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
