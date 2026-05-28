@@ -3,5 +3,5 @@ node = "24.14.1"
 
 [tasks.cargo_tests]
 description = "Run backend Cargo tests"
-run = "cargo test tests"
+run = "cargo test"
 dir = "src-tauri"
