@@ -17,7 +17,7 @@ pub struct TimeLog {
 
 #[tauri::command]
 pub async fn list_time_logs(state: State<'_, DbState>) -> Result<Vec<TimeLog>, String> {
-    let conn = state.0.lock().map_err(|e| e.to_string())?;
+    let conn = state.connection.lock().map_err(|e| e.to_string())?;
     let mut stmt = conn
         .prepare("SELECT tl.id, tl.task_id, t.title, tl.start_time, tl.end_time, tl.duration FROM time_logs tl JOIN tasks t ON tl.task_id = t.id ORDER BY tl.start_time")
         .map_err(|e| e.to_string())?;
@@ -48,7 +48,7 @@ pub async fn create_time_log(
     duration: i64,
     state: State<'_, DbState>,
 ) -> Result<String, String> {
-    let conn = state.0.lock().map_err(|e| e.to_string())?;
+    let conn = state.connection.lock().map_err(|e| e.to_string())?;
     let id = Uuid::new_v4().to_string();
 
     conn.execute(

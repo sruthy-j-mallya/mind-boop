@@ -35,7 +35,7 @@ pub struct CalendarTask {
 
 #[tauri::command]
 pub async fn list_tasks(search_string: String, state: State<'_, DbState>) -> Result<Vec<Task>, String> {
-    let conn = state.0.lock().map_err(|e| e.to_string())?;
+    let conn = state.connection.lock().map_err(|e| e.to_string())?;
     let pattern = format!("%{}%", search_string);
     let mut stmt = conn
         .prepare("SELECT id, title, description, estimated_minutes, is_duration, is_all_day, is_completed, starts_on, starts_at, ends_on, ends_at FROM tasks WHERE is_completed = 0 AND (title LIKE ?1 OR description LIKE ?1) ORDER BY starts_on IS NULL, starts_on, starts_at IS NULL, starts_at")
@@ -66,7 +66,7 @@ pub async fn list_tasks(search_string: String, state: State<'_, DbState>) -> Res
 
 #[tauri::command]
 pub async fn create_task(title: String, state: State<'_, DbState>) -> Result<String, String> {
-    let conn = state.0.lock().map_err(|e| e.to_string())?;
+    let conn = state.connection.lock().map_err(|e| e.to_string())?;
     let id = Uuid::new_v4().to_string();
 
     conn.execute(
@@ -79,7 +79,7 @@ pub async fn create_task(title: String, state: State<'_, DbState>) -> Result<Str
 
 #[tauri::command]
 pub async fn show_task(id: String, state: State<'_, DbState>) -> Result<Task, String> {
-    let conn = state.0.lock().map_err(|e| e.to_string())?;
+    let conn = state.connection.lock().map_err(|e| e.to_string())?;
     let mut stmt = conn
         .prepare("SELECT id, title, description, estimated_minutes, is_duration, is_all_day, is_completed, starts_on, starts_at, ends_on, ends_at FROM tasks WHERE id = ?1")
         .map_err(|e| e.to_string())?;
@@ -104,7 +104,7 @@ pub async fn show_task(id: String, state: State<'_, DbState>) -> Result<Task, St
 
 #[tauri::command]
 pub async fn update_task_title_and_description(id: String, title: String, description: String, state: State<'_, DbState>) -> Result<String, String> {
-    let conn = state.0.lock().map_err(|e| e.to_string())?;
+    let conn = state.connection.lock().map_err(|e| e.to_string())?;
     let result = conn.execute(
         "UPDATE tasks SET title = ?1, description = ?2, updated_at = datetime('now') WHERE id = ?3",
         (title, description, id),
@@ -119,7 +119,7 @@ pub async fn update_task_title_and_description(id: String, title: String, descri
 
 #[tauri::command]
 pub async fn set_estimated_minutes(id: String, estimated_minutes: u16, state: State<'_, DbState>) -> Result<String, String> {
-    let conn = state.0.lock().map_err(|e| e.to_string())?;
+    let conn = state.connection.lock().map_err(|e| e.to_string())?;
     let result = conn.execute(
         "UPDATE tasks SET estimated_minutes = ?1,  updated_at = datetime('now') WHERE id = ?2",
         (estimated_minutes, id),
@@ -134,7 +134,7 @@ pub async fn set_estimated_minutes(id: String, estimated_minutes: u16, state: St
 
 #[tauri::command]
 pub async fn list_calendar_tasks(state: State<'_, DbState>) -> Result<Vec<CalendarTask>, String> {
-    let conn = state.0.lock().map_err(|e| e.to_string())?;
+    let conn = state.connection.lock().map_err(|e| e.to_string())?;
     let mut stmt = conn
         .prepare("SELECT id, title, is_duration, is_all_day, starts_on, starts_at, ends_on, ends_at FROM tasks WHERE starts_on IS NOT NULL AND is_completed = 0 AND deleted_at IS NULL ORDER BY starts_on, starts_at IS NULL, starts_at")
         .map_err(|e| e.to_string())?;
@@ -161,7 +161,7 @@ pub async fn list_calendar_tasks(state: State<'_, DbState>) -> Result<Vec<Calend
 
 #[tauri::command]
 pub async fn complete_task(id: String, state: State<'_, DbState>) -> Result<String, String> {
-    let conn = state.0.lock().map_err(|e| e.to_string())?;
+    let conn = state.connection.lock().map_err(|e| e.to_string())?;
     conn.execute(
         "UPDATE tasks SET is_completed = 1, updated_at = datetime('now') WHERE id = ?1",
         [id],
@@ -180,7 +180,7 @@ pub async fn set_task_schedule(
     ends_on: Option<String>,
     state: State<'_, DbState>,
 ) -> Result<String, String> {
-    let conn = state.0.lock().map_err(|e| e.to_string())?;
+    let conn = state.connection.lock().map_err(|e| e.to_string())?;
     conn.execute(
         "UPDATE tasks SET is_duration = ?1, is_all_day = ?2, starts_at = ?3, starts_on = ?4, ends_at = ?5, ends_on = ?6, updated_at = datetime('now') WHERE id = ?7",
         (is_duration as i32, is_all_day as i32, starts_at, starts_on, ends_at, ends_on, id),
