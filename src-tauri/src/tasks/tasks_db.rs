@@ -22,7 +22,7 @@ pub struct Task {
 pub fn list_db_tasks(search_string: &str, connection: &Connection,) -> Result<Vec<Task>, String> {
   let pattern = format!("%{}%", search_string);
     let mut stmt = connection
-        .prepare("SELECT id, title, description, estimated_minutes, is_duration, is_all_day, is_completed, starts_on, starts_at, ends_on, ends_at FROM tasks WHERE is_completed = 0 AND (title LIKE ?1 OR description LIKE ?1) ORDER BY starts_on IS NULL, starts_on DESC, starts_at IS NULL, starts_at DESC")
+        .prepare("SELECT id, title, description, estimated_minutes, is_duration, is_all_day, is_completed, starts_on, starts_at, ends_on, ends_at FROM tasks WHERE is_completed = 0 AND (title LIKE ?1 OR description LIKE ?1) ORDER BY COALESCE(starts_on, '01-01-3000') DESC, COALESCE(starts_at, '23:59') ASC")
         .map_err(|e| e.to_string())?;
 
     let tasks = stmt
