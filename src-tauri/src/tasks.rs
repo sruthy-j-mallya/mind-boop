@@ -43,21 +43,21 @@ pub async fn set_estimated_minutes(id: String, estimated_minutes: u16, state: St
 
 #[tauri::command]
 pub async fn complete_task(id: String, state: State<'_, DbState>) -> Result<String, String> {
-    let connection = state.connection.lock().map_err(|e| e.to_string())?;
+  let connection = state.connection.lock().map_err(|e| e.to_string())?;
 
-    tasks_db::complete_db_task(id, &connection)
+  tasks_db::complete_db_task(id, &connection)
 }
 
 #[tauri::command]
 pub async fn set_task_schedule(
-    id: String,
-    is_duration: bool,
-    is_all_day: bool,
-    starts_at: Option<String>,
-    starts_on: Option<String>,
-    ends_at: Option<String>,
-    ends_on: Option<String>,
-    state: State<'_, DbState>,
+  id: String,
+  is_duration: bool,
+  is_all_day: bool,
+  starts_at: Option<String>,
+  starts_on: Option<String>,
+  ends_at: Option<String>,
+  ends_on: Option<String>,
+  state: State<'_, DbState>,
 ) -> Result<String, String> {
     let connection = state.connection.lock().map_err(|e| e.to_string())?;
 
