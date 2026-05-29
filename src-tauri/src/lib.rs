@@ -1,6 +1,7 @@
 pub mod db;
 pub mod tasks;
 pub mod time_logs;
+pub mod calendar_events;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -11,7 +12,7 @@ pub fn run() {
             tasks::create_task,
             tasks::update_task_title_and_description,
             tasks::list_tasks,
-            tasks::list_calendar_tasks,
+            calendar_events::list_calendar_tasks,
             tasks::show_task,
             tasks::set_estimated_minutes,
             tasks::set_task_schedule,
