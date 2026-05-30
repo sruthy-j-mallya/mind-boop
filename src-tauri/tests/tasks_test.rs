@@ -16,9 +16,7 @@ fn set_up_db() -> Connection {
             is_all_day          INTEGER NOT NULL DEFAULT 0,
             is_completed        INTEGER NOT NULL DEFAULT 0,
             starts_at           TEXT,
-            starts_on           TEXT,
             ends_at             TEXT,
-            ends_on             TEXT,
             created_at          TEXT    NOT NULL DEFAULT CURRENT_TIMESTAMP,
             updated_at          TEXT    NOT NULL DEFAULT CURRENT_TIMESTAMP,
             deleted_at          TEXT
@@ -93,22 +91,21 @@ pub fn it_lists_all_uncompleted_tasks_when_search_string_is_absent() {
 }
 
 #[test]
-#[ignore = "This test will be enabled once all the date and time values are stored as ISO string in SQLite"]
 pub fn it_lists_uncompleted_tasks_in_order_of_starting_date_and_time() {
   let connection = set_up_db();
 
   let tasks = vec![
-    (Uuid::new_v4().to_string(), "Buy groceries", Some("01-01-2000"), Some("10:00")),
-    (Uuid::new_v4().to_string(), "Write unit tests", Some("01-01-2000"), None),
-    (Uuid::new_v4().to_string(), "Write integration tests", Some("02-01-2000"), Some("08:00")),
-    (Uuid::new_v4().to_string(), "Organize study table", None, None),
+    (Uuid::new_v4().to_string(), "Buy groceries", Some("2000-01-01")),
+    (Uuid::new_v4().to_string(), "Write unit tests", Some("2000-01-01T10:00:00")),
+    (Uuid::new_v4().to_string(), "Write integration tests", Some("2000-01-02T08:00:00")),
+    (Uuid::new_v4().to_string(), "Organize study table", None),
   ];
 
-  for (id, title, starts_at, starts_on) in &tasks {
+  for (id, title, starts_at) in &tasks {
     connection.execute(
-      "INSERT INTO tasks (id, title, starts_at, starts_on, created_at, updated_at)
-        VALUES (?1, ?2, ?3, ?4, datetime('now'), datetime('now'))",
-      rusqlite::params![id, title, starts_at, starts_on],
+      "INSERT INTO tasks (id, title, starts_at, created_at, updated_at)
+        VALUES (?1, ?2, ?3, datetime('now'), datetime('now'))",
+      rusqlite::params![id, title, starts_at],
     ).expect("failed to insert task");
   };
 

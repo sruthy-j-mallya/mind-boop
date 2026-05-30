@@ -1,9 +1,8 @@
 pub mod tasks_db;
 
-use tasks_db::Task;
-
 use tauri::{State};
 
+use tasks_db::Task;
 use crate::db::DbState;
 
 #[tauri::command]
@@ -54,12 +53,10 @@ pub async fn set_task_schedule(
   is_duration: bool,
   is_all_day: bool,
   starts_at: Option<String>,
-  starts_on: Option<String>,
   ends_at: Option<String>,
-  ends_on: Option<String>,
   state: State<'_, DbState>,
 ) -> Result<String, String> {
     let connection = state.connection.lock().map_err(|e| e.to_string())?;
 
-    tasks_db::set_db_task_schedule(id, is_duration, is_all_day, starts_at, starts_on, ends_at, ends_on, &connection)
+    tasks_db::set_db_task_schedule(id, is_duration, is_all_day, starts_at, ends_at, &connection)
 }

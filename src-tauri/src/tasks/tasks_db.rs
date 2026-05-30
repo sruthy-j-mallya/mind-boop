@@ -13,16 +13,14 @@ pub struct Task {
     pub is_duration: bool,
     pub is_all_day: bool,
     pub is_completed: bool,
-    pub starts_on: Option<String>,
     pub starts_at: Option<String>,
-    pub ends_on: Option<String>,
     pub ends_at: Option<String>,
 }
 
 pub fn list_db_tasks(search_string: &str, connection: &Connection,) -> Result<Vec<Task>, String> {
   let pattern = format!("%{}%", search_string);
     let mut stmt = connection
-        .prepare("SELECT id, title, description, estimated_minutes, is_duration, is_all_day, is_completed, starts_on, starts_at, ends_on, ends_at FROM tasks WHERE is_completed = 0 AND (title LIKE ?1 OR description LIKE ?1) ORDER BY COALESCE(starts_on, '01-01-3000') DESC, COALESCE(starts_at, '23:59') ASC")
+        .prepare("SELECT id, title, description, estimated_minutes, is_duration, is_all_day, is_completed, starts_at, ends_at FROM tasks WHERE is_completed = 0 AND (title LIKE ?1 OR description LIKE ?1) ORDER BY COALESCE(starts_at, '9999-12-30T23:59:59Z'), created_at DESC")
         .map_err(|e| e.to_string())?;
 
     let tasks = stmt
@@ -35,10 +33,8 @@ pub fn list_db_tasks(search_string: &str, connection: &Connection,) -> Result<Ve
                 is_duration: row.get::<_, i32>(4)? != 0,
                 is_all_day: row.get::<_, i32>(5)? != 0,
                 is_completed: row.get::<_, i32>(6)? != 0,
-                starts_on: row.get(7)?,
-                starts_at: row.get(8)?,
-                ends_on: row.get(9)?,
-                ends_at: row.get(10)?,
+                starts_at: row.get(7)?,
+                ends_at: row.get(8)?,
             })
         })
         .map_err(|e| e.to_string())?
@@ -61,7 +57,7 @@ pub fn create_db_task(title: String, connection: &Connection) -> Result<String, 
 
 pub fn show_db_task(id: String, connection: &Connection) -> Result<Task, String> {
     let mut stmt = connection
-        .prepare("SELECT id, title, description, estimated_minutes, is_duration, is_all_day, is_completed, starts_on, starts_at, ends_on, ends_at FROM tasks WHERE id = ?1")
+        .prepare("SELECT id, title, description, estimated_minutes, is_duration, is_all_day, is_completed, starts_at, ends_at FROM tasks WHERE id = ?1")
         .map_err(|e| e.to_string())?;
 
     stmt.query_row([id], |row| {
@@ -73,10 +69,8 @@ pub fn show_db_task(id: String, connection: &Connection) -> Result<Task, String>
             is_duration: row.get::<_, i32>(4)? != 0,
             is_all_day: row.get::<_, i32>(5)? != 0,
             is_completed: row.get::<_, i32>(6)? != 0,
-            starts_on: row.get(7)?,
-            starts_at: row.get(8)?,
-            ends_on: row.get(9)?,
-            ends_at: row.get(10)?,
+            starts_at: row.get(7)?,
+            ends_at: row.get(8)?,
         })
     })
     .map_err(|e| e.to_string())
@@ -121,14 +115,12 @@ pub fn set_db_task_schedule(
     is_duration: bool,
     is_all_day: bool,
     starts_at: Option<String>,
-    starts_on: Option<String>,
     ends_at: Option<String>,
-    ends_on: Option<String>,
     connection: &Connection,
 ) -> Result<String, String> {
     connection.execute(
-        "UPDATE tasks SET is_duration = ?1, is_all_day = ?2, starts_at = ?3, starts_on = ?4, ends_at = ?5, ends_on = ?6, updated_at = datetime('now') WHERE id = ?7",
-        (is_duration as i32, is_all_day as i32, starts_at, starts_on, ends_at, ends_on, id),
+        "UPDATE tasks SET is_duration = ?1, is_all_day = ?2, starts_at = ?3, ends_at = ?4, updated_at = datetime('now') WHERE id = ?5",
+        (is_duration as i32, is_all_day as i32, starts_at, ends_at, id),
     ).map_err(|e| e.to_string())?;
     Ok("Schedule updated successfully".to_string())
 }

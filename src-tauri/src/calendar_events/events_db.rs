@@ -8,14 +8,12 @@ pub struct CalendarEvent {
     pub title: String,
     pub is_duration: bool,
     pub is_all_day: bool,
-    pub starts_on: Option<String>,
     pub starts_at: Option<String>,
-    pub ends_on: Option<String>,
     pub ends_at: Option<String>,
 }
 pub fn list_db_events(connection: &Connection) -> Result<Vec<CalendarEvent>, String> {
     let mut stmt = connection
-        .prepare("SELECT id, title, is_duration, is_all_day, starts_on, starts_at, ends_on, ends_at FROM tasks WHERE starts_on IS NOT NULL AND is_completed = 0 AND deleted_at IS NULL ORDER BY starts_on, starts_at IS NULL, starts_at")
+        .prepare("SELECT id, title, is_duration, is_all_day, starts_at, ends_at FROM tasks WHERE starts_at IS NOT NULL AND is_completed = 0 AND deleted_at IS NULL ORDER BY starts_at")
         .map_err(|e| e.to_string())?;
 
     let tasks: Vec<CalendarEvent> = stmt
@@ -25,10 +23,8 @@ pub fn list_db_events(connection: &Connection) -> Result<Vec<CalendarEvent>, Str
                 title: row.get(1)?,
                 is_duration: row.get::<_, i32>(2)? != 0,
                 is_all_day: row.get::<_, i32>(3)? != 0,
-                starts_on: row.get(4)?,
-                starts_at: row.get(5)?,
-                ends_on: row.get(6)?,
-                ends_at: row.get(7)?,
+                starts_at: row.get(4)?,
+                ends_at: row.get(5)?,
             })
         })
         .map_err(|e| e.to_string())?
