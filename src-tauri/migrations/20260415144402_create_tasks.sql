@@ -7,9 +7,7 @@ CREATE TABLE IF NOT EXISTS tasks (
     is_all_day          INTEGER NOT NULL DEFAULT 0,
     is_completed        INTEGER NOT NULL DEFAULT 0,
     starts_at           TEXT,
-    starts_on           TEXT,
     ends_at             TEXT,
-    ends_on             TEXT,
     created_at          TEXT    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at          TEXT    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted_at          TEXT
