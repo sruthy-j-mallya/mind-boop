@@ -52,8 +52,8 @@ const taskToEvent = (task: CalendarTask): CalendarEvent | null => {
 
 const timeLogToEvent = (log: TimeLog): CalendarEvent => ({
   title: log.taskTitle,
-  start: new Date(log.startTime),
-  end: new Date(log.endTime),
+  start: new Date(log.startsAt),
+  end: new Date(log.endsAt),
   type: "timeLog",
 });
 

@@ -65,11 +65,11 @@ const Timer = ({
 
   const { data: task } = useShowTask(selectedTaskId);
   const { mutate: createTimeLog } = useCreateTimeLog();
-  const startTimeRef = useRef<string | null>(null);
+  const startsAtRef = useRef<string | null>(null);
 
   useEffect(() => {
-    if (isRunning && startTimeRef.current == null)
-      startTimeRef.current = new Date().toISOString();
+    if (isRunning && startsAtRef.current == null)
+      startsAtRef.current = new Date().toISOString();
   }, [isRunning]);
 
   const handleTaskSelect = (selected: Task) => {
@@ -86,21 +86,20 @@ const Timer = ({
   };
 
   const handleStop = () => {
-    if (isTimerActive && selectedTaskId && startTimeRef.current) {
-      const endTime = new Date().toISOString();
+    if (isTimerActive && selectedTaskId && startsAtRef.current) {
+      const endsAt = new Date().toISOString();
       const duration = Math.round(
-        (new Date(endTime).getTime() -
-          new Date(startTimeRef.current).getTime()) /
+        (new Date(endsAt).getTime() - new Date(startsAtRef.current).getTime()) /
           1000,
       );
       createTimeLog({
         taskId: selectedTaskId,
-        startTime: startTimeRef.current,
-        endTime,
+        startsAt: startsAtRef.current,
+        endsAt,
         duration,
       });
     }
-    startTimeRef.current = null;
+    startsAtRef.current = null;
     setIsRunning(false);
     setIsTimerActive(false);
     setTimer((prev) => ({
@@ -133,20 +132,20 @@ const Timer = ({
 
       if (timer.mode === "timer" && nextMinutes === 0 && nextSeconds === 0) {
         const endTime = new Date().toISOString();
-        if (selectedTaskId && startTimeRef.current) {
+        if (selectedTaskId && startsAtRef.current) {
           const duration = Math.round(
             (new Date(endTime).getTime() -
-              new Date(startTimeRef.current).getTime()) /
+              new Date(startsAtRef.current).getTime()) /
               1000,
           );
           createTimeLog({
             taskId: selectedTaskId,
-            startTime: startTimeRef.current,
-            endTime,
+            startsAt: startsAtRef.current,
+            endsAt: endTime,
             duration,
           });
         }
-        startTimeRef.current = null;
+        startsAtRef.current = null;
         setIsRunning(false);
         setIsTimerActive(false);
       }

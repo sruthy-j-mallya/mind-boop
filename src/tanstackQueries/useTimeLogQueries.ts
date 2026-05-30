@@ -5,15 +5,15 @@ export type TimeLog = {
   id: string;
   taskId: string;
   taskTitle: string;
-  startTime: string;
-  endTime: string;
+  startsAt: string;
+  endsAt: string;
   duration: number;
 };
 
 type CreateTimeLogPayload = {
   taskId: string;
-  startTime: string;
-  endTime: string;
+  startsAt: string;
+  endsAt: string;
   duration: number;
 };
 
@@ -26,11 +26,11 @@ export const useListTimeLogs = () =>
 export const useCreateTimeLog = () => {
   const queryClient = useQueryClient();
   return useMutation<string, Error, CreateTimeLogPayload>({
-    mutationFn: async ({ taskId, startTime, endTime, duration }) =>
+    mutationFn: async ({ taskId, startsAt, endsAt, duration }) =>
       invoke<string>("create_time_log", {
         taskId,
-        startTime,
-        endTime,
+        startsAt,
+        endsAt,
         duration,
       }),
     onSuccess: () => {
