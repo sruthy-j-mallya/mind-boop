@@ -13,7 +13,7 @@ import {
   useShowTask,
 } from "@/tanstackQueries/useTaskQueries";
 import {
-  toDateString,
+  toISOString,
   formatScheduleLabel,
   taskToCommittedSchedule,
 } from "../utils";
@@ -64,10 +64,8 @@ const SchedulePicker = ({ taskId }: Props) => {
         id: taskId,
         isDuration,
         isAllDay,
-        startsOn: startsOn ? toDateString(startsOn) : startsOn,
-        startsAt,
-        endsOn: endsOn ? toDateString(endsOn) : endsOn,
-        endsAt,
+        startsAt: startsOn ? toISOString(startsOn, startsAt) : undefined,
+        endsAt: endsOn ? toISOString(endsOn, endsAt) : undefined,
       });
     }
 

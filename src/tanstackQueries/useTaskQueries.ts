@@ -9,9 +9,7 @@ export type Task = {
   isDuration: boolean;
   isAllDay: boolean;
   isCompleted: boolean;
-  startsOn: string | null;
   startsAt: string | null;
-  endsOn: string | null;
   endsAt: string | null;
 };
 
@@ -20,9 +18,7 @@ export type CalendarTask = {
   title: string;
   isDuration: boolean;
   isAllDay: boolean;
-  startsOn: string | null;
   startsAt: string | null;
-  endsOn: string | null;
   endsAt: string | null;
 };
 
@@ -91,9 +87,7 @@ type SetTaskSchedulePayload = {
   isDuration: boolean;
   isAllDay: boolean;
   startsAt?: string;
-  startsOn?: string;
   endsAt?: string;
-  endsOn?: string;
 };
 
 export const useSetTaskSchedule = () => {
@@ -104,18 +98,14 @@ export const useSetTaskSchedule = () => {
       isDuration,
       isAllDay,
       startsAt,
-      startsOn,
       endsAt,
-      endsOn,
     }: SetTaskSchedulePayload) =>
       invoke("set_task_schedule", {
         id,
         isDuration,
         isAllDay,
         startsAt: startsAt ?? null,
-        startsOn: startsOn ?? null,
         endsAt: endsAt ?? null,
-        endsOn: endsOn ?? null,
       }),
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: ["tasks", id] });

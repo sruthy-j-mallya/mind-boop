@@ -5,49 +5,36 @@ import { type CalendarTask } from "@/tanstackQueries/useTaskQueries";
 import { CalendarEvent } from "./types";
 
 const taskToEvent = (task: CalendarTask): CalendarEvent | null => {
-  if (!task.startsOn) return null;
+  // No due date or duration available, don't show on calendar
+  if (!task.startsAt) return null;
 
-  const startDate = dayjs(task.startsOn, "DD-MM-YYYY");
+  const start = dayjs(task.startsAt);
+  const hasStartTime = task.startsAt.includes("T");
 
-  if (task.isAllDay) {
-    const endDate = task.endsOn
-      ? dayjs(task.endsOn, "DD-MM-YYYY").add(1, "day")
-      : startDate.add(1, "day");
+  // In case of due date, if time is there, add 15 minutes, else, add one day.
+  if (!task.endsAt) {
     return {
       title: task.title,
-      start: startDate.toDate(),
-      end: endDate.toDate(),
-      allDay: true,
+      start: start.toDate(),
+      end: hasStartTime
+        ? start.add(15, "minutes").toDate()
+        : start.add(1, "day").toDate(),
+      allDay: !hasStartTime,
       type: "task",
     };
   }
 
-  if (!task.startsAt) {
-    return {
-      title: task.title,
-      start: startDate.toDate(),
-      end: startDate.add(1, "day").toDate(),
-      allDay: true,
-      type: "task",
-    };
-  }
+  // In case of duration, if time is there, just use it, else add one day.
+  const end = task.isAllDay
+    ? dayjs(task.endsAt).add(1, "day")
+    : dayjs(task.endsAt);
 
-  const [sh, sm] = task.startsAt.split(":").map(Number);
-  const start = startDate.hour(sh).minute(sm).second(0).toDate();
-
-  let end: Date;
-  if (task.endsOn && task.endsAt) {
-    const [eh, em] = task.endsAt.split(":").map(Number);
-    end = dayjs(task.endsOn, "DD-MM-YYYY")
-      .hour(eh)
-      .minute(em)
-      .second(0)
-      .toDate();
-  } else {
-    end = dayjs(start).add(1, "hour").toDate();
-  }
-
-  return { title: task.title, start, end, type: "task" };
+  return {
+    title: task.title,
+    start: start.toDate(),
+    end: end.toDate(),
+    type: "task",
+  };
 };
 
 const timeLogToEvent = (log: TimeLog): CalendarEvent => ({

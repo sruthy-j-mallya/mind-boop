@@ -60,19 +60,29 @@ const formatScheduleLabel = (schedule: CommittedSchedule): string => {
 const taskToCommittedSchedule = (task: {
   isDuration: boolean;
   isAllDay: boolean;
-  startsOn: string | null;
   startsAt: string | null;
-  endsOn: string | null;
   endsAt: string | null;
 }): CommittedSchedule | null => {
-  if (!task.startsOn) return null;
+  if (!task.startsAt) return null;
+
+  const startDt = dayjs(task.startsAt);
+  const hasStartTime = task.startsAt.includes("T");
+
+  let endsOn: Date | undefined;
+  let endsAt: string | undefined;
+  if (task.endsAt) {
+    const endDt = dayjs(task.endsAt);
+    endsOn = endDt.toDate();
+    endsAt = task.endsAt.includes("T") ? endDt.format("HH:mm") : undefined;
+  }
+
   return {
     scheduleType: task.isDuration ? "duration" : "date",
     isAllDay: task.isAllDay,
-    startsOn: dayjs(task.startsOn, "DD-MM-YYYY").toDate(),
-    startsAt: task.startsAt ?? undefined,
-    endsOn: task.endsOn ? dayjs(task.endsOn, "DD-MM-YYYY").toDate() : undefined,
-    endsAt: task.endsAt ?? undefined,
+    startsOn: startDt.toDate(),
+    startsAt: hasStartTime ? startDt.format("HH:mm") : undefined,
+    endsOn,
+    endsAt,
   };
 };
 

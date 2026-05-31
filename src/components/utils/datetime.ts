@@ -1,6 +1,10 @@
 import dayjs from "@/lib/dayjs";
 
-const toDateString = (date: Date) => dayjs(date).format("DD-MM-YYYY");
+const toISOString = (date: Date, time?: string): string => {
+  if (!time) return dayjs(date).format("YYYY-MM-DD");
+  const [h, m] = time.split(":").map(Number);
+  return dayjs(date).hour(h).minute(m).second(0).format("YYYY-MM-DDTHH:mm:ss");
+};
 
 const getNearestHour = () => {
   const now = dayjs();
@@ -25,4 +29,4 @@ const hourEndsAt = (startsOn: Date, startsAt: string) => {
   return { endsOn: endDateTime.toDate(), endsAt: endDateTime.format("HH:mm") };
 };
 
-export { toDateString, getNearestHour, hourEndsAt };
+export { toISOString, getNearestHour, hourEndsAt };

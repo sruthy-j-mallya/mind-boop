@@ -14,7 +14,6 @@ import {
   useSetEstimatedMinutes,
   useSetTaskSchedule,
 } from "@/tanstackQueries/useTaskQueries";
-import { toDateString } from "@/components/utils";
 import dayjs from "dayjs";
 import useClickOutside from "@/components/hooks/useClickOutside";
 
@@ -52,7 +51,7 @@ const AddTaskBar = () => {
         id: taskId,
         isDuration: false,
         isAllDay: true,
-        startsOn: toDateString(dueDate),
+        startsAt: dayjs(dueDate).format("YYYY-MM-DD"),
       });
     }
 
