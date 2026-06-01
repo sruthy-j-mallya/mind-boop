@@ -16,9 +16,8 @@ pub async fn create_time_log(
     task_id: String,
     starts_at: String,
     ends_at: String,
-    duration: i64,
     state: State<'_, DbState>,
 ) -> Result<String, String> {
   let connection = state.connection.lock().map_err(|e| e.to_string())?;
-  log_db::create_db_time_log(task_id, starts_at, ends_at, duration, &connection)
+  log_db::create_db_time_log(task_id, starts_at, ends_at, &connection)
 }
