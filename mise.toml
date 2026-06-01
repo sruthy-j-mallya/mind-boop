@@ -5,3 +5,13 @@ node = "24.14.1"
 description = "Run backend Cargo tests"
 run = "cargo test"
 dir = "src-tauri"
+
+[tasks.db_reset]
+description = "Reset the local SQLite database"
+run = 'sqlx database reset --database-url "sqlite:./mind-boop-local.db"'
+dir = "src-tauri"
+
+[tasks.db_migrate]
+description = "Run pending SQLite migrations"
+run = 'sqlx migrate run --database-url "sqlite:./mind-boop-local.db"'
+dir = "src-tauri"
