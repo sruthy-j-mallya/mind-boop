@@ -1,6 +1,6 @@
 pub mod task_db;
 
-use tauri::{State};
+use tauri::State;
 
 use task_db::Task;
 use crate::db::DbState;
