@@ -295,3 +295,302 @@ pub fn it_sets_the_schedule_of_a_task() {
   assert_eq!(starts_at, Some(String::from("2026-06-01T09:00:00")));
   assert_eq!(ends_at, Some(String::from("2026-06-01T10:00:00")));
 }
+
+#[test]
+pub fn it_should_raise_error_if_is_duration_is_false_but_ends_at_is_present() {
+  let connection = set_up_db();
+  let task_id = Uuid::new_v4().to_string();
+
+  insert_sample_task(&task_id, "Test task", &connection);
+
+  let result = set_db_task_schedule(
+    task_id,
+    false,
+    false,
+    Some("2026-06-01T09:00:00".to_string()),
+    Some("2026-06-01T10:00:00".to_string()),
+    &connection,
+  );
+
+  assert!(result.is_err());
+  assert_eq!(result.unwrap_err(), "ends_at need not be populated within due date context");
+}
+
+#[test]
+pub fn it_should_raise_error_if_is_duration_is_false_and_is_all_day_is_true() {
+  let connection = set_up_db();
+  let task_id = Uuid::new_v4().to_string();
+
+  insert_sample_task(&task_id, "Test task", &connection);
+
+  let result = set_db_task_schedule(
+    task_id,
+    false,
+    true,
+    Some("2026-06-01T10:00:00".to_string()),
+    None,
+    &connection,
+  );
+
+  assert!(result.is_err());
+  assert_eq!(result.unwrap_err(), "is_all_day need not be populated within due date context");
+}
+
+#[test]
+pub fn it_should_raise_error_if_due_at_is_invalid_datetime() {
+  let connection = set_up_db();
+  let task_id = Uuid::new_v4().to_string();
+
+  insert_sample_task(&task_id, "Test task", &connection);
+
+  let result = set_db_task_schedule(
+    task_id,
+    false,
+    false,
+    Some("Invalid date/datetime".to_string()),
+    None,
+    &connection,
+  );
+
+  assert!(result.is_err());
+  assert_eq!(result.unwrap_err(), "Invalid due date/time format");
+}
+
+#[test]
+pub fn it_should_set_schedule_when_starts_at_is_none() {
+  let connection = set_up_db();
+  let task_id = Uuid::new_v4().to_string();
+
+  insert_sample_task(&task_id, "Test task", &connection);
+
+  let result = set_db_task_schedule(
+    task_id.clone(),
+    false,
+    false,
+    None,
+    None,
+    &connection,
+  );
+  assert!(result.is_ok());
+
+  let success_msg = result.expect("Success message should be present");
+  assert_eq!(String::from("Schedule updated successfully"), success_msg);
+
+  let updated_task_result: Result<(bool, bool, Option<String>, Option<String>), rusqlite::Error> = connection.query_row(
+    "SELECT is_duration, is_all_day, starts_at, ends_at FROM tasks WHERE id = ?1",
+    [task_id],
+    |row| Ok((row.get(0)?, row.get(1)?, row.get(2)?, row.get(3)?)),
+  );
+  let (is_duration, is_all_day, starts_at, ends_at) = updated_task_result.expect("Task should be present");
+
+  assert_eq!(is_duration, false);
+  assert_eq!(is_all_day, false);
+  assert_eq!(starts_at, None);
+  assert_eq!(ends_at, None);
+}
+
+#[test]
+pub fn it_should_set_schedule_when_starts_at_is_valid_date() {
+  let connection = set_up_db();
+  let task_id = Uuid::new_v4().to_string();
+
+  insert_sample_task(&task_id, "Test task", &connection);
+
+  let result = set_db_task_schedule(
+    task_id.clone(),
+    false,
+    false,
+    Some("2026-06-01".to_string()),
+    None,
+    &connection,
+  );
+  assert!(result.is_ok());
+
+  let success_msg = result.expect("Success message should be present");
+  assert_eq!(String::from("Schedule updated successfully"), success_msg);
+
+  let updated_task_result: Result<(bool, bool, Option<String>, Option<String>), rusqlite::Error> = connection.query_row(
+    "SELECT is_duration, is_all_day, starts_at, ends_at FROM tasks WHERE id = ?1",
+    [task_id],
+    |row| Ok((row.get(0)?, row.get(1)?, row.get(2)?, row.get(3)?)),
+  );
+  let (is_duration, is_all_day, starts_at, ends_at) = updated_task_result.expect("Task should be present");
+
+  assert_eq!(is_duration, false);
+  assert_eq!(is_all_day, false);
+  assert_eq!(starts_at, Some("2026-06-01".to_string()));
+  assert_eq!(ends_at, None);
+}
+
+#[test]
+pub fn it_should_set_schedule_when_starts_at_is_valid_date_time() {
+  let connection = set_up_db();
+  let task_id = Uuid::new_v4().to_string();
+
+  insert_sample_task(&task_id, "Test task", &connection);
+
+  let result = set_db_task_schedule(
+    task_id.clone(),
+    false,
+    false,
+    Some("2026-06-01T10:00:00".to_string()),
+    None,
+    &connection,
+  );
+  assert!(result.is_ok());
+
+  let success_msg = result.expect("Success message should be present");
+  assert_eq!(String::from("Schedule updated successfully"), success_msg);
+
+  let updated_task_result: Result<(bool, bool, Option<String>, Option<String>), rusqlite::Error> = connection.query_row(
+    "SELECT is_duration, is_all_day, starts_at, ends_at FROM tasks WHERE id = ?1",
+    [task_id],
+    |row| Ok((row.get(0)?, row.get(1)?, row.get(2)?, row.get(3)?)),
+  );
+  let (is_duration, is_all_day, starts_at, ends_at) = updated_task_result.expect("Task should be present");
+
+  assert_eq!(is_duration, false);
+  assert_eq!(is_all_day, false);
+  assert_eq!(starts_at, Some("2026-06-01T10:00:00".to_string()));
+  assert_eq!(ends_at, None);
+}
+
+#[test]
+pub fn it_should_raise_error_if_schedule_is_duration_and_starts_at_is_absent() {
+  let connection = set_up_db();
+  let task_id = Uuid::new_v4().to_string();
+
+  insert_sample_task(&task_id, "Test task", &connection);
+
+  let result = set_db_task_schedule(
+    task_id,
+    true,
+    false,
+    None,
+    Some(String::from("2026-06-01T10:00:00")),
+    &connection,
+  );
+
+  assert!(result.is_err());
+  assert_eq!(result.unwrap_err(), "starts_at must be present");
+}
+
+#[test]
+pub fn it_should_raise_error_if_schedule_is_duration_and_ends_at_is_absent() {
+  let connection = set_up_db();
+  let task_id = Uuid::new_v4().to_string();
+
+  insert_sample_task(&task_id, "Test task", &connection);
+
+  let result = set_db_task_schedule(
+    task_id,
+    true,
+    false,
+    Some(String::from("2026-06-01T09:00:00")),
+    None,
+    &connection,
+  );
+
+  assert!(result.is_err());
+  assert_eq!(result.unwrap_err(), "ends_at must be present");
+}
+
+#[test]
+pub fn it_sets_schedule_when_duration_and_all_day_with_valid_dates() {
+  let connection = set_up_db();
+  let task_id = Uuid::new_v4().to_string();
+
+  insert_sample_task(&task_id, "Test task", &connection);
+
+  let result = set_db_task_schedule(
+    task_id,
+    true,
+    true,
+    Some("2026-06-01".to_string()),
+    Some("2026-06-03".to_string()),
+    &connection,
+  );
+
+  assert!(result.is_ok());
+  assert_eq!(result.unwrap(), "Schedule updated successfully");
+}
+
+#[test]
+pub fn it_should_raise_error_if_duration_is_all_day_and_starts_at_is_invalid() {
+  let connection = set_up_db();
+  let task_id = Uuid::new_v4().to_string();
+
+  insert_sample_task(&task_id, "Test task", &connection);
+
+  let result = set_db_task_schedule(
+    task_id,
+    true,
+    true,
+    Some("invalid-date".to_string()),
+    Some("2026-06-03".to_string()),
+    &connection,
+  );
+
+  assert!(result.is_err());
+  assert_eq!(result.unwrap_err(), "Invalid starts_at date format");
+}
+
+#[test]
+pub fn it_should_raise_error_if_duration_is_all_day_and_ends_at_is_invalid() {
+  let connection = set_up_db();
+  let task_id = Uuid::new_v4().to_string();
+
+  insert_sample_task(&task_id, "Test task", &connection);
+
+  let result = set_db_task_schedule(
+    task_id,
+    true,
+    true,
+    Some("2026-06-01".to_string()),
+    Some("invalid-date".to_string()),
+    &connection,
+  );
+
+  assert!(result.is_err());
+  assert_eq!(result.unwrap_err(), "Invalid ends_at date format");
+}
+
+#[test]
+pub fn it_should_raise_error_if_duration_is_not_all_day_and_starts_at_is_invalid() {
+  let connection = set_up_db();
+  let task_id = Uuid::new_v4().to_string();
+
+  insert_sample_task(&task_id, "Test task", &connection);
+
+  let result = set_db_task_schedule(
+    task_id,
+    true,
+    false,
+    Some("invalid-datetime".to_string()),
+    Some("2026-06-01T10:00:00".to_string()),
+    &connection,
+  );
+
+  assert!(result.is_err());
+  assert_eq!(result.unwrap_err(), "Invalid starts_at datetime format");
+}
+
+#[test]
+pub fn it_should_raise_error_if_duration_is_not_all_day_and_ends_at_is_invalid() {
+  let connection = set_up_db();
+  let task_id = Uuid::new_v4().to_string();
+
+  insert_sample_task(&task_id, "Test task", &connection);
+
+  let result = set_db_task_schedule(
+    task_id,
+    true,
+    false,
+    Some("2026-06-01T09:00:00".to_string()),
+    Some("invalid-datetime".to_string()),
+    &connection,
+  );
+
+  assert!(result.is_err());
+  assert_eq!(result.unwrap_err(), "Invalid ends_at datetime format");
+}

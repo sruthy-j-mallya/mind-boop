@@ -1,6 +1,8 @@
 use serde::Serialize;
 use rusqlite::Connection;
 use uuid::Uuid;
+use chrono::NaiveDate;
+use chrono::NaiveDateTime;
 
 #[derive(Debug)]
 #[derive(Serialize)]
@@ -110,6 +112,60 @@ pub fn complete_db_task(id: String, connection: &Connection) -> Result<String, S
     Ok("Task completed".to_string())
 }
 
+struct Schedule {
+    is_duration: bool,
+    is_all_day: bool,
+    starts_at: Option<String>,
+    ends_at: Option<String>
+}
+
+fn validate_schedule(schedule: Schedule) -> Result<Schedule, String> {
+    if !schedule.is_duration {
+        if schedule.ends_at.is_some() {
+            return Err("ends_at need not be populated within due date context".to_string());
+        }
+        if schedule.is_all_day {
+            return Err("is_all_day need not be populated within due date context".to_string());
+        }
+        if let Some(ref starts_at) = schedule.starts_at {
+            let is_valid = NaiveDate::parse_from_str(starts_at, "%Y-%m-%d").is_ok()
+                || NaiveDateTime::parse_from_str(starts_at, "%Y-%m-%dT%H:%M:%S").is_ok();
+            if !is_valid {
+                return Err("Invalid due date/time format".to_string());
+            }
+        }
+        return Ok(schedule);
+    }
+
+    if schedule.starts_at.is_none() {
+        return Err("starts_at must be present".to_string());
+    }
+    if schedule.ends_at.is_none() {
+        return Err("ends_at must be present".to_string());
+    }
+
+    let starts_at = schedule.starts_at.as_ref().unwrap();
+    let ends_at = schedule.ends_at.as_ref().unwrap();
+
+    if schedule.is_all_day {
+        if NaiveDate::parse_from_str(starts_at, "%Y-%m-%d").is_err() {
+            return Err("Invalid starts_at date format".to_string());
+        }
+        if NaiveDate::parse_from_str(ends_at, "%Y-%m-%d").is_err() {
+            return Err("Invalid ends_at date format".to_string());
+        }
+    } else {
+        if NaiveDateTime::parse_from_str(starts_at, "%Y-%m-%dT%H:%M:%S").is_err() {
+            return Err("Invalid starts_at datetime format".to_string());
+        }
+        if NaiveDateTime::parse_from_str(ends_at, "%Y-%m-%dT%H:%M:%S").is_err() {
+            return Err("Invalid ends_at datetime format".to_string());
+        }
+    }
+
+    Ok(schedule)
+}
+
 pub fn set_db_task_schedule(
     id: String,
     is_duration: bool,
@@ -118,9 +174,27 @@ pub fn set_db_task_schedule(
     ends_at: Option<String>,
     connection: &Connection,
 ) -> Result<String, String> {
-    connection.execute(
-        "UPDATE tasks SET is_duration = ?1, is_all_day = ?2, starts_at = ?3, ends_at = ?4, updated_at = datetime('now') WHERE id = ?5",
-        (is_duration as i32, is_all_day as i32, starts_at, ends_at, id),
-    ).map_err(|e| e.to_string())?;
+
+    let validator_result = validate_schedule(Schedule {
+        is_duration,
+        is_all_day,
+        starts_at,
+        ends_at
+    });
+
+    match validator_result {
+        Ok(schedule) => {
+            connection
+                .execute(
+                    "UPDATE tasks SET is_duration = ?1, is_all_day = ?2, starts_at = ?3, ends_at = ?4, updated_at = datetime('now') WHERE id = ?5",
+                    (schedule.is_duration as i32, schedule.is_all_day as i32, schedule.starts_at, schedule.ends_at, id),
+                )
+                .map_err(|e| e.to_string())?;
+        }
+        Err(e) => {
+            return Err(e.to_string());
+        }
+    }
+
     Ok("Schedule updated successfully".to_string())
 }
