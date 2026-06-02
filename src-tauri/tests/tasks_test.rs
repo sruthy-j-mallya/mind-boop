@@ -77,10 +77,10 @@ pub fn it_lists_uncompleted_tasks_tasks_with_a_given_search_string() {
 
   let result_tasks = result.expect("Tasks should be present");
   assert_eq!(result_tasks.len(), 1);
-  if let Some(matched_task) = result_tasks.get(0) {
-    assert_eq!(matched_task.id, tasks[3].0);
-    assert_eq!(matched_task.title, "Write integration tests");
-  }
+
+  let matched_task = result_tasks.get(0).expect("Task should be present");
+  assert_eq!(matched_task.id, tasks[3].0);
+  assert_eq!(matched_task.title, "Write integration tests");
 }
 
 #[test]
@@ -221,9 +221,8 @@ pub fn it_updates_title_and_description_of_a_task(){
   let (updated_title, description_option) = updated_task_result.expect("Task title should be present");
 
   assert_eq!(new_title, updated_title);
-  if let Some(updated_description) = description_option  {
-    assert_eq!(new_description, updated_description)
-  }
+  let updated_description = description_option.expect("Description should be present");
+  assert_eq!(new_description, updated_description)
 }
 
 #[test]
@@ -273,7 +272,7 @@ pub fn it_sets_the_schedule_of_a_task() {
 
   let result = set_db_task_schedule(
     task_id.clone(),
-    false,
+    true,
     false,
     Some(String::from("2026-06-01T09:00:00")),
     Some(String::from("2026-06-01T10:00:00")),
@@ -291,7 +290,7 @@ pub fn it_sets_the_schedule_of_a_task() {
   );
   let (is_duration, is_all_day, starts_at, ends_at) = updated_task_result.expect("Task should be present");
 
-  assert_eq!(is_duration, false);
+  assert_eq!(is_duration, true);
   assert_eq!(is_all_day, false);
   assert_eq!(starts_at, Some(String::from("2026-06-01T09:00:00")));
   assert_eq!(ends_at, Some(String::from("2026-06-01T10:00:00")));
