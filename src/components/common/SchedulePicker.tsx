@@ -38,7 +38,9 @@ const SchedulePicker = ({ taskId }: Props) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const { data: task } = useShowTask(taskId);
-  const committedSchedule = task ? taskToCommittedSchedule(task) : null;
+  const [committedSchedule, setCommittedSchedule] = useState(() =>
+    task ? taskToCommittedSchedule(task) : schedule,
+  );
 
   const { mutate: setTaskSchedule } = useSetTaskSchedule();
 
@@ -47,6 +49,7 @@ const SchedulePicker = ({ taskId }: Props) => {
 
   const handleClearSchedule = () => {
     resetSelections();
+    setCommittedSchedule(null);
 
     if (!taskId) return;
     setTaskSchedule({
@@ -69,6 +72,7 @@ const SchedulePicker = ({ taskId }: Props) => {
       });
     }
 
+    setCommittedSchedule(schedule);
     setIsPopoverOpen(false);
   };
 
