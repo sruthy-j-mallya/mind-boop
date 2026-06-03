@@ -1,6 +1,6 @@
 use mind_boop_lib::tasks::task_db::{
   Task,
-  create_db_task,
+  create_db_task_with_title_only,
   list_db_tasks,
   set_db_estimated_minutes,
   set_db_task_schedule,
@@ -152,7 +152,7 @@ pub fn it_creates_task_when_provided_with_title() {
   let connection = set_up_db();
   let title = String::from("Test task");
 
-  let result = create_db_task(title.clone(), &connection);
+  let result = create_db_task_with_title_only(title.clone(), &connection);
 
   assert!(result.is_ok());
 

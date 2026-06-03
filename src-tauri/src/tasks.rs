@@ -13,10 +13,10 @@ pub async fn list_tasks(search_string: &str, state: State<'_, DbState>) -> Resul
 }
 
 #[tauri::command]
-pub async fn create_task(title: String, state: State<'_, DbState>) -> Result<String, String> {
+pub async fn create_task_with_title_only(title: String, state: State<'_, DbState>) -> Result<String, String> {
   let connection = state.connection.lock().map_err(|e| e.to_string())?;
 
-  task_db::create_db_task(title, &connection)
+  task_db::create_db_task_with_title_only(title, &connection)
 }
 
 #[tauri::command]

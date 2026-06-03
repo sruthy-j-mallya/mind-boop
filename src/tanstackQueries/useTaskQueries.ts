@@ -46,7 +46,7 @@ export const useCreateTask = (onSuccess?: CreateTaskSuccessCallback) => {
   const queryClient = useQueryClient();
   return useMutation<string, Error, string>({
     mutationFn: async (title) =>
-      invoke<string>("create_task", {
+      invoke<string>("create_task_with_title_only", {
         title,
       }),
     onSuccess: (taskId) => {

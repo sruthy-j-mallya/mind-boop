@@ -46,7 +46,7 @@ pub fn list_db_tasks(search_string: &str, connection: &Connection,) -> Result<Ve
     Ok(tasks)
 }
 
-pub fn create_db_task(title: String, connection: &Connection) -> Result<String, String> {
+pub fn create_db_task_with_title_only(title: String, connection: &Connection) -> Result<String, String> {
     let id = Uuid::new_v4().to_string();
 
     connection.execute(
