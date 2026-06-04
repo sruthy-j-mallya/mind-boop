@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { RefObject, useState } from "react";
 import { CalendarDays, Clock2Icon, X } from "lucide-react";
 import { Calendar } from "@/components/ui/Calendar";
 import Button from "../ui/Button";
@@ -8,20 +8,28 @@ import { InputGroup, InputGroupInput, InputGroupAddon } from "../ui/InputGroup";
 import DateTimePicker from "../DateTimePicker";
 import { FieldLabel, Field } from "@/components/ui/Field";
 import Switch from "../ui/Switch";
-import {
-  useSetTaskSchedule,
-  useShowTask,
-} from "@/tanstackQueries/useTaskQueries";
-import {
-  toISOString,
-  formatScheduleLabel,
-  taskToCommittedSchedule,
-} from "../utils";
-import useScheduleStore from "@/stores/useScheduleStore";
+import { formatScheduleLabel } from "../utils";
+import useSchedule from "@common/hooks/useSchedule";
+import { Schedule } from "@common/types";
 
-type Props = { taskId: string };
+type Props = {
+  ref?: RefObject<HTMLDivElement | null>;
+  datePickerPopoverRefs?: [
+    RefObject<HTMLDivElement | null>,
+    RefObject<HTMLDivElement | null>,
+  ];
+  value?: Schedule | null;
+  onConfirm: (schedule: Schedule | null) => void;
+};
 
-const SchedulePicker = ({ taskId }: Props) => {
+const SchedulePicker = ({
+  ref,
+  datePickerPopoverRefs,
+  value = null,
+  onConfirm,
+}: Props) => {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
   const {
     schedule,
     setStartsOn,
@@ -32,84 +40,36 @@ const SchedulePicker = ({ taskId }: Props) => {
     toggleIsAllDay,
     changeScheduleType,
     resetSelections,
-    loadSchedule,
-  } = useScheduleStore();
-
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-
-  const { data: task } = useShowTask(taskId);
-  const [committedSchedule, setCommittedSchedule] = useState(() =>
-    task ? taskToCommittedSchedule(task) : schedule,
-  );
-
-  const { mutate: setTaskSchedule } = useSetTaskSchedule();
-
+  } = useSchedule(value);
   const { scheduleType, isAllDay, startsOn, startsAt, endsOn, endsAt } =
     schedule;
 
   const handleClearSchedule = () => {
     resetSelections();
-    setCommittedSchedule(null);
-
-    if (!taskId) return;
-    setTaskSchedule({
-      id: taskId,
-      isDuration: false,
-      isAllDay: false,
-    });
-  };
-
-  const handleSetSchedule = () => {
-    if (taskId) {
-      const isDuration = scheduleType == "duration";
-
-      setTaskSchedule({
-        id: taskId,
-        isDuration,
-        isAllDay,
-        startsAt: startsOn ? toISOString(startsOn, startsAt) : undefined,
-        endsAt: endsOn ? toISOString(endsOn, endsAt) : undefined,
-      });
-    }
-
-    setCommittedSchedule(schedule);
+    onConfirm(null);
     setIsPopoverOpen(false);
   };
 
-  const handleOpenChange = (open: boolean) => {
-    if (open && committedSchedule !== undefined) {
-      if (committedSchedule) {
-        loadSchedule({
-          scheduleType: committedSchedule.scheduleType,
-          isAllDay: committedSchedule.isAllDay,
-          startsOn: committedSchedule.startsOn,
-          startsAt: committedSchedule.startsAt,
-          endsOn: committedSchedule.endsOn,
-          endsAt: committedSchedule.endsAt,
-        });
-      } else {
-        resetSelections();
-      }
-    }
-    setIsPopoverOpen(open);
+  const handleSetSchedule = () => {
+    onConfirm(schedule);
+    setIsPopoverOpen(false);
   };
 
   return (
-    <Popover open={isPopoverOpen} onOpenChange={handleOpenChange}>
+    <Popover
+      open={isPopoverOpen}
+      onOpenChange={(open) => setIsPopoverOpen(open)}
+    >
       <PopoverTrigger>
         <Button
           variant="link"
           className="min-w-0 overflow-hidden p-0 text-xs font-normal text-blue-500"
         >
           <CalendarDays className="shrink-0" />
-          <span>
-            {committedSchedule
-              ? formatScheduleLabel(committedSchedule)
-              : "Due Date"}
-          </span>
+          <span>{value ? formatScheduleLabel(value) : "Due Date"}</span>
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="mx-4 w-fit">
+      <PopoverContent ref={ref} className="mx-4 w-fit">
         <Tabs value={scheduleType}>
           <TabsList className="w-full">
             <TabsTrigger
@@ -180,6 +140,7 @@ const SchedulePicker = ({ taskId }: Props) => {
                 time={startsAt}
                 onTimeChange={setStartsAt}
                 allDay={isAllDay}
+                popoverRef={datePickerPopoverRefs?.[0]}
               />
               <DateTimePicker
                 label="End"
@@ -188,6 +149,7 @@ const SchedulePicker = ({ taskId }: Props) => {
                 time={endsAt}
                 onTimeChange={setEndsAt}
                 allDay={isAllDay}
+                popoverRef={datePickerPopoverRefs?.[1]}
               />
             </div>
             <Field orientation="horizontal">
