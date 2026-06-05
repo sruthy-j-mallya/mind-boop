@@ -271,6 +271,7 @@ const Timer = ({
           <Button
             type="button"
             variant="ghost"
+            disabled={!selectedTaskId}
             onClick={() => {
               setIsRunning(true);
               setIsTimerActive(true);
