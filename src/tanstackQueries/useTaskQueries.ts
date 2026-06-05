@@ -24,6 +24,16 @@ export type CalendarTask = {
 
 type CreateTaskSuccessCallback = (taskId: string) => void;
 
+type CreateTaskPayload = {
+  title: string;
+  description?: string;
+  estimatedMinutes: number;
+  isDuration: boolean;
+  isAllDay: boolean;
+  startsAt?: string;
+  endsAt?: string;
+};
+
 type UpdateTaskPayload = {
   id: string;
   title: string;
@@ -42,12 +52,43 @@ export const useListCalendarTasks = () =>
     queryFn: () => invoke<CalendarTask[]>("list_calendar_tasks"),
   });
 
-export const useCreateTask = (onSuccess?: CreateTaskSuccessCallback) => {
+export const useCreateTaskWithTitle = (
+  onSuccess?: CreateTaskSuccessCallback,
+) => {
   const queryClient = useQueryClient();
   return useMutation<string, Error, string>({
     mutationFn: async (title) =>
       invoke<string>("create_task_with_title_only", {
         title,
+      }),
+    onSuccess: (taskId) => {
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["calendarTasks"] });
+      onSuccess?.(taskId);
+    },
+  });
+};
+
+export const useCreateTask = (onSuccess?: CreateTaskSuccessCallback) => {
+  const queryClient = useQueryClient();
+  return useMutation<string, Error, CreateTaskPayload>({
+    mutationFn: async ({
+      title,
+      description,
+      estimatedMinutes,
+      isDuration,
+      isAllDay,
+      startsAt,
+      endsAt,
+    }) =>
+      invoke<string>("create_task", {
+        title,
+        description: description ?? null,
+        estimatedMinutes,
+        isDuration,
+        isAllDay,
+        startsAt: startsAt ?? null,
+        endsAt: endsAt ?? null,
       }),
     onSuccess: (taskId) => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });

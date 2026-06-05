@@ -1,6 +1,5 @@
 import { useRef, useState } from "react";
-import { CalendarDays, Hourglass, Plus } from "lucide-react";
-import { Calendar } from "@/components/ui/Calendar";
+import { Hourglass, Plus } from "lucide-react";
 import {
   Popover,
   PopoverContent,
@@ -9,30 +8,30 @@ import {
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/Field";
-import {
-  useCreateTask,
-  useSetEstimatedMinutes,
-  useSetTaskSchedule,
-} from "@/tanstackQueries/useTaskQueries";
-import dayjs from "dayjs";
+import { useCreateTask } from "@/tanstackQueries/useTaskQueries";
 import useClickOutside from "@/components/hooks/useClickOutside";
+import SchedulePicker from "./common/SchedulePicker";
+import { Schedule } from "./common/types";
+import { toISOString } from "./utils";
 
 const AddTaskBar = () => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [title, setTitle] = useState("");
-  const [dueDate, setDueDate] = useState<Date | undefined>(undefined);
   const [estimatedHours, setEstimatedHours] = useState(0);
   const [estimatedMinutes, setEstimatedMinutes] = useState(0);
-  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [isEstimateOpen, setIsEstimateOpen] = useState(false);
+  const [committedSchedule, setCommittedSchedule] = useState<Schedule | null>(
+    null,
+  );
 
   const containerRef = useRef<HTMLDivElement>(null);
   const calendarPopoverRef = useRef<HTMLDivElement>(null);
   const estimatePopoverRef = useRef<HTMLDivElement>(null);
+  const startDatePickerPopoverRef = useRef<HTMLDivElement>(null);
+  const endDatePickerPopoverRef = useRef<HTMLDivElement>(null);
 
   const reset = () => {
     setTitle("");
-    setDueDate(undefined);
     setEstimatedHours(0);
     setEstimatedMinutes(0);
     setIsExpanded(false);
@@ -41,34 +40,28 @@ const AddTaskBar = () => {
   useClickOutside(containerRef, reset, [
     calendarPopoverRef,
     estimatePopoverRef,
+    startDatePickerPopoverRef,
+    endDatePickerPopoverRef,
   ]);
 
-  const { mutate: setTaskSchedule } = useSetTaskSchedule();
-  const { mutate: updateEstimatedMinutes } = useSetEstimatedMinutes();
-  const { mutate: createTask, isPending } = useCreateTask((taskId) => {
-    if (dueDate) {
-      setTaskSchedule({
-        id: taskId,
-        isDuration: false,
-        isAllDay: true,
-        startsAt: dayjs(dueDate).format("YYYY-MM-DD"),
-      });
-    }
-
-    const totalMinutes = estimatedHours * 60 + estimatedMinutes;
-    if (totalMinutes > 0) {
-      updateEstimatedMinutes({ id: taskId, estimatedMinutes: totalMinutes });
-    }
-
-    reset();
-  });
+  const { mutate: createTask, isPending } = useCreateTask(reset);
 
   const handleAdd = () => {
     if (!title.trim() || isPending) return;
-    createTask(title.trim());
+    createTask({
+      title,
+      estimatedMinutes: estimatedHours * 60 + estimatedMinutes,
+      isDuration: committedSchedule?.scheduleType == "duration",
+      isAllDay: committedSchedule?.isAllDay || false,
+      startsAt:
+        committedSchedule?.startsOn &&
+        toISOString(committedSchedule.startsOn, committedSchedule?.startsAt),
+      endsAt:
+        committedSchedule?.endsOn &&
+        toISOString(committedSchedule.endsOn, committedSchedule.endsAt),
+    });
   };
 
-  const dueDateLabel = dueDate ? dayjs(dueDate).format("MMM D") : null;
   const estimateLabel =
     estimatedHours > 0 || estimatedMinutes > 0
       ? estimatedHours > 0 && estimatedMinutes > 0
@@ -100,37 +93,21 @@ const AddTaskBar = () => {
         autoFocus
         value={title}
         onChange={(e) => setTitle(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === "Enter") handleAdd();
-          if (e.key === "Escape") reset();
-        }}
         placeholder="What would you like to do?"
         className="border-0 px-0 shadow-none focus-visible:ring-0"
       />
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1">
-          <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
-            <PopoverTrigger asChild>
-              <Button
-                variant={dueDate ? "secondary" : "ghost"}
-                className="h-7 gap-1.5 px-2 text-xs"
-              >
-                <CalendarDays className="h-3.5 w-3.5" />
-                {dueDateLabel ?? "Due date"}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent ref={calendarPopoverRef} className="w-fit p-2">
-              <Calendar
-                mode="single"
-                selected={dueDate}
-                onSelect={(date) => {
-                  setDueDate(date);
-                  setIsCalendarOpen(false);
-                }}
-                fixedWeeks
-              />
-            </PopoverContent>
-          </Popover>
+          <SchedulePicker
+            ref={calendarPopoverRef}
+            key={"task-bar"}
+            datePickerPopoverRefs={[
+              startDatePickerPopoverRef,
+              endDatePickerPopoverRef,
+            ]}
+            value={committedSchedule}
+            onConfirm={setCommittedSchedule}
+          />
 
           <Popover open={isEstimateOpen} onOpenChange={setIsEstimateOpen}>
             <PopoverTrigger asChild>
@@ -176,7 +153,7 @@ const AddTaskBar = () => {
 
         <Button
           className="h-7 px-3 text-xs"
-          onClick={handleAdd}
+          onClick={() => handleAdd()}
           disabled={!title.trim() || isPending}
         >
           Add
