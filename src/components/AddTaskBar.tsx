@@ -50,7 +50,7 @@ const AddTaskBar = () => {
     if (!title.trim() || isPending) return;
     createTask({
       title,
-      estimatedMinutes: estimatedHours * 60 + estimatedMinutes,
+      estimatedMinutes: estimatedHours * 60 + estimatedMinutes || null,
       isDuration: committedSchedule?.scheduleType == "duration",
       isAllDay: committedSchedule?.isAllDay || false,
       startsAt:

@@ -27,7 +27,7 @@ type CreateTaskSuccessCallback = (taskId: string) => void;
 type CreateTaskPayload = {
   title: string;
   description?: string;
-  estimatedMinutes: number;
+  estimatedMinutes: number | null;
   isDuration: boolean;
   isAllDay: boolean;
   startsAt?: string;
