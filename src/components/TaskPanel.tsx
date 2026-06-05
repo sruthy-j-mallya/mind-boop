@@ -4,6 +4,7 @@ import { MarkdownEditor } from "@/components/MarkdownEditor/MarkdownEditor";
 import useDebounce from "@/lib/hooks/useDebounce";
 import {
   useCreateTaskWithTitle,
+  useSetEstimatedMinutes,
   useSetTaskSchedule,
   useShowTask,
   useUpdateTask,
@@ -42,6 +43,7 @@ const TaskPanel = ({
     data: {
       title: savedTitle = "",
       description: savedDescription = "",
+      estimatedMinutes: savedEstimatedMinutes = null,
       isDuration: savedIsDuration,
       isAllDay: savedIsAllDay,
       startsAt: savedStartsAt,
@@ -54,6 +56,9 @@ const TaskPanel = ({
   const [committedSchedule, setCommittedSchedule] = useState<Schedule | null>(
     null,
   );
+  const [estimatedMinutes, setEstimatedMinutes] = useState<number | null>(
+    savedEstimatedMinutes,
+  );
   const savedSchedule = taskToSchedule({
     isDuration: savedIsDuration ?? false,
     isAllDay: savedIsAllDay ?? false,
@@ -61,6 +66,7 @@ const TaskPanel = ({
     endsAt: savedEndsAt ?? null,
   });
   const { mutate: setTaskSchedule } = useSetTaskSchedule();
+  const { mutate: saveEstimatedMinutesToDB } = useSetEstimatedMinutes();
   const [hasUserEdited, setHasUserEdited] = useState(false);
   const [isTimerDialogOpen, setIsTimerDialogOpen] = useState(false);
   const editorRef = useRef<Editor | null>(null);
@@ -110,6 +116,10 @@ const TaskPanel = ({
       });
     }
   }, [committedSchedule, taskId, setTaskSchedule]);
+
+  useEffect(() => {
+    saveEstimatedMinutesToDB({ id: taskId, estimatedMinutes });
+  }, [taskId, estimatedMinutes, saveEstimatedMinutesToDB]);
 
   return (
     <Card className="h-full">
@@ -165,7 +175,19 @@ const TaskPanel = ({
         />
       </CardContent>
       <CardFooter className="flex flex-row justify-between">
-        <EstimationInput key={taskId} taskId={taskId} />
+        <EstimationInput
+          key={taskId}
+          value={estimatedMinutes}
+          onChange={(minutes) => {
+            setEstimatedMinutes(minutes);
+            if (taskId) {
+              saveEstimatedMinutesToDB({
+                id: taskId,
+                estimatedMinutes: minutes,
+              });
+            }
+          }}
+        />
         {!hideStartButton && (
           <Button onClick={() => setIsTimerDialogOpen(true)} disabled={!taskId}>
             Start now

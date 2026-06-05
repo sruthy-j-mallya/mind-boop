@@ -5,7 +5,7 @@ export type Task = {
   id: string;
   title: string;
   description: string;
-  estimatedMinutes: number;
+  estimatedMinutes: number | null;
   isDuration: boolean;
   isAllDay: boolean;
   isCompleted: boolean;
@@ -113,7 +113,7 @@ export const useSetEstimatedMinutes = () => {
       estimatedMinutes,
     }: {
       id: string;
-      estimatedMinutes: number;
+      estimatedMinutes: number | null;
     }) => invoke("set_estimated_minutes", { id, estimatedMinutes }),
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: ["tasks", id] });

@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { Hourglass } from "lucide-react";
+import { useState } from "react";
+import { Hourglass, X } from "lucide-react";
 import {
   Popover,
   PopoverContent,
@@ -7,69 +7,90 @@ import {
   PopoverTitle,
   PopoverTrigger,
 } from "../ui/Popover";
-
+import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
-
 import { FieldGroup, FieldLabel, Field } from "@/components/ui/Field";
-import {
-  useShowTask,
-  useSetEstimatedMinutes,
-} from "@/tanstackQueries/useTaskQueries";
-import Skeleton from "../ui/Skeleton";
 
-const EstimationInput = ({ taskId }: { taskId: string }) => {
-  const {
-    data: { estimatedMinutes: totalEstimationInMinutes } = {
-      estimatedMinutes: 5,
-    },
-    isLoading,
-  } = useShowTask(taskId);
-  const { mutate: updateEstimatedMinutes } = useSetEstimatedMinutes();
+interface EstimationInputProps {
+  value: number | null;
+  onChange: (minutes: number | null) => void;
+  popoverRef?: React.Ref<HTMLDivElement>;
+}
 
+const EstimationInput = ({
+  value,
+  onChange,
+  popoverRef,
+}: EstimationInputProps) => {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [estimatedHours, setEstimatedHours] = useState(
-    Math.floor(totalEstimationInMinutes / 60),
+    value != null ? Math.floor(value / 60) : 0,
   );
   const [estimatedMinutes, setEstimatedMinutes] = useState(
-    totalEstimationInMinutes % 60,
+    value != null ? value % 60 : 0,
   );
 
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  // TODO: Use Pluralize package or internationalization here
+  const label = (() => {
+    if (estimatedHours == 0 && estimatedMinutes == 0) return null;
 
-  const humanizedEstimationLabel = () => {
-    if (estimatedHours == 0) {
+    if (estimatedHours === 0) {
+      if (estimatedMinutes == 1) return "1 min";
+
       return `${estimatedMinutes} mins`;
-    } else if (estimatedMinutes == 0) {
-      return `${estimatedHours} hrs`;
-    } else {
-      return `${estimatedHours} hrs ${estimatedMinutes} mins`;
     }
+
+    if (estimatedMinutes === 0) {
+      if (estimatedHours == 1) return "1 hr";
+
+      return `${estimatedHours} hrs`;
+    }
+
+    return `${estimatedHours} hrs ${estimatedMinutes} mins`;
+  })();
+
+  const handleHoursChange = (hours: number) => {
+    setEstimatedHours(hours);
+    const total = hours * 60 + estimatedMinutes;
+    onChange(total > 0 ? total : null);
   };
 
-  const handleSubmit = () => {
-    updateEstimatedMinutes({
-      id: taskId,
-      estimatedMinutes: estimatedHours * 60 + estimatedMinutes,
-    });
+  const handleMinutesChange = (minutes: number) => {
+    setEstimatedMinutes(minutes);
+    const total = estimatedHours * 60 + minutes;
+    onChange(total > 0 ? total : null);
   };
 
-  if (isLoading) {
-    <Skeleton className="w-16" />;
-  }
-
-  useEffect(() => {
-    updateEstimatedMinutes({
-      id: taskId,
-      estimatedMinutes: estimatedHours * 60 + estimatedMinutes,
-    });
-  }, [taskId, estimatedHours, estimatedMinutes, updateEstimatedMinutes]);
+  const handleClear = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEstimatedHours(0);
+    setEstimatedMinutes(0);
+    onChange(null);
+  };
 
   return (
     <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-      <PopoverTrigger className="flex items-center gap-1.5 text-blue-500">
-        <Hourglass className="h-3.5 w-3.5" />
-        {humanizedEstimationLabel()}
-      </PopoverTrigger>
-      <PopoverContent onBlur={handleSubmit} className="w-48">
+      <div className="flex items-center">
+        <PopoverTrigger asChild>
+          <Button
+            variant={value != null ? "secondary" : "ghost"}
+            className={`h-7 gap-1.5 px-2 text-xs ${value != null ? "rounded-r-none" : ""}`}
+          >
+            <Hourglass className="h-3.5 w-3.5" />
+            {label ?? "Estimate"}
+          </Button>
+        </PopoverTrigger>
+        {value != null && (
+          <Button
+            variant="secondary"
+            className="border-l-background h-7 rounded-l-none border-l px-1.5 text-xs"
+            onClick={handleClear}
+          >
+            <X className="h-3 w-3" />
+          </Button>
+        )}
+      </div>
+      <PopoverContent ref={popoverRef} className="w-48">
         <PopoverHeader>
           <PopoverTitle>Estimate</PopoverTitle>
         </PopoverHeader>
@@ -79,11 +100,11 @@ const EstimationInput = ({ taskId }: { taskId: string }) => {
               <Input
                 type="number"
                 min={0}
+                max={8}
                 value={estimatedHours}
-                onChange={(e) => {
-                  const hours = Math.max(0, Number(e.target.value));
-                  setEstimatedHours(hours);
-                }}
+                onChange={(e) =>
+                  handleHoursChange(Math.max(0, Number(e.target.value)))
+                }
               />
               <FieldLabel>hours</FieldLabel>
             </Field>
@@ -93,13 +114,11 @@ const EstimationInput = ({ taskId }: { taskId: string }) => {
                 min={0}
                 max={59}
                 value={estimatedMinutes}
-                onChange={(e) => {
-                  const minutes = Math.min(
-                    59,
-                    Math.max(0, Number(e.target.value)),
-                  );
-                  setEstimatedMinutes(minutes);
-                }}
+                onChange={(e) =>
+                  handleMinutesChange(
+                    Math.min(59, Math.max(0, Number(e.target.value))),
+                  )
+                }
               />
               <FieldLabel>mins</FieldLabel>
             </Field>
