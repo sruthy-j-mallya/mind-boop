@@ -84,7 +84,7 @@ export const MarkdownEditor = ({
       <div
         id={id}
         className={cn(
-          "border-border bg-background text-muted-foreground rounded-md border px-3 py-8 text-sm",
+          "border-border text-muted-foreground rounded-md border bg-transparent px-3 py-8 text-sm",
           className,
         )}
       >
@@ -96,7 +96,7 @@ export const MarkdownEditor = ({
   return (
     <div
       id={id}
-      className={cn("bg-background flex flex-col overflow-hidden", className)}
+      className={cn("flex flex-col overflow-hidden bg-transparent", className)}
     >
       <EditorContent
         editor={editor}
