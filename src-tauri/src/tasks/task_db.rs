@@ -46,6 +46,25 @@ pub fn list_db_tasks(search_string: &str, connection: &Connection,) -> Result<Ve
     Ok(tasks)
 }
 
+pub fn create_db_task(
+  title: String,
+  description: Option<String>,
+  estimated_minutes: u16,
+  is_duration: bool,
+  is_all_day: bool,
+  starts_at: Option<String>,
+  ends_at: Option<String>,
+  connection: &Connection) -> Result<String, String> {
+    let id = Uuid::new_v4().to_string();
+
+    connection.execute(
+        "INSERT INTO tasks (id, title, description, estimated_minutes, is_duration, is_all_day, starts_at, ends_at, created_at, updated_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, datetime('now'), datetime('now'))",
+        (id.clone(), title, description, estimated_minutes, is_duration, is_all_day, starts_at, ends_at),
+    ).map_err(|e| e.to_string())?;
+
+    Ok(id)
+}
+
 pub fn create_db_task_with_title_only(title: String, connection: &Connection) -> Result<String, String> {
     let id = Uuid::new_v4().to_string();
 

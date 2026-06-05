@@ -13,6 +13,30 @@ pub async fn list_tasks(search_string: &str, state: State<'_, DbState>) -> Resul
 }
 
 #[tauri::command]
+pub async fn create_task(
+  title: String,
+  description: Option<String>,
+  estimated_minutes: u16,
+  is_duration: bool,
+  is_all_day: bool,
+  starts_at: Option<String>,
+  ends_at: Option<String>,
+  state: State<'_, DbState>) -> Result<String, String> {
+  let connection = state.connection.lock().map_err(|e| e.to_string())?;
+
+  task_db::create_db_task(
+    title,
+    description,
+    estimated_minutes,
+    is_duration,
+    is_all_day,
+    starts_at,
+    ends_at,
+    &connection
+  )
+}
+
+#[tauri::command]
 pub async fn create_task_with_title_only(title: String, state: State<'_, DbState>) -> Result<String, String> {
   let connection = state.connection.lock().map_err(|e| e.to_string())?;
 
