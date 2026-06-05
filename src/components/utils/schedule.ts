@@ -1,13 +1,6 @@
 import dayjs from "@/lib/dayjs";
-
-type CommittedSchedule = {
-  scheduleType: "date" | "duration";
-  isAllDay: boolean;
-  startsOn?: Date;
-  startsAt?: string;
-  endsOn?: Date;
-  endsAt?: string;
-};
+import { Schedule } from "../common/types";
+import { toISOString } from "./datetime";
 
 const getDayLabel = (date: dayjs.Dayjs): string => {
   const today = dayjs().startOf("day");
@@ -17,7 +10,7 @@ const getDayLabel = (date: dayjs.Dayjs): string => {
   return date.format("ddd");
 };
 
-const formatScheduleLabel = (schedule: CommittedSchedule): string => {
+const formatScheduleLabel = (schedule: Schedule): string => {
   const { scheduleType, isAllDay, startsOn, startsAt, endsOn, endsAt } =
     schedule;
 
@@ -57,12 +50,12 @@ const formatScheduleLabel = (schedule: CommittedSchedule): string => {
   }
 };
 
-const taskToCommittedSchedule = (task: {
+const taskToSchedule = (task: {
   isDuration: boolean;
   isAllDay: boolean;
   startsAt: string | null;
   endsAt: string | null;
-}): CommittedSchedule | null => {
+}): Schedule | null => {
   if (!task.startsAt) return null;
 
   const startDt = dayjs(task.startsAt);
@@ -86,5 +79,23 @@ const taskToCommittedSchedule = (task: {
   };
 };
 
-export { formatScheduleLabel, taskToCommittedSchedule };
-export type { CommittedSchedule };
+const scheduleToTaskScheduleFields = (
+  schedule: Schedule,
+): {
+  isDuration: boolean;
+  isAllDay: boolean;
+  startsAt?: string;
+  endsAt?: string;
+} => {
+  const { scheduleType, isAllDay, startsOn, startsAt, endsOn, endsAt } =
+    schedule;
+
+  return {
+    isDuration: scheduleType === "duration",
+    isAllDay,
+    startsAt: startsOn ? toISOString(startsOn, startsAt) : undefined,
+    endsAt: endsOn ? toISOString(endsOn, endsAt) : undefined,
+  };
+};
+
+export { formatScheduleLabel, taskToSchedule, scheduleToTaskScheduleFields };

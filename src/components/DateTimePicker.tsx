@@ -20,6 +20,7 @@ interface DateTimePickerProps {
   time: string | undefined;
   onTimeChange: (time: string) => void;
   allDay?: boolean;
+  popoverRef?: React.RefObject<HTMLDivElement | null>;
 }
 
 const DateTimePicker = ({
@@ -29,6 +30,7 @@ const DateTimePicker = ({
   time,
   onTimeChange,
   allDay = false,
+  popoverRef,
 }: DateTimePickerProps) => {
   const [open, setOpen] = React.useState(false);
 
@@ -48,7 +50,11 @@ const DateTimePicker = ({
             <ChevronDownIcon className="shrink-0" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto overflow-hidden p-0" align="start">
+        <PopoverContent
+          ref={popoverRef}
+          className="w-auto overflow-hidden p-0"
+          align="start"
+        >
           <Calendar
             mode="single"
             selected={date}

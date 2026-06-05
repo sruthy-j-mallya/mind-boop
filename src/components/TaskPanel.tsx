@@ -3,10 +3,15 @@ import { useRef, useState, useEffect } from "react";
 import { MarkdownEditor } from "@/components/MarkdownEditor/MarkdownEditor";
 import useDebounce from "@/lib/hooks/useDebounce";
 import {
-  useCreateTask,
+  useCreateTaskWithTitle,
+  useSetTaskSchedule,
   useShowTask,
   useUpdateTask,
 } from "@/tanstackQueries/useTaskQueries";
+import {
+  scheduleToTaskScheduleFields,
+  taskToSchedule,
+} from "@/components/utils";
 import { Maximize, X } from "lucide-react";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
@@ -22,6 +27,7 @@ import {
 import EstimationInput from "@common/EstimationInput";
 import SchedulePicker from "@common/SchedulePicker";
 import TimerOptionsDialog from "@/components/Timer/TimerOptionsDialog";
+import { Schedule } from "./common/types";
 
 const TaskPanel = ({
   hideStartButton = false,
@@ -33,22 +39,38 @@ const TaskPanel = ({
   selectedTaskId?: string;
 }) => {
   const {
-    data: { title: savedTitle = "", description: savedDescription = "" } = {},
+    data: {
+      title: savedTitle = "",
+      description: savedDescription = "",
+      isDuration: savedIsDuration,
+      isAllDay: savedIsAllDay,
+      startsAt: savedStartsAt,
+      endsAt: savedEndsAt,
+    } = {},
   } = useShowTask(selectedTaskId);
   const [taskId, setTaskId] = useState(selectedTaskId);
   const [title, setTitle] = useState(savedTitle);
   const [description, setDescription] = useState(savedDescription);
+  const [committedSchedule, setCommittedSchedule] = useState<Schedule | null>(
+    null,
+  );
+  const savedSchedule = taskToSchedule({
+    isDuration: savedIsDuration ?? false,
+    isAllDay: savedIsAllDay ?? false,
+    startsAt: savedStartsAt ?? null,
+    endsAt: savedEndsAt ?? null,
+  });
+  const { mutate: setTaskSchedule } = useSetTaskSchedule();
   const [hasUserEdited, setHasUserEdited] = useState(false);
   const [isTimerDialogOpen, setIsTimerDialogOpen] = useState(false);
   const editorRef = useRef<Editor | null>(null);
   const debouncedTitle = useDebounce(title, 500);
   const debouncedDescription = useDebounce(description, 500);
 
-  const { mutate: createTask, isPending: isCreateTaskPending } = useCreateTask(
-    (createdTaskId: string) => {
+  const { mutate: createTask, isPending: isCreateTaskPending } =
+    useCreateTaskWithTitle((createdTaskId: string) => {
       setTaskId(createdTaskId);
-    },
-  );
+    });
   const { mutate: updateTask } = useUpdateTask();
 
   useEffect(() => {
@@ -80,12 +102,25 @@ const TaskPanel = ({
     editorRef.current?.commands.focus();
   };
 
+  useEffect(() => {
+    if (taskId && committedSchedule) {
+      setTaskSchedule({
+        id: taskId,
+        ...scheduleToTaskScheduleFields(committedSchedule),
+      });
+    }
+  }, [committedSchedule, taskId, setTaskSchedule]);
+
   return (
     <Card className="h-full">
       <CardHeader>
         <CardTitle>
           <CardAction className="flex flex-row justify-between">
-            <SchedulePicker taskId={taskId} />
+            <SchedulePicker
+              key={`task-panel-${taskId}`}
+              value={committedSchedule ?? savedSchedule}
+              onConfirm={(schedule) => setCommittedSchedule(schedule)}
+            />
             <div className="flex items-center gap-2">
               <Button variant="ghost" className="h-6 w-6">
                 <Maximize className="text-foreground size-4" />
