@@ -19,7 +19,10 @@ import {
 import { CalendarEvent } from "./types";
 
 const HomeCalendar = () => {
-  const [view, setView] = useState<CalendarView>("month");
+  const [view, setView] = useState<CalendarView>(() => {
+    const saved = localStorage.getItem("calendarView");
+    return (saved as CalendarView) ?? "month";
+  });
   const [date, setDate] = useState(new Date());
   const [isTaskInputVisible, setIsTaskInputVisible] = useState(false);
 
@@ -34,7 +37,10 @@ const HomeCalendar = () => {
     return [...taskEvents, ...logEvents];
   }, [calendarTasks, timeLogs]);
 
-  const handleView = (nextView: CalendarView) => setView(nextView);
+  const handleView = (nextView: CalendarView) => {
+    localStorage.setItem("calendarView", nextView);
+    setView(nextView);
+  };
 
   return (
     <ResizablePanelGroup className="flex h-full gap-4 overflow-hidden">
