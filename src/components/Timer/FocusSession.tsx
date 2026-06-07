@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useParams } from "react-router-dom";
 
 import {
   ResizablePanelGroup,
@@ -11,15 +10,13 @@ import Textarea from "@/components/ui/TextArea";
 
 import TaskPanel from "../TaskPanel";
 import Timer from "./Timer";
+import useTimerStore from "@/stores/useTimer";
 
 const FocusSession = () => {
-  const { id: taskId } = useParams<{ id?: string }>();
-
-  const [selectedTaskId, setSelectedTaskId] = useState(taskId ?? "");
-
   const [isTaskPanelOpen, setIsTaskPanelOpen] = useState(false);
   const [isDistractionLogOpen, setIsDistractionLogOpen] = useState(false);
   const [noteText, setNoteText] = useState("");
+  const { taskId } = useTimerStore();
 
   return (
     <ResizablePanelGroup orientation="horizontal">
@@ -29,8 +26,6 @@ const FocusSession = () => {
             <Timer
               setIsTaskPanelOpen={setIsTaskPanelOpen}
               setIsDistractionLogOpen={setIsDistractionLogOpen}
-              selectedTaskId={selectedTaskId}
-              setSelectedTaskId={setSelectedTaskId}
             />
           </ResizablePanel>
           {isDistractionLogOpen && (
@@ -58,7 +53,7 @@ const FocusSession = () => {
             <div className="mx-2 my-10 h-10/12">
               <TaskPanel
                 hideStartButton
-                selectedTaskId={selectedTaskId}
+                selectedTaskId={taskId || ""}
                 onClose={() => setIsTaskPanelOpen(false)}
               />
             </div>

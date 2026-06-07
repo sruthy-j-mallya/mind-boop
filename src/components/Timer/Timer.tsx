@@ -40,15 +40,13 @@ import TaskPicker from "./TaskPicker";
 const Timer = ({
   setIsDistractionLogOpen,
   setIsTaskPanelOpen,
-  selectedTaskId,
-  setSelectedTaskId,
 }: {
   setIsDistractionLogOpen: React.Dispatch<React.SetStateAction<boolean>>;
   setIsTaskPanelOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  selectedTaskId: string;
-  setSelectedTaskId: React.Dispatch<React.SetStateAction<string>>;
 }) => {
   const { state } = useLocation() as { state: TimerLocationState };
+  const { taskId: selectedTaskId, setTaskId: setSelectedTaskId } =
+    useTimerStore();
 
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isTaskSelectOpen, setIsTaskSelectOpen] = useState(false);
@@ -63,7 +61,7 @@ const Timer = ({
   const { isActive: isTimerActive, setIsActive: setIsTimerActive } =
     useTimerStore();
 
-  const { data: task } = useShowTask(selectedTaskId);
+  const { data: task } = useShowTask(selectedTaskId || "");
   const { mutate: createTimeLog } = useCreateTimeLog();
   const startsAtRef = useRef<string | null>(null);
 
@@ -197,7 +195,7 @@ const Timer = ({
             </PopoverTrigger>
             <PopoverContent className="w-64 p-0">
               <TaskPicker
-                selectedTaskId={selectedTaskId}
+                selectedTaskId={selectedTaskId || ""}
                 onSelect={handleTaskSelect}
               />
             </PopoverContent>

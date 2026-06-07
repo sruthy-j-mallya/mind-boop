@@ -40,7 +40,7 @@ const TimerOptionsDialog = ({ taskId, open, onOpenChange }: Props) => {
 
   const handleStart = (mode: "timer" | "stopwatch") => {
     onOpenChange(false);
-    navigate(`/timer/tasks/${taskId}`, {
+    navigate(`/timer`, {
       state: {
         mode,
         minutes: mode === "timer" ? timerDuration : 0,
