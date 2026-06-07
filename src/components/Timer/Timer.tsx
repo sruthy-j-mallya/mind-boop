@@ -25,10 +25,9 @@ import { Task, useShowTask } from "@/tanstackQueries/useTaskQueries";
 import { useCreateTimeLog } from "@/tanstackQueries/useTimeLogQueries";
 import { cn } from "@/lib/utils";
 
-import { TimerDisplayState, TimerLocationState } from "./types";
+import { TimerLocationState } from "./types";
 
 import {
-  buildTimerState,
   taskTimerMinutes,
   incrementTime,
   decrementTime,
@@ -45,21 +44,23 @@ const Timer = ({
   setIsTaskPanelOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
   const { state } = useLocation() as { state: TimerLocationState };
-  const { taskId: selectedTaskId, setTaskId: setSelectedTaskId } =
-    useTimerStore();
+  const {
+    taskId: selectedTaskId,
+    setTaskId: setSelectedTaskId,
+    mode,
+    timerPreset,
+    displayMinutes: minutes,
+    displaySeconds: seconds,
+    isActive: isTimerActive,
+    setIsActive: setIsTimerActive,
+    setTimerPreset,
+    setDisplay,
+  } = useTimerStore();
 
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isTaskSelectOpen, setIsTaskSelectOpen] = useState(false);
   const [isRunning, setIsRunning] = useState(state?.autoStart ?? false);
-
-  const initialMode = state?.mode ?? "timer";
-  const initialMinutes = state?.minutes ?? 5;
-  const [timer, setTimer] = useState<TimerDisplayState>(() =>
-    buildTimerState(initialMode, initialMinutes),
-  );
-
-  const { isActive: isTimerActive, setIsActive: setIsTimerActive } =
-    useTimerStore();
+  const [minutesInput, setMinutesInput] = useState(String(minutes));
 
   const { data: task } = useShowTask(selectedTaskId || "");
   const { mutate: createTimeLog } = useCreateTimeLog();
@@ -73,12 +74,7 @@ const Timer = ({
   const handleTaskSelect = (selected: Task) => {
     setSelectedTaskId(selected.id);
     if (selected.estimatedMinutes && selected.estimatedMinutes <= 30) {
-      setTimer(
-        buildTimerState(
-          "timer",
-          taskTimerMinutes(selected.estimatedMinutes, initialMinutes),
-        ),
-      );
+      setTimerPreset(taskTimerMinutes(selected.estimatedMinutes, minutes));
     }
     setIsTaskSelectOpen(false);
   };
@@ -100,22 +96,13 @@ const Timer = ({
     startsAtRef.current = null;
     setIsRunning(false);
     setIsTimerActive(false);
-    setTimer((prev) => ({
-      ...prev,
-      minutes: prev.mode === "timer" ? prev.timerPreset : 0,
-      seconds: 0,
-    }));
+    setDisplay(mode === "timer" ? timerPreset : 0, 0);
   };
 
   const handleApplyEdit = () => {
-    const parsed = parseInt(timer.minutesInput, 10);
+    const parsed = parseInt(minutesInput, 10);
     if (!isNaN(parsed) && parsed > 0) {
-      setTimer((prev) => ({
-        ...prev,
-        minutes: parsed,
-        seconds: 0,
-        timerPreset: parsed,
-      }));
+      setTimerPreset(parsed);
     }
     setIsEditOpen(false);
   };
@@ -124,11 +111,11 @@ const Timer = ({
     if (!isRunning) return;
     const interval = setInterval(() => {
       const { nextMinutes, nextSeconds } =
-        timer.mode === "stopwatch"
-          ? incrementTime(timer.minutes, timer.seconds)
-          : decrementTime(timer.minutes, timer.seconds);
+        mode === "stopwatch"
+          ? incrementTime(minutes, seconds)
+          : decrementTime(minutes, seconds);
 
-      if (timer.mode === "timer" && nextMinutes === 0 && nextSeconds === 0) {
+      if (mode === "timer" && nextMinutes === 0 && nextSeconds === 0) {
         const endTime = new Date().toISOString();
         if (selectedTaskId && startsAtRef.current) {
           const duration = Math.round(
@@ -148,21 +135,18 @@ const Timer = ({
         setIsTimerActive(false);
       }
 
-      setTimer((prev) => ({
-        ...prev,
-        minutes: nextMinutes,
-        seconds: nextSeconds,
-      }));
+      setDisplay(nextMinutes, nextSeconds);
     }, 1000);
     return () => clearInterval(interval);
   }, [
     isRunning,
-    timer.mode,
-    timer.minutes,
-    timer.seconds,
+    mode,
+    minutes,
+    seconds,
     selectedTaskId,
     createTimeLog,
     setIsTimerActive,
+    setDisplay,
   ]);
 
   useEffect(() => {
@@ -207,11 +191,7 @@ const Timer = ({
           open={isEditOpen}
           onOpenChange={(open) => {
             if (open && isTimerActive) return;
-            if (open)
-              setTimer((prev) => ({
-                ...prev,
-                minutesInput: String(prev.minutes),
-              }));
+            if (open) setMinutesInput(String(minutes));
             setIsEditOpen(open);
           }}
         >
@@ -225,7 +205,7 @@ const Timer = ({
                 },
               )}
             >
-              {displayTime(timer.minutes, timer.seconds)}
+              {displayTime(minutes, seconds)}
             </span>
           </PopoverTrigger>
           <PopoverContent className="w-48">
@@ -234,13 +214,8 @@ const Timer = ({
               <Input
                 type="number"
                 min={1}
-                value={timer.minutesInput}
-                onChange={(e) =>
-                  setTimer((prev) => ({
-                    ...prev,
-                    minutesInput: e.target.value,
-                  }))
-                }
+                value={minutesInput}
+                onChange={(e) => setMinutesInput(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") handleApplyEdit();
                 }}

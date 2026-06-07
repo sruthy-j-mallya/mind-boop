@@ -17,6 +17,7 @@ import * as R from "ramda";
 
 import { PRESETS } from "./constants";
 import Skeleton from "../ui/Skeleton";
+import useTimerStore from "@/stores/useTimer";
 
 type Props = {
   taskId: string;
@@ -28,22 +29,21 @@ const TimerOptionsDialog = ({ taskId, open, onOpenChange }: Props) => {
   const navigate = useNavigate();
   const { data: { estimatedMinutes } = {}, isFetching } = useShowTask(taskId);
 
-  const [selectedDuration, setSelectedDuration] = useState<number | null>(null);
+  const { mode, timerPreset, setTimerPreset, switchMode } = useTimerStore();
+
   const [selectedIsPreset, setSelectedIsPreset] = useState<boolean | null>(
     null,
   );
 
-  const defaultDuration =
-    estimatedMinutes && estimatedMinutes <= 30 ? estimatedMinutes : 5;
-  const timerDuration = selectedDuration ?? defaultDuration;
+  const estimatedDuration =
+    estimatedMinutes && estimatedMinutes <= 30 ? estimatedMinutes : null;
+  const timerDuration = estimatedDuration ?? timerPreset;
   const isPreset = selectedIsPreset ?? R.includes(timerDuration, PRESETS);
 
-  const handleStart = (mode: "timer" | "stopwatch") => {
+  const handleStart = () => {
     onOpenChange(false);
     navigate(`/timer`, {
       state: {
-        mode,
-        minutes: mode === "timer" ? timerDuration : 0,
         autoStart: true,
       },
     });
@@ -55,7 +55,10 @@ const TimerOptionsDialog = ({ taskId, open, onOpenChange }: Props) => {
         <DialogHeader>
           <DialogTitle>Start timer</DialogTitle>
         </DialogHeader>
-        <Tabs defaultValue="timer">
+        <Tabs
+          value={mode}
+          onValueChange={(mode) => switchMode(mode as "timer" | "stopwatch")}
+        >
           <TabsList className="w-full">
             <TabsTrigger value="timer" className="flex-1">
               Timer
@@ -81,7 +84,7 @@ const TimerOptionsDialog = ({ taskId, open, onOpenChange }: Props) => {
                     }
                     onClick={() => {
                       setSelectedIsPreset(true);
-                      setSelectedDuration(preset);
+                      setTimerPreset(preset);
                     }}
                     className="w-10"
                   >
@@ -94,9 +97,7 @@ const TimerOptionsDialog = ({ taskId, open, onOpenChange }: Props) => {
                     min={1}
                     max={480}
                     value={timerDuration}
-                    onChange={(e) =>
-                      setSelectedDuration(Number(e.target.value))
-                    }
+                    onChange={(e) => setTimerPreset(Number(e.target.value))}
                     placeholder="Minutes"
                     className="border-foreground col-span-2 border-2"
                     autoFocus
@@ -107,7 +108,7 @@ const TimerOptionsDialog = ({ taskId, open, onOpenChange }: Props) => {
                     variant="outline"
                     onClick={() => {
                       setSelectedIsPreset(false);
-                      setSelectedDuration(25);
+                      setTimerPreset(25);
                     }}
                     className="col-span-2 w-auto px-3"
                   >
@@ -116,10 +117,6 @@ const TimerOptionsDialog = ({ taskId, open, onOpenChange }: Props) => {
                 )}
               </div>
             )}
-
-            <Button type="button" onClick={() => handleStart("timer")}>
-              Start
-            </Button>
           </TabsContent>
 
           <TabsContent value="stopwatch" className="flex flex-col gap-4 pt-2">
@@ -130,10 +127,10 @@ const TimerOptionsDialog = ({ taskId, open, onOpenChange }: Props) => {
             >
               {displayTime(0, 0)}
             </div>
-            <Button type="button" onClick={() => handleStart("stopwatch")}>
-              Start
-            </Button>
           </TabsContent>
+          <Button type="button" onClick={handleStart}>
+            Start
+          </Button>
         </Tabs>
       </DialogContent>
     </Dialog>
