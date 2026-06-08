@@ -15,3 +15,8 @@ dir = "src-tauri"
 description = "Run pending SQLite migrations"
 run = 'sqlx migrate run --database-url "sqlite:./mind-boop-local.db"'
 dir = "src-tauri"
+
+[tasks.add_migration]
+description = "Add new migrations"
+run = 'sqlx migrate add --database-url "sqlite:./mind-boop-local.db"'
+dir = "src-tauri"
