@@ -7,8 +7,8 @@ CREATE TABLE IF NOT EXISTS time_logs (
     pause_count                   INTEGER NOT NULL DEFAULT 0,
     is_running                    INTEGER NOT NULL DEFAULT 0,
     current_run_started_at        INTEGER,
-    started_at                    INTEGER NOT NULL,
-    completed_at                  INTEGER,
+    started_at                    TEXT NOT NULL,
+    completed_at                  TEXT,
     created_at                    TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at                    TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted_at                    TEXT
