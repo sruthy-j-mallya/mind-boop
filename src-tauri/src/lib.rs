@@ -2,6 +2,7 @@ pub mod db;
 pub mod tasks;
 pub mod time_logs;
 pub mod calendar_events;
+pub mod timers;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -20,6 +21,11 @@ pub fn run() {
             calendar_events::list_calendar_tasks,
             time_logs::create_time_log,
             time_logs::list_time_logs,
+            timers::start_timer,
+            timers::pause_timer,
+            timers::restart_timer,
+            timers::complete_timer,
+            timers::get_timer_status,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
