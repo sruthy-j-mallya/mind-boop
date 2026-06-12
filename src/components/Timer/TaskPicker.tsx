@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 const PAGE_SIZE = 5;
 
 type TaskPickerProps = {
-  selectedTaskId: string;
+  selectedTaskId: string | null;
   onSelect: (task: Task) => void;
 };
 
