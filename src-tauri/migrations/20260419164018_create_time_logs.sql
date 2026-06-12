@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS time_logs (
     id                            TEXT PRIMARY KEY NOT NULL,
     task_id                       TEXT NOT NULL,
     mode                          TEXT NOT NULL,
-    timer_preset                  INTEGER NOT NULL DEFAULT 300,
+    timer_preset                  INTEGER,
     accumulated_elapsed_seconds   INTEGER NOT NULL DEFAULT 0,
     pause_count                   INTEGER NOT NULL DEFAULT 0,
     is_running                    INTEGER NOT NULL DEFAULT 0,
