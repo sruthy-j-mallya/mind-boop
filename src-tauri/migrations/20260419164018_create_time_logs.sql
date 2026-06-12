@@ -13,3 +13,6 @@ CREATE TABLE IF NOT EXISTS time_logs (
     updated_at                    TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted_at                    TEXT
 );
+
+CREATE INDEX IF NOT EXISTS idx_time_logs_task_id ON time_logs(task_id);
+CREATE INDEX IF NOT EXISTS idx_time_logs_deleted_at ON time_logs(deleted_at);
