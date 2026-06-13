@@ -7,6 +7,7 @@ export type TimerState = {
   mode: string;
   timerPreset: number;
   accumulatedElapsedSeconds: number;
+  currentRunStartedAt: number;
   isRunning: boolean;
 };
 
@@ -19,14 +20,14 @@ type StartTimerPayload = {
 export const useGetTimerStatus = () =>
   useQuery<TimerState | null>({
     queryKey: ["timerStatus"],
-    queryFn: () => invoke<TimerState | null>("get_timer_status"),
+    queryFn: () => invoke<TimerState | null>("get_status"),
   });
 
 export const useStartTimer = () => {
   const queryClient = useQueryClient();
   return useMutation<string, Error, StartTimerPayload>({
     mutationFn: async ({ taskId, mode, timerPreset }) =>
-      invoke<string>("start_timer", { taskId, mode, timerPreset }),
+      invoke<string>("start", { taskId, mode, timerPreset }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["timerStatus"] });
     },
@@ -36,7 +37,7 @@ export const useStartTimer = () => {
 export const usePauseTimer = () => {
   const queryClient = useQueryClient();
   return useMutation<void, Error, string>({
-    mutationFn: async (id) => invoke("pause_timer", { id }),
+    mutationFn: async (id) => invoke("pause", { id }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["timerStatus"] });
     },
@@ -46,7 +47,7 @@ export const usePauseTimer = () => {
 export const useRestartTimer = () => {
   const queryClient = useQueryClient();
   return useMutation<void, Error, string>({
-    mutationFn: async (id) => invoke("restart_timer", { id }),
+    mutationFn: async (id) => invoke("restart", { id }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["timerStatus"] });
     },
@@ -56,7 +57,7 @@ export const useRestartTimer = () => {
 export const useCompleteTimer = () => {
   const queryClient = useQueryClient();
   return useMutation<void, Error, string>({
-    mutationFn: async (id) => invoke("complete_timer", { id }),
+    mutationFn: async (id) => invoke("complete", { id }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["timerStatus"] });
     },
