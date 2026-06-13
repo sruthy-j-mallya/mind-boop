@@ -25,13 +25,19 @@ fn set_up_db() -> Connection {
                 deleted_at          TEXT
             );
             CREATE TABLE IF NOT EXISTS time_logs (
-                id          TEXT PRIMARY KEY NOT NULL,
-                task_id     TEXT NOT NULL,
-                starts_at   TEXT NOT NULL,
-                ends_at     TEXT NOT NULL,
-                created_at  TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                updated_at  TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                deleted_at  TEXT
+                id                            TEXT PRIMARY KEY NOT NULL,
+                task_id                       TEXT NOT NULL,
+                mode                          TEXT NOT NULL,
+                timer_preset                  INTEGER,
+                accumulated_elapsed_seconds   INTEGER NOT NULL DEFAULT 0,
+                pause_count                   INTEGER NOT NULL DEFAULT 0,
+                is_running                    INTEGER NOT NULL DEFAULT 0,
+                current_run_started_at        INTEGER,
+                started_at                    TEXT NOT NULL,
+                completed_at                  TEXT,
+                created_at                    TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                updated_at                    TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                deleted_at                    TEXT
             );",
     )
     .expect("failed to run migrations");
@@ -60,18 +66,18 @@ fn create_sample_tasks_and_time_logs(connection: &Connection) -> Vec<String> {
   }
 
   let time_logs = vec![
-    (Uuid::new_v4().to_string(), tasks[0].id.clone(), "2026-06-01T08:00:00Z".to_string(), "2026-06-01T08:45:00Z".to_string()),
-    (Uuid::new_v4().to_string(), tasks[1].id.clone(), "2026-06-01T09:00:00Z".to_string(), "2026-06-01T10:30:00Z".to_string()),
-    (Uuid::new_v4().to_string(), tasks[2].id.clone(), "2026-06-01T11:00:00Z".to_string(), "2026-06-01T11:20:00Z".to_string()),
-    (Uuid::new_v4().to_string(), tasks[3].id.clone(), "2026-06-01T13:00:00Z".to_string(), "2026-06-01T14:00:00Z".to_string()),
+    (Uuid::new_v4().to_string(), tasks[0].id.clone(), "timer",     Some(1500i64), "2026-06-01T08:00:00Z".to_string(), Some("2026-06-01T08:45:00Z".to_string())),
+    (Uuid::new_v4().to_string(), tasks[1].id.clone(), "timer",     Some(3600i64), "2026-06-01T09:00:00Z".to_string(), Some("2026-06-01T10:30:00Z".to_string())),
+    (Uuid::new_v4().to_string(), tasks[2].id.clone(), "stopwatch", None,          "2026-06-01T11:00:00Z".to_string(), Some("2026-06-01T11:20:00Z".to_string())),
+    (Uuid::new_v4().to_string(), tasks[3].id.clone(), "stopwatch", None,          "2026-06-01T13:00:00Z".to_string(), None),
   ];
 
-  let ids: Vec<String> = time_logs.iter().map(|(id, _, _, _)| id.clone()).collect();
+  let ids: Vec<String> = time_logs.iter().map(|(id, _, _, _, _, _)| id.clone()).collect();
 
-  for (id, task_id, starts_at, ends_at) in time_logs {
+  for (id, task_id, mode, timer_preset, started_at, completed_at) in time_logs {
     connection.execute(
-      "INSERT INTO time_logs (id, task_id, starts_at, ends_at) VALUES (?1, ?2, ?3, ?4)",
-      (id, task_id, starts_at, ends_at),
+      "INSERT INTO time_logs (id, task_id, mode, timer_preset, started_at, completed_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+      rusqlite::params![id, task_id, mode, timer_preset, started_at, completed_at],
     ).expect("failed to create time log");
   }
 
@@ -100,29 +106,31 @@ pub fn it_creates_a_time_log() {
     rusqlite::params![task_id, "Test task"],
   ).expect("Task should get inserted to DB");
 
-  let starts_at = String::from("2026-06-01T09:00:00Z");
-  let ends_at = String::from("2026-06-01T10:00:00Z");
+  let started_at = String::from("2026-06-01T09:00:00Z");
+  let completed_at = Some(String::from("2026-06-01T10:00:00Z"));
 
-  let result = create_db_time_log(task_id.clone(), starts_at.clone(), ends_at.clone(), &connection);
+  let result = create_db_time_log(task_id.clone(), "timer".to_string(), Some(3600), started_at.clone(), completed_at.clone(), &connection);
 
   assert!(result.is_ok());
 
   let created_id = result.expect("Id of created time log should be present");
 
-  let fetched_result: Result<(String, String, String), rusqlite::Error> = connection.query_row(
-    "SELECT task_id, starts_at, ends_at FROM time_logs WHERE id = ?1",
+  let fetched_result: Result<(String, String, Option<u16>, String, Option<String>), rusqlite::Error> = connection.query_row(
+    "SELECT task_id, mode, timer_preset, started_at, completed_at FROM time_logs WHERE id = ?1",
     [created_id],
-    |row| Ok((row.get(0)?, row.get(1)?, row.get(2)?)),
+    |row| Ok((row.get(0)?, row.get(1)?, row.get(2)?, row.get(3)?, row.get(4)?)),
   );
-  let (fetched_task_id, fetched_starts_at, fetched_ends_at) = fetched_result.expect("Time log should be present");
+  let (fetched_task_id, fetched_mode, fetched_timer_preset, fetched_started_at, fetched_completed_at) = fetched_result.expect("Time log should be present");
 
   assert_eq!(fetched_task_id, task_id);
-  assert_eq!(fetched_starts_at, starts_at);
-  assert_eq!(fetched_ends_at, ends_at);
+  assert_eq!(fetched_mode, "timer");
+  assert_eq!(fetched_timer_preset, Some(3600));
+  assert_eq!(fetched_started_at, started_at);
+  assert_eq!(fetched_completed_at, completed_at);
 }
 
 #[test]
-pub fn it_rejects_time_log_when_starts_at_is_after_ends_at() {
+pub fn it_rejects_time_log_when_started_at_is_after_completed_at() {
   let connection = set_up_db();
   let task_id = Uuid::new_v4().to_string();
   connection.execute(
@@ -132,13 +140,15 @@ pub fn it_rejects_time_log_when_starts_at_is_after_ends_at() {
 
   let result = create_db_time_log(
     task_id,
+    "timer".to_string(),
+    Some(600),
     "2026-06-01T10:00:00Z".to_string(),
-    "2026-06-01T09:00:00Z".to_string(),
+    Some("2026-06-01T09:00:00Z".to_string()),
     &connection,
   );
 
   assert!(result.is_err());
-  assert_eq!(result.unwrap_err(), "starts_at must be before ends_at");
+  assert_eq!(result.unwrap_err(), "started_at must be before completed_at");
 }
 
 #[test]
@@ -152,17 +162,19 @@ pub fn it_rejects_time_log_when_gap_is_less_than_2_minutes() {
 
   let result = create_db_time_log(
     task_id,
+    "stopwatch".to_string(),
+    None,
     "2026-06-01T09:00:00Z".to_string(),
-    "2026-06-01T09:01:30Z".to_string(),
+    Some("2026-06-01T09:01:30Z".to_string()),
     &connection,
   );
 
   assert!(result.is_err());
-  assert_eq!(result.unwrap_err(), "ends_at must be at least 2 minutes after starts_at");
+  assert_eq!(result.unwrap_err(), "completed_at must be at least 2 minutes after started_at");
 }
 
 #[test]
-pub fn it_rejects_time_log_when_starts_at_is_invalid() {
+pub fn it_rejects_time_log_when_started_at_is_invalid() {
   let connection = set_up_db();
   let task_id = Uuid::new_v4().to_string();
   connection.execute(
@@ -172,17 +184,19 @@ pub fn it_rejects_time_log_when_starts_at_is_invalid() {
 
   let result = create_db_time_log(
     task_id,
+    "timer".to_string(),
+    Some(600),
     "not-a-date".to_string(),
-    "2026-06-01T09:00:00Z".to_string(),
+    None,
     &connection,
   );
 
   assert!(result.is_err());
-  assert!(result.unwrap_err().starts_with("Invalid starts_at"));
+  assert!(result.unwrap_err().starts_with("Invalid started_at"));
 }
 
 #[test]
-pub fn it_rejects_time_log_when_ends_at_is_invalid() {
+pub fn it_rejects_time_log_when_completed_at_is_invalid() {
   let connection = set_up_db();
   let task_id = Uuid::new_v4().to_string();
   connection.execute(
@@ -192,11 +206,13 @@ pub fn it_rejects_time_log_when_ends_at_is_invalid() {
 
   let result = create_db_time_log(
     task_id,
+    "stopwatch".to_string(),
+    None,
     "2026-06-01T09:00:00Z".to_string(),
-    "not-a-date".to_string(),
+    Some("not-a-date".to_string()),
     &connection,
   );
 
   assert!(result.is_err());
-  assert!(result.unwrap_err().starts_with("Invalid ends_at"));
+  assert!(result.unwrap_err().starts_with("Invalid completed_at"));
 }
