@@ -9,29 +9,29 @@ use crate::db::DbState;
 pub async fn start(
     task_id: String,
     mode: String,
-    timer_preset: u16,
+    timer_preset: Option<u16>,
     state: State<'_, DbState>,
 ) -> Result<String, String> {
     let connection = state.connection.lock().map_err(|e| e.to_string())?;
-    timer_db::start_timer(task_id, mode, timer_preset, &connection)
+    timer_db::add_new_timer(task_id, mode, timer_preset, &connection)
 }
 
 #[tauri::command]
 pub async fn pause(id: String, state: State<'_, DbState>) -> Result<(), String> {
     let connection = state.connection.lock().map_err(|e| e.to_string())?;
-    timer_db::pause_timer(id, &connection)
+    timer_db::mark_as_paused(id, &connection)
 }
 
 #[tauri::command]
 pub async fn restart(id: String, state: State<'_, DbState>) -> Result<(), String> {
     let connection = state.connection.lock().map_err(|e| e.to_string())?;
-    timer_db::restart_timer(id, &connection)
+    timer_db::mark_as_restarted(id, &connection)
 }
 
 #[tauri::command]
 pub async fn complete(id: String, state: State<'_, DbState>) -> Result<(), String> {
     let connection = state.connection.lock().map_err(|e| e.to_string())?;
-    timer_db::complete_timer(id, &connection)
+    timer_db::mark_as_completed(id, &connection)
 }
 
 #[tauri::command]
