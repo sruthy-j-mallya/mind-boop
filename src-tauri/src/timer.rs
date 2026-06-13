@@ -39,5 +39,5 @@ pub async fn get_status(
     state: State<'_, DbState>,
 ) -> Result<Option<TimerState>, String> {
     let connection = state.connection.lock().map_err(|e| e.to_string())?;
-    timer_db::get_timer_status(&connection)
+    timer_db::get_the_current_running_timer_status(&connection)
 }

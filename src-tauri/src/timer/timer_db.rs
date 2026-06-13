@@ -7,8 +7,8 @@ pub struct TimerState {
     pub id: String,
     pub task_id: String,
     pub mode: String,
-    pub timer_preset: u16,
-    pub current_run_started_at: u16,
+    pub timer_preset: Option<u16>,
+    pub current_run_started_at: Option<u32>,
     pub accumulated_elapsed_seconds: u16,
     pub is_running: bool,
 }
@@ -70,7 +70,7 @@ pub fn mark_as_completed(id: String, connection: &Connection) -> Result<(), Stri
       is_running = 0,
       accumulated_elapsed_seconds = accumulated_elapsed_seconds + (strftime('%s', 'now') - current_run_started_at),
       current_run_started_at = NULL,
-      completed_at = datetime('now')
+      completed_at = datetime('now'),
       updated_at = datetime('now')
     WHERE id = ?1",
     (&id,),
@@ -79,10 +79,10 @@ pub fn mark_as_completed(id: String, connection: &Connection) -> Result<(), Stri
   Ok(())
 }
 
-pub fn get_timer_status(connection: &Connection) -> Result<Option<TimerState>, String> {
+pub fn get_the_current_running_timer_status(connection: &Connection) -> Result<Option<TimerState>, String> {
     let mut stmt = connection
         .prepare(
-            "SELECT id, task_id, mode, timer_preset, accumulated_elapsed_seconds, is_running
+            "SELECT id, task_id, mode, timer_preset, current_run_started_at, accumulated_elapsed_seconds, is_running
              FROM time_logs
              WHERE completed_at IS NULL AND deleted_at IS NULL
              LIMIT 1",
