@@ -21,7 +21,8 @@
     "noFallthroughCasesInSwitch": true,
     "paths": {
       "@/*": ["./src/*"],
-      "@common/*": ["./src/components/common/*"]
+      "@common/*": ["./src/components/common/*"],
+      "@ui/*": ["./src/components/ui/*"]
     }
   },
   "include": ["src"],
