@@ -53,7 +53,7 @@ const TimerOptionsDialog = ({ taskId, open, onOpenChange }: Props) => {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-56">
         <DialogHeader>
-          <DialogTitle>Start timer</DialogTitle>
+          <DialogTitle>Start Focus Session</DialogTitle>
         </DialogHeader>
         <Tabs
           value={mode}
