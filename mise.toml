@@ -1,5 +1,6 @@
 [tools]
 node = "24.14.1"
+pnpm = "10.34.3"
 
 [tasks.cargo_tests]
 description = "Run backend Cargo tests"
