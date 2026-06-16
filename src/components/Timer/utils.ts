@@ -1,29 +1,29 @@
-const taskTimerMinutes = (estimatedMinutes: number, fallback: number) =>
-  estimatedMinutes > 0 && estimatedMinutes <= 30 ? estimatedMinutes : fallback;
+import dayjs from "dayjs";
+import { TimerState } from "@/tanstackQueries/useTimerQueries";
 
-const displayTime = (minutes: number, seconds: number) =>
-  [minutes, seconds]
-    .map((value) => value.toString().padStart(2, "0"))
-    .join(":");
+const getInitialRuntime = (timerState: TimerState): number => {
+  const { mode, timerPreset, currentRunStartedAt, accumulatedElapsedSeconds } =
+    timerState;
 
-const incrementTime = (
-  minutes: number,
-  seconds: number,
-): { nextMinutes: number; nextSeconds: number } => {
-  if (seconds === 59) {
-    return { nextMinutes: minutes + 1, nextSeconds: 0 };
+  let calculatedRuntime = 0;
+  if (currentRunStartedAt) {
+    calculatedRuntime =
+      dayjs().unix() - currentRunStartedAt + accumulatedElapsedSeconds;
+  } else {
+    calculatedRuntime = accumulatedElapsedSeconds;
   }
-  return { nextMinutes: minutes, nextSeconds: seconds + 1 };
+
+  if (mode == "stopwatch") {
+    return calculatedRuntime;
+  } else {
+    return timerPreset * 60 - calculatedRuntime;
+  }
 };
 
-const decrementTime = (
-  minutes: number,
-  seconds: number,
-): { nextMinutes: number; nextSeconds: number } => {
-  if (seconds === 0) {
-    return { nextMinutes: minutes - 1, nextSeconds: 59 };
-  }
-  return { nextMinutes: minutes, nextSeconds: seconds - 1 };
+export {
+  taskTimerMinutes,
+  displayTime,
+  incrementTime,
+  decrementTime,
+  getInitialRuntime,
 };
-
-export { taskTimerMinutes, displayTime, incrementTime, decrementTime };
