@@ -1,6 +1,4 @@
-use chrono::DateTime;
 use serde::Serialize;
-use uuid::Uuid;
 
 use rusqlite::Connection;
 
@@ -43,37 +41,4 @@ pub fn list_db_time_logs(connection: &Connection) -> Result<Vec<TimeLog>, String
         .map_err(|e| e.to_string())?;
 
     Ok(logs)
-}
-
-pub fn create_db_time_log(
-    task_id: String,
-    mode: String,
-    timer_preset: Option<i64>,
-    started_at: String,
-    completed_at: Option<String>,
-    connection: &Connection,
-) -> Result<String, String> {
-    let id = Uuid::new_v4().to_string();
-
-    let start = DateTime::parse_from_rfc3339(&started_at)
-        .map_err(|_| format!("Invalid started_at: {started_at}"))?;
-
-    if let Some(ref ca) = completed_at {
-        let end = DateTime::parse_from_rfc3339(ca)
-            .map_err(|_| format!("Invalid completed_at: {ca}"))?;
-
-        if start >= end {
-            return Err("started_at must be before completed_at".to_string());
-        }
-        if (end - start).num_minutes() < 2 {
-            return Err("completed_at must be at least 2 minutes after started_at".to_string());
-        }
-    }
-
-    connection.execute(
-        "INSERT INTO time_logs (id, task_id, mode, timer_preset, started_at, completed_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
-        rusqlite::params![&id, task_id, mode, timer_preset, started_at, completed_at],
-    ).map_err(|e| e.to_string())?;
-
-    Ok(id)
 }

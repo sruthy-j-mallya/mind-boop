@@ -19,7 +19,6 @@ pub fn run() {
             tasks::set_task_schedule,
             tasks::complete_task,
             calendar_events::list_calendar_tasks,
-            time_logs::create_time_log,
             time_logs::list_time_logs,
             timer::start,
             timer::pause,
