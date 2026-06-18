@@ -5,9 +5,10 @@ export type TimeLog = {
   id: string;
   taskId: string;
   taskTitle: string;
-  startsAt: string;
-  endsAt: string;
-  duration: number;
+  mode: string;
+  timerPreset: number | null;
+  startedAt: string;
+  completedAt: string | null;
 };
 
 export const useListTimeLogs = () =>
