@@ -43,3 +43,9 @@
 .dark .rbc-time-slot {
   border-color: oklch(1 0 0 / 10%);
 }
+
+/* TODO: This has been added to hide the time label from calendar events */
+/* See if there is any other proper fix */
+.log-event .rbc-event-label {
+  display: none;
+}

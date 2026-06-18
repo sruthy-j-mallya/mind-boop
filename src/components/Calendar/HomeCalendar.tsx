@@ -53,6 +53,8 @@ const HomeCalendar = () => {
           events={events}
           views={["day", "week", "month"]}
           eventPropGetter={(event) => ({
+            className:
+              (event as CalendarEvent).type === "timeLog" ? "log-event" : "",
             style: {
               backgroundColor:
                 (event as CalendarEvent).type === "task"
