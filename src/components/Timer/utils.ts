@@ -20,10 +20,4 @@ const getInitialRuntime = (timerState: TimerState): number => {
   }
 };
 
-export {
-  taskTimerMinutes,
-  displayTime,
-  incrementTime,
-  decrementTime,
-  getInitialRuntime,
-};
+export { getInitialRuntime };

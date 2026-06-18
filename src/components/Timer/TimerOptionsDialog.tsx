@@ -9,7 +9,6 @@ import {
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/Tabs";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
-import { displayTime } from "./utils";
 import { cn } from "@/lib/utils";
 import { useShowTask } from "@/tanstackQueries/useTaskQueries";
 
@@ -125,7 +124,7 @@ const TimerOptionsDialog = ({ taskId, open, onOpenChange }: Props) => {
                 "flex items-center justify-center rounded-md border py-4 text-4xl tabular-nums",
               )}
             >
-              {displayTime(0, 0)}
+              0:0
             </div>
           </TabsContent>
           <Button type="button" onClick={handleStart}>
