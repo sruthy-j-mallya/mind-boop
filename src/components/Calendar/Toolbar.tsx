@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Select,
   SelectContent,
@@ -6,10 +7,22 @@ import {
   SelectValue,
   SelectTrigger,
 } from "@/components/ui/Select";
-import { ChevronLeftIcon, ChevronRightIcon, Plus } from "lucide-react";
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  CalendarPlus,
+  Zap,
+} from "lucide-react";
 
 import Button from "@/components/ui/Button";
 import { ButtonGroup } from "@/components/ui/ButtonGroup";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/Popover";
+import TaskPanel from "@/components/TaskPanel";
+import QuickStartDialog from "@/components/Timer/QuickStartDialog";
 import WeekDayHeader from "./WeekDayHeader";
 import { CalendarView } from "./types";
 
@@ -18,14 +31,15 @@ const Toolbar = ({
   handleViewChange,
   date,
   setDate,
-  onAdd,
 }: {
   view: CalendarView;
   handleViewChange: (view: CalendarView) => void;
   date: Date;
   setDate: (date: Date) => void;
-  onAdd: () => void;
 }) => {
+  const [isQuickStartOpen, setIsQuickStartOpen] = useState(false);
+  const [isAddTaskOpen, setIsAddTaskOpen] = useState(false);
+
   const header = date.toLocaleDateString("en-US", {
     month: "long",
     year: "numeric",
@@ -62,9 +76,22 @@ const Toolbar = ({
       <h1 className="text-2xl font-bold">{header}</h1>
       {view === "day" && <WeekDayHeader date={date} />}
       <div className="flex items-center gap-2">
-        <Button variant="outline" onClick={onAdd}>
-          <Plus />
+        <Button variant="outline" onClick={() => setIsQuickStartOpen(true)}>
+          <Zap />
         </Button>
+        <Popover open={isAddTaskOpen} onOpenChange={setIsAddTaskOpen}>
+          <PopoverTrigger asChild>
+            <Button variant="outline">
+              <CalendarPlus />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="h-112 w-96 p-0" align="end">
+            <TaskPanel
+              hideStartButton
+              onClose={() => setIsAddTaskOpen(false)}
+            />
+          </PopoverContent>
+        </Popover>
         <ButtonGroup>
           <Button variant="outline" onClick={handlePrevious}>
             <ChevronLeftIcon className="h-4 w-4" />
@@ -89,6 +116,10 @@ const Toolbar = ({
           </SelectContent>
         </Select>
       </div>
+      <QuickStartDialog
+        open={isQuickStartOpen}
+        onOpenChange={setIsQuickStartOpen}
+      />
     </div>
   );
 };

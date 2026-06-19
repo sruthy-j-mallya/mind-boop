@@ -4,17 +4,12 @@ import Toolbar from "@/components/Calendar/Toolbar";
 import WeekDayHeader from "@/components/Calendar/WeekDayHeader";
 import { CalendarView } from "@/components/Calendar/types";
 import { calendarLocalizer } from "@/lib/calendarLocalizer";
-import TaskPanel from "../TaskPanel";
 import { useListCalendarTasks } from "@/tanstackQueries/useTaskQueries";
 import { useListTimeLogs } from "@/tanstackQueries/useTimeLogQueries";
 
 import { taskToEvent, timeLogToEvent } from "./utils";
 
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from "@/components/ui/Resizable";
+import { ResizablePanel, ResizablePanelGroup } from "@/components/ui/Resizable";
 
 import { CalendarEvent } from "./types";
 
@@ -24,7 +19,6 @@ const HomeCalendar = () => {
     return (saved as CalendarView) ?? "month";
   });
   const [date, setDate] = useState(new Date());
-  const [isTaskInputVisible, setIsTaskInputVisible] = useState(false);
 
   const { data: calendarTasks = [] } = useListCalendarTasks();
   const { data: timeLogs = [] } = useListTimeLogs();
@@ -71,7 +65,6 @@ const HomeCalendar = () => {
                 handleViewChange={handleView}
                 date={date}
                 setDate={setDate}
-                onAdd={() => setIsTaskInputVisible(true)}
               />
             ),
             week: {
@@ -82,14 +75,6 @@ const HomeCalendar = () => {
           }}
         />
       </ResizablePanel>
-      {isTaskInputVisible && (
-        <>
-          <ResizableHandle />
-          <ResizablePanel className="bg-background h-11/12 shrink-0 overflow-y-auto px-6 py-3">
-            <TaskPanel onClose={() => setIsTaskInputVisible(false)} />
-          </ResizablePanel>
-        </>
-      )}
     </ResizablePanelGroup>
   );
 };
