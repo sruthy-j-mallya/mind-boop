@@ -232,7 +232,7 @@ const Timer = ({
               </TabsContent>
               <TabsContent value="stopwatch">
                 <div className="flex h-44 w-44 cursor-pointer items-center justify-center rounded-full border-4 hover:opacity-70">
-                  <span className="text-5xl tabular-nums">0:00</span>
+                  <span className="text-5xl tabular-nums">00:00</span>
                 </div>
               </TabsContent>
             </>
