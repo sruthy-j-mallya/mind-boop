@@ -22,7 +22,7 @@ import { PanelLeftOpen, ChevronDown, Play, Pause, Square } from "lucide-react";
 
 import { getInitialRuntime } from "./utils";
 
-const NewTimer = ({
+const Timer = ({
   setIsDistractionLogOpen,
   setIsTaskPanelOpen,
 }: {
@@ -284,4 +284,4 @@ const NewTimer = ({
   );
 };
 
-export default NewTimer;
+export default Timer;
