@@ -58,7 +58,7 @@ pub fn create_db_task(
     let id = Uuid::new_v4().to_string();
 
     connection.execute(
-        "INSERT INTO tasks (id, title, description, estimated_minutes, is_duration, is_all_day, starts_at, ends_at, created_at, updated_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, datetime('now'), datetime('now'))",
+        "INSERT INTO tasks (id, title, description, estimated_minutes, is_duration, is_all_day, starts_at, ends_at, created_at, updated_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, strftime('%Y-%m-%dT%H:%M:%SZ', 'now'), strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))",
         (id.clone(), title, description, estimated_minutes, is_duration, is_all_day, starts_at, ends_at),
     ).map_err(|e| e.to_string())?;
 
@@ -69,7 +69,7 @@ pub fn create_db_task_with_title_only(title: String, connection: &Connection) ->
     let id = Uuid::new_v4().to_string();
 
     connection.execute(
-        "INSERT INTO tasks (id, title, created_at, updated_at) VALUES (?1, ?2, datetime('now'), datetime('now'))",
+        "INSERT INTO tasks (id, title, created_at, updated_at) VALUES (?1, ?2, strftime('%Y-%m-%dT%H:%M:%SZ', 'now'), strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))",
         (id.clone(), title),
     ).map_err(|e| e.to_string())?;
 
@@ -99,7 +99,7 @@ pub fn show_db_task(id: String, connection: &Connection) -> Result<Task, String>
 
 pub fn update_db_task_title_and_description(id: String, title: String, description: String, connection: &Connection) -> Result<String, String> {
     let result = connection.execute(
-        "UPDATE tasks SET title = ?1, description = ?2, updated_at = datetime('now') WHERE id = ?3",
+        "UPDATE tasks SET title = ?1, description = ?2, updated_at = strftime('%Y-%m-%dT%H:%M:%SZ', 'now') WHERE id = ?3",
         (title, description, id),
     ).map_err(|e| e.to_string());
 
@@ -112,7 +112,7 @@ pub fn update_db_task_title_and_description(id: String, title: String, descripti
 
 pub fn set_db_estimated_minutes(id: String, estimated_minutes: u16, connection: &Connection) -> Result<String, String> {
     let result = connection.execute(
-        "UPDATE tasks SET estimated_minutes = ?1,  updated_at = datetime('now') WHERE id = ?2",
+        "UPDATE tasks SET estimated_minutes = ?1,  updated_at = strftime('%Y-%m-%dT%H:%M:%SZ', 'now') WHERE id = ?2",
         (estimated_minutes, id),
     ).map_err(|e| e.to_string());
 
@@ -125,7 +125,7 @@ pub fn set_db_estimated_minutes(id: String, estimated_minutes: u16, connection: 
 
 pub fn complete_db_task(id: String, connection: &Connection) -> Result<String, String> {
     connection.execute(
-        "UPDATE tasks SET is_completed = 1, updated_at = datetime('now') WHERE id = ?1",
+        "UPDATE tasks SET is_completed = 1, updated_at = strftime('%Y-%m-%dT%H:%M:%SZ', 'now') WHERE id = ?1",
         [id],
     ).map_err(|e| e.to_string())?;
     Ok("Task completed".to_string())
@@ -148,7 +148,7 @@ fn validate_schedule(schedule: Schedule) -> Result<Schedule, String> {
         }
         if let Some(ref starts_at) = schedule.starts_at {
             let is_valid = NaiveDate::parse_from_str(starts_at, "%Y-%m-%d").is_ok()
-                || NaiveDateTime::parse_from_str(starts_at, "%Y-%m-%dT%H:%M:%S").is_ok();
+                || NaiveDateTime::parse_from_str(starts_at, "%Y-%m-%dT%H:%M:%SZ").is_ok();
             if !is_valid {
                 return Err("Invalid due date/time format".to_string());
             }
@@ -174,10 +174,10 @@ fn validate_schedule(schedule: Schedule) -> Result<Schedule, String> {
             return Err("Invalid ends_at date format".to_string());
         }
     } else {
-        if NaiveDateTime::parse_from_str(starts_at, "%Y-%m-%dT%H:%M:%S").is_err() {
+        if NaiveDateTime::parse_from_str(starts_at, "%Y-%m-%dT%H:%M:%SZ").is_err() {
             return Err("Invalid starts_at datetime format".to_string());
         }
-        if NaiveDateTime::parse_from_str(ends_at, "%Y-%m-%dT%H:%M:%S").is_err() {
+        if NaiveDateTime::parse_from_str(ends_at, "%Y-%m-%dT%H:%M:%SZ").is_err() {
             return Err("Invalid ends_at datetime format".to_string());
         }
     }
@@ -205,7 +205,7 @@ pub fn set_db_task_schedule(
         Ok(schedule) => {
             connection
                 .execute(
-                    "UPDATE tasks SET is_duration = ?1, is_all_day = ?2, starts_at = ?3, ends_at = ?4, updated_at = datetime('now') WHERE id = ?5",
+                    "UPDATE tasks SET is_duration = ?1, is_all_day = ?2, starts_at = ?3, ends_at = ?4, updated_at = strftime('%Y-%m-%dT%H:%M:%SZ', 'now') WHERE id = ?5",
                     (schedule.is_duration as i32, schedule.is_all_day as i32, schedule.starts_at, schedule.ends_at, id),
                 )
                 .map_err(|e| e.to_string())?;

@@ -15,7 +15,7 @@ use uuid::Uuid;
 fn insert_task_with_all_details(task: &Task, connection: &Connection) {
   connection.execute(
     "INSERT INTO tasks (id, title, description, estimated_minutes, starts_at, ends_at, is_all_day, is_completed, is_duration, created_at, updated_at)
-      VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, datetime('now'), datetime('now'))",
+      VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, strftime('%Y-%m-%dT%H:%M:%SZ', 'now'), strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))",
     rusqlite::params![task.id, task.title, task.description, task.estimated_minutes, task.starts_at, task.ends_at, task.is_all_day, task.is_completed, task.is_duration],
   ).expect("Task should get inserted to DB");
 }
@@ -23,7 +23,7 @@ fn insert_task_with_all_details(task: &Task, connection: &Connection) {
 fn insert_sample_task(task_id: &str, title: &str, connection: &Connection) {
   connection.execute(
     "INSERT INTO tasks (id, title, created_at, updated_at)
-      VALUES (?1, ?2, datetime('now'), datetime('now'))",
+      VALUES (?1, ?2, strftime('%Y-%m-%dT%H:%M:%SZ', 'now'), strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))",
     rusqlite::params![task_id, title],
   ).expect("Task should get inserted to DB");
 }
@@ -66,7 +66,7 @@ pub fn it_lists_uncompleted_tasks_tasks_with_a_given_search_string() {
   for (id, title, is_completed) in &tasks {
     connection.execute(
       "INSERT INTO tasks (id, title, is_completed, created_at, updated_at)
-        VALUES (?1, ?2, ?3, datetime('now'), datetime('now'))",
+        VALUES (?1, ?2, ?3, strftime('%Y-%m-%dT%H:%M:%SZ', 'now'), strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))",
       rusqlite::params![id, title, is_completed],
     ).expect("Task should get inserted to DB");
   };
@@ -97,7 +97,7 @@ pub fn it_lists_all_uncompleted_tasks_when_search_string_is_absent() {
   for (id, title, is_completed) in &tasks {
     connection.execute(
       "INSERT INTO tasks (id, title, is_completed, created_at, updated_at)
-        VALUES (?1, ?2, ?3, datetime('now'), datetime('now'))",
+        VALUES (?1, ?2, ?3, strftime('%Y-%m-%dT%H:%M:%SZ', 'now'), strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))",
       rusqlite::params![id, title, is_completed],
     ).expect("Task should get inserted to DB");
   };
@@ -129,7 +129,7 @@ pub fn it_lists_uncompleted_tasks_in_order_of_starting_date_and_time() {
   for (id, title, starts_at) in &tasks {
     connection.execute(
       "INSERT INTO tasks (id, title, starts_at, created_at, updated_at)
-        VALUES (?1, ?2, ?3, datetime('now'), datetime('now'))",
+        VALUES (?1, ?2, ?3, strftime('%Y-%m-%dT%H:%M:%SZ', 'now'), strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))",
       rusqlite::params![id, title, starts_at],
     ).expect("Task should get inserted to DB");
   };
@@ -207,7 +207,7 @@ pub fn it_updates_title_and_description_of_a_task(){
 
   connection.execute(
     "INSERT INTO tasks (id, title, description, created_at, updated_at)
-      VALUES (?1, ?2, ?3, datetime('now'), datetime('now'))",
+      VALUES (?1, ?2, ?3, strftime('%Y-%m-%dT%H:%M:%SZ', 'now'), strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))",
     rusqlite::params![task_id, "Test task", "Test task description"],
   ).expect("Task should get inserted to DB");
 
@@ -274,8 +274,8 @@ pub fn it_sets_the_schedule_of_a_task() {
     task_id.clone(),
     true,
     false,
-    Some(String::from("2026-06-01T09:00:00")),
-    Some(String::from("2026-06-01T10:00:00")),
+    Some(String::from("2026-06-01T09:00:00Z")),
+    Some(String::from("2026-06-01T10:00:00Z")),
     &connection,
   );
   assert!(result.is_ok());
@@ -292,8 +292,8 @@ pub fn it_sets_the_schedule_of_a_task() {
 
   assert_eq!(is_duration, true);
   assert_eq!(is_all_day, false);
-  assert_eq!(starts_at, Some(String::from("2026-06-01T09:00:00")));
-  assert_eq!(ends_at, Some(String::from("2026-06-01T10:00:00")));
+  assert_eq!(starts_at, Some(String::from("2026-06-01T09:00:00Z")));
+  assert_eq!(ends_at, Some(String::from("2026-06-01T10:00:00Z")));
 }
 
 #[test]
@@ -307,8 +307,8 @@ pub fn it_should_raise_error_if_is_duration_is_false_but_ends_at_is_present() {
     task_id,
     false,
     false,
-    Some("2026-06-01T09:00:00".to_string()),
-    Some("2026-06-01T10:00:00".to_string()),
+    Some("2026-06-01T09:00:00Z".to_string()),
+    Some("2026-06-01T10:00:00Z".to_string()),
     &connection,
   );
 
@@ -327,7 +327,7 @@ pub fn it_should_raise_error_if_is_duration_is_false_and_is_all_day_is_true() {
     task_id,
     false,
     true,
-    Some("2026-06-01T10:00:00".to_string()),
+    Some("2026-06-01T10:00:00Z".to_string()),
     None,
     &connection,
   );
@@ -433,7 +433,7 @@ pub fn it_should_set_schedule_when_starts_at_is_valid_date_time() {
     task_id.clone(),
     false,
     false,
-    Some("2026-06-01T10:00:00".to_string()),
+    Some("2026-06-01T10:00:00Z".to_string()),
     None,
     &connection,
   );
@@ -451,7 +451,7 @@ pub fn it_should_set_schedule_when_starts_at_is_valid_date_time() {
 
   assert_eq!(is_duration, false);
   assert_eq!(is_all_day, false);
-  assert_eq!(starts_at, Some("2026-06-01T10:00:00".to_string()));
+  assert_eq!(starts_at, Some("2026-06-01T10:00:00Z".to_string()));
   assert_eq!(ends_at, None);
 }
 
@@ -467,7 +467,7 @@ pub fn it_should_raise_error_if_schedule_is_duration_and_starts_at_is_absent() {
     true,
     false,
     None,
-    Some(String::from("2026-06-01T10:00:00")),
+    Some(String::from("2026-06-01T10:00:00Z")),
     &connection,
   );
 
@@ -486,7 +486,7 @@ pub fn it_should_raise_error_if_schedule_is_duration_and_ends_at_is_absent() {
     task_id,
     true,
     false,
-    Some(String::from("2026-06-01T09:00:00")),
+    Some(String::from("2026-06-01T09:00:00Z")),
     None,
     &connection,
   );
@@ -567,7 +567,7 @@ pub fn it_should_raise_error_if_duration_is_not_all_day_and_starts_at_is_invalid
     true,
     false,
     Some("invalid-datetime".to_string()),
-    Some("2026-06-01T10:00:00".to_string()),
+    Some("2026-06-01T10:00:00Z".to_string()),
     &connection,
   );
 
@@ -586,7 +586,7 @@ pub fn it_should_raise_error_if_duration_is_not_all_day_and_ends_at_is_invalid()
     task_id,
     true,
     false,
-    Some("2026-06-01T09:00:00".to_string()),
+    Some("2026-06-01T09:00:00Z".to_string()),
     Some("invalid-datetime".to_string()),
     &connection,
   );

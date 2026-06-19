@@ -29,7 +29,8 @@ pub fn add_new_timer(
     )
     VALUES (
       ?1, ?2, ?3, ?4, 1,
-      datetime('now'), strftime('%s', 'now'), datetime('now'), datetime('now')
+      strftime('%Y-%m-%dT%H:%M:%SZ', 'now'), strftime('%s', 'now'),
+      strftime('%Y-%m-%dT%H:%M:%SZ', 'now'), strftime('%Y-%m-%dT%H:%M:%SZ', 'now')
     )",
     (&id, task_id, mode, timer_preset),
   ).map_err(|e| e.to_string())?;
@@ -44,7 +45,7 @@ pub fn mark_as_paused(id: String, connection: &Connection) -> Result<(), String>
       accumulated_elapsed_seconds = accumulated_elapsed_seconds + (strftime('%s', 'now') - current_run_started_at),
       pause_count = pause_count + 1,
       current_run_started_at = NULL,
-      updated_at = datetime('now')
+      updated_at = strftime('%Y-%m-%dT%H:%M:%SZ', 'now')
     WHERE id = ?1",
     (&id,),
   ).map_err(|e| e.to_string())?;
@@ -57,7 +58,7 @@ pub fn mark_as_restarted(id: String, connection: &Connection) -> Result<(), Stri
     "UPDATE time_logs SET
       is_running = 1,
       current_run_started_at = strftime('%s', 'now'),
-      updated_at = datetime('now')
+      updated_at = strftime('%Y-%m-%dT%H:%M:%SZ', 'now')
     WHERE id = ?1",
     (&id,),
   ).map_err(|e| e.to_string())?;
@@ -71,8 +72,8 @@ pub fn mark_as_completed(id: String, connection: &Connection) -> Result<(), Stri
       is_running = 0,
       accumulated_elapsed_seconds = accumulated_elapsed_seconds + (strftime('%s', 'now') - current_run_started_at),
       current_run_started_at = NULL,
-      completed_at = datetime('now'),
-      updated_at = datetime('now')
+      completed_at = strftime('%Y-%m-%dT%H:%M:%SZ', 'now'),
+      updated_at = strftime('%Y-%m-%dT%H:%M:%SZ', 'now')
     WHERE id = ?1",
     (&id,),
   ).map_err(|e| e.to_string())?;

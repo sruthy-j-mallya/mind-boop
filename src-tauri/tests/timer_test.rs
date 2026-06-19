@@ -45,7 +45,7 @@ fn set_up_db() -> Connection {
 fn insert_sample_task(task_id: &str, title: &str, connection: &Connection) {
   connection.execute(
     "INSERT INTO tasks (id, title, created_at, updated_at)
-      VALUES (?1, ?2, datetime('now'), datetime('now'))",
+      VALUES (?1, ?2, strftime('%Y-%m-%dT%H:%M:%SZ', 'now'), strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))",
     rusqlite::params![task_id, title],
   ).expect("Task should get inserted to DB");
 }
@@ -62,7 +62,7 @@ fn insert_timer_timelog(timer_id: &str, connection: &Connection) {
     VALUES (
         ?1, ?2, 'timer', 600, 0,
         0, 1, strftime('%s', 'now') - 600,
-        datetime('now'), datetime('now'), datetime('now')
+        strftime('%Y-%m-%dT%H:%M:%SZ', 'now'), strftime('%Y-%m-%dT%H:%M:%SZ', 'now'), strftime('%Y-%m-%dT%H:%M:%SZ', 'now')
     )",
     rusqlite::params![timer_id, task_id],
   ).expect("Time log should get inserted to DB");

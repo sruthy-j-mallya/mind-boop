@@ -36,7 +36,7 @@ fn insert_event(
 ) {
   connection.execute(
     "INSERT INTO tasks (id, title, starts_at, is_completed, deleted_at, created_at, updated_at)
-      VALUES (?1, ?2, ?3, ?4, ?5, datetime('now'), datetime('now'))",
+      VALUES (?1, ?2, ?3, ?4, ?5, strftime('%Y-%m-%dT%H:%M:%SZ', 'now'), strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))",
     rusqlite::params![task_id, title, starts_at, is_completed as i32, deleted_at],
   ).expect("Task should get inserted to DB");
 }

@@ -3,7 +3,9 @@ import dayjs from "@/lib/dayjs";
 const toISOString = (date: Date, time?: string): string => {
   if (!time) return dayjs(date).format("YYYY-MM-DD");
   const [h, m] = time.split(":").map(Number);
-  return dayjs(date).hour(h).minute(m).second(0).format("YYYY-MM-DDTHH:mm:ss");
+
+  // returns a string of format "YYYY-MM-DDTHH:mm:ssZ"
+  return dayjs(date).hour(h).minute(m).second(0).utc().format();
 };
 
 const getNearestHour = () => {
