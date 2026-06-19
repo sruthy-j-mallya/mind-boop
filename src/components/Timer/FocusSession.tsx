@@ -10,13 +10,14 @@ import Textarea from "@/components/ui/TextArea";
 
 import TaskPanel from "../TaskPanel";
 import Timer from "./Timer";
-import useTimerStore from "@/stores/useTimer";
+import { useGetTimerStatus } from "@/tanstackQueries/useTimerQueries";
 
 const FocusSession = () => {
   const [isTaskPanelOpen, setIsTaskPanelOpen] = useState(false);
   const [isDistractionLogOpen, setIsDistractionLogOpen] = useState(false);
   const [noteText, setNoteText] = useState("");
-  const { taskId } = useTimerStore();
+  const { data: timerStatus } = useGetTimerStatus();
+  const { taskId = "" } = timerStatus ?? {};
 
   return (
     <ResizablePanelGroup orientation="horizontal">
@@ -53,7 +54,7 @@ const FocusSession = () => {
             <div className="mx-2 my-10 h-10/12">
               <TaskPanel
                 hideStartButton
-                selectedTaskId={taskId || ""}
+                selectedTaskId={taskId}
                 onClose={() => setIsTaskPanelOpen(false)}
               />
             </div>
