@@ -11,6 +11,7 @@ import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import { cn } from "@/lib/utils";
 import { useShowTask } from "@/tanstackQueries/useTaskQueries";
+import { useStartTimer } from "@/tanstackQueries/useTimerQueries";
 
 import * as R from "ramda";
 
@@ -29,6 +30,7 @@ const TimerOptionsDialog = ({ taskId, open, onOpenChange }: Props) => {
   const { data: { estimatedMinutes } = {}, isFetching } = useShowTask(taskId);
 
   const { mode, timerPreset, setTimerPreset, switchMode } = useTimerStore();
+  const { mutate: startTimer, isPending: isStartingTimer } = useStartTimer();
 
   const [selectedIsPreset, setSelectedIsPreset] = useState<boolean | null>(
     null,
@@ -40,12 +42,15 @@ const TimerOptionsDialog = ({ taskId, open, onOpenChange }: Props) => {
   const isPreset = selectedIsPreset ?? R.includes(timerDuration, PRESETS);
 
   const handleStart = () => {
-    onOpenChange(false);
-    navigate(`/timer`, {
-      state: {
-        autoStart: true,
+    startTimer(
+      { taskId, mode, timerPreset: timerDuration },
+      {
+        onSuccess: () => {
+          onOpenChange(false);
+          navigate(`/timer`);
+        },
       },
-    });
+    );
   };
 
   return (
@@ -127,7 +132,11 @@ const TimerOptionsDialog = ({ taskId, open, onOpenChange }: Props) => {
               0:0
             </div>
           </TabsContent>
-          <Button type="button" onClick={handleStart}>
+          <Button
+            type="button"
+            disabled={isStartingTimer}
+            onClick={handleStart}
+          >
             Start
           </Button>
         </Tabs>
