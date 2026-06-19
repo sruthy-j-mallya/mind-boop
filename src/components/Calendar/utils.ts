@@ -21,6 +21,7 @@ const taskToEvent = (task: CalendarTask): CalendarEvent | null => {
         : start.add(1, "day").toDate(),
       allDay: !hasStartTime,
       type: "task",
+      taskId: task.id,
     };
   }
 
@@ -34,6 +35,7 @@ const taskToEvent = (task: CalendarTask): CalendarEvent | null => {
     start: start.toDate(),
     end: end.toDate(),
     type: "task",
+    taskId: task.id,
   };
 };
 
@@ -42,6 +44,7 @@ const timeLogToEvent = (log: TimeLog): CalendarEvent => ({
   start: new Date(log.startedAt),
   end: log.completedAt ? new Date(log.completedAt) : new Date(),
   type: "timeLog",
+  taskId: log.taskId,
 });
 
 export { taskToEvent, timeLogToEvent };

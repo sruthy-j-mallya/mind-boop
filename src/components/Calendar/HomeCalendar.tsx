@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { Calendar } from "react-big-calendar";
+import EventPopover from "@/components/Calendar/EventPopover";
 import Toolbar from "@/components/Calendar/Toolbar";
 import WeekDayHeader from "@/components/Calendar/WeekDayHeader";
 import { CalendarView } from "@/components/Calendar/types";
@@ -72,6 +73,7 @@ const HomeCalendar = () => {
                 <WeekDayHeader date={date} />
               ),
             },
+            event: EventPopover,
           }}
         />
       </ResizablePanel>
