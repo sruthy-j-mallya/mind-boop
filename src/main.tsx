@@ -1,12 +1,12 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import Home from "./Home";
 import "./styles/index.css";
 import { TooltipProvider } from "@/components/ui/Tooltip";
+import Toaster from "@ui/Toaster";
 import { BrowserRouter } from "react-router-dom";
-
-const queryClient = new QueryClient();
+import { queryClient } from "@/queryClient";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
@@ -15,6 +15,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
         <BrowserRouter>
           <Home />
         </BrowserRouter>
+        <Toaster />
       </TooltipProvider>
     </QueryClientProvider>
   </React.StrictMode>,
