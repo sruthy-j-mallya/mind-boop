@@ -13,7 +13,12 @@ pub struct CalendarEvent {
 }
 pub fn list_db_events(connection: &Connection) -> Result<Vec<CalendarEvent>, String> {
     let mut stmt = connection
-        .prepare("SELECT id, title, is_duration, is_all_day, starts_at, ends_at FROM tasks WHERE starts_at IS NOT NULL AND is_completed = 0 AND deleted_at IS NULL ORDER BY starts_at")
+        .prepare(
+            "SELECT id, title, is_duration, is_all_day, starts_at, ends_at
+             FROM tasks
+             WHERE starts_at IS NOT NULL AND is_completed = 0 AND deleted_at IS NULL
+             ORDER BY starts_at",
+        )
         .map_err(|e| e.to_string())?;
 
     let tasks: Vec<CalendarEvent> = stmt

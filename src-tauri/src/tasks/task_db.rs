@@ -1,8 +1,9 @@
 use serde::Serialize;
-use rusqlite::Connection;
+use rusqlite::{named_params, Connection};
 use uuid::Uuid;
 use chrono::NaiveDate;
 use chrono::NaiveDateTime;
+use crate::time_helpers::now_iso;
 
 #[derive(Debug)]
 #[derive(Serialize)]
@@ -22,11 +23,19 @@ pub struct Task {
 pub fn list_db_tasks(search_string: &str, connection: &Connection,) -> Result<Vec<Task>, String> {
   let pattern = format!("%{}%", search_string);
     let mut stmt = connection
-        .prepare("SELECT id, title, description, estimated_minutes, is_duration, is_all_day, is_completed, starts_at, ends_at FROM tasks WHERE is_completed = 0 AND (title LIKE ?1 OR description LIKE ?1) ORDER BY COALESCE(starts_at, '9999-12-30T23:59:59Z'), created_at DESC")
+        .prepare(
+            "SELECT id, title, description, estimated_minutes, is_duration, is_all_day, is_completed, starts_at, ends_at
+             FROM tasks
+             WHERE
+                is_completed = 0 AND
+                deleted_at IS NULL AND
+                (title LIKE :pattern OR description LIKE :pattern)
+             ORDER BY COALESCE(starts_at, '9999-12-30T23:59:59Z'), created_at DESC",
+        )
         .map_err(|e| e.to_string())?;
 
     let tasks = stmt
-        .query_map([&pattern], |row| {
+        .query_map(named_params! { ":pattern": pattern }, |row| {
             Ok(Task {
                 id: row.get(0)?,
                 title: row.get(1)?,
@@ -56,32 +65,62 @@ pub fn create_db_task(
   ends_at: Option<String>,
   connection: &Connection) -> Result<String, String> {
     let id = Uuid::new_v4().to_string();
+    let now = now_iso();
 
-    connection.execute(
-        "INSERT INTO tasks (id, title, description, estimated_minutes, is_duration, is_all_day, starts_at, ends_at, created_at, updated_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, strftime('%Y-%m-%dT%H:%M:%SZ', 'now'), strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))",
-        (id.clone(), title, description, estimated_minutes, is_duration, is_all_day, starts_at, ends_at),
-    ).map_err(|e| e.to_string())?;
+    connection
+        .execute(
+            "INSERT INTO tasks (
+                id, title, description,
+                estimated_minutes, is_duration, is_all_day,
+                starts_at, ends_at, created_at, updated_at
+             )
+             VALUES (
+                :id, :title, :description,
+                :estimated_minutes, :is_duration, :is_all_day,
+                :starts_at, :ends_at, :now, :now
+             )",
+            named_params! {
+                ":id": id.clone(),
+                ":title": title,
+                ":description": description,
+                ":estimated_minutes": estimated_minutes,
+                ":is_duration": is_duration,
+                ":is_all_day": is_all_day,
+                ":starts_at": starts_at,
+                ":ends_at": ends_at,
+                ":now": now,
+            },
+        )
+        .map_err(|e| e.to_string())?;
 
     Ok(id)
 }
 
-pub fn create_db_task_with_title_only(title: String, connection: &Connection) -> Result<String, String> {
+pub fn create_db_task_with_title(title: String, connection: &Connection) -> Result<String, String> {
     let id = Uuid::new_v4().to_string();
+    let now = now_iso();
 
-    connection.execute(
-        "INSERT INTO tasks (id, title, created_at, updated_at) VALUES (?1, ?2, strftime('%Y-%m-%dT%H:%M:%SZ', 'now'), strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))",
-        (id.clone(), title),
-    ).map_err(|e| e.to_string())?;
+    connection
+        .execute(
+            "INSERT INTO tasks (id, title, created_at, updated_at)
+             VALUES (:id, :title, :now, :now)",
+            named_params! { ":id": id.clone(), ":title": title, ":now": now },
+        )
+        .map_err(|e| e.to_string())?;
 
     Ok(id)
 }
 
 pub fn show_db_task(id: String, connection: &Connection) -> Result<Task, String> {
     let mut stmt = connection
-        .prepare("SELECT id, title, description, estimated_minutes, is_duration, is_all_day, is_completed, starts_at, ends_at FROM tasks WHERE id = ?1")
+        .prepare(
+            "SELECT id, title, description, estimated_minutes, is_duration, is_all_day, is_completed, starts_at, ends_at
+             FROM tasks
+             WHERE id = :id",
+        )
         .map_err(|e| e.to_string())?;
 
-    stmt.query_row([id], |row| {
+    stmt.query_row(named_params! { ":id": id }, |row| {
         Ok(Task {
             id: row.get(0)?,
             title: row.get(1)?,
@@ -98,10 +137,15 @@ pub fn show_db_task(id: String, connection: &Connection) -> Result<Task, String>
 }
 
 pub fn update_db_task_title(id: String, title: String, connection: &Connection) -> Result<String, String> {
-    let result = connection.execute(
-        "UPDATE tasks SET title = ?1, updated_at = strftime('%Y-%m-%dT%H:%M:%SZ', 'now') WHERE id = ?2",
-        (title, id),
-    ).map_err(|e| e.to_string());
+    let now = now_iso();
+    let result: Result<usize, String> = connection
+        .execute(
+            "UPDATE tasks
+             SET title = :title, updated_at = :now
+             WHERE id = :id",
+            named_params! { ":title": title, ":id": id, ":now": now },
+        )
+        .map_err(|e| e.to_string());
 
     if result.is_err() {
         return Err(result.err().unwrap().to_string());
@@ -111,10 +155,15 @@ pub fn update_db_task_title(id: String, title: String, connection: &Connection) 
 }
 
 pub fn update_db_task_description(id: String, description: Option<String>, connection: &Connection) -> Result<String, String> {
-    let result = connection.execute(
-        "UPDATE tasks SET description = ?1, updated_at = strftime('%Y-%m-%dT%H:%M:%SZ', 'now') WHERE id = ?2",
-        (description, id),
-    ).map_err(|e| e.to_string());
+    let now = now_iso();
+    let result = connection
+        .execute(
+            "UPDATE tasks
+             SET description = :description, updated_at = :now
+             WHERE id = :id",
+            named_params! { ":description": description, ":id": id, ":now": now },
+        )
+        .map_err(|e| e.to_string());
 
     if result.is_err() {
         return Err(result.err().unwrap().to_string());
@@ -124,10 +173,15 @@ pub fn update_db_task_description(id: String, description: Option<String>, conne
 }
 
 pub fn set_db_estimated_minutes(id: String, estimated_minutes: Option<u16>, connection: &Connection) -> Result<String, String> {
-    let result = connection.execute(
-        "UPDATE tasks SET estimated_minutes = ?1,  updated_at = strftime('%Y-%m-%dT%H:%M:%SZ', 'now') WHERE id = ?2",
-        (estimated_minutes, id),
-    ).map_err(|e| e.to_string());
+    let now = now_iso();
+    let result = connection
+        .execute(
+            "UPDATE tasks
+             SET estimated_minutes = :estimated_minutes, updated_at = :now
+             WHERE id = :id",
+            named_params! { ":estimated_minutes": estimated_minutes, ":id": id, ":now": now },
+        )
+        .map_err(|e| e.to_string());
 
     if result.is_err() {
         return Err(result.err().unwrap().to_string());
@@ -137,10 +191,15 @@ pub fn set_db_estimated_minutes(id: String, estimated_minutes: Option<u16>, conn
 }
 
 pub fn complete_db_task(id: String, connection: &Connection) -> Result<String, String> {
-    connection.execute(
-        "UPDATE tasks SET is_completed = 1, updated_at = strftime('%Y-%m-%dT%H:%M:%SZ', 'now') WHERE id = ?1",
-        [id],
-    ).map_err(|e| e.to_string())?;
+    let now = now_iso();
+    connection
+        .execute(
+            "UPDATE tasks
+             SET is_completed = 1, updated_at = :now
+             WHERE id = :id",
+            named_params! { ":id": id, ":now": now },
+        )
+        .map_err(|e| e.to_string())?;
     Ok("Task completed".to_string())
 }
 
@@ -216,10 +275,21 @@ pub fn set_db_task_schedule(
 
     match validator_result {
         Ok(schedule) => {
+            let now = now_iso();
             connection
                 .execute(
-                    "UPDATE tasks SET is_duration = ?1, is_all_day = ?2, starts_at = ?3, ends_at = ?4, updated_at = strftime('%Y-%m-%dT%H:%M:%SZ', 'now') WHERE id = ?5",
-                    (schedule.is_duration as i32, schedule.is_all_day as i32, schedule.starts_at, schedule.ends_at, id),
+                    "UPDATE tasks
+                     SET is_duration = :is_duration, is_all_day = :is_all_day, starts_at = :starts_at, ends_at = :ends_at,
+                         updated_at = :now
+                     WHERE id = :id",
+                    named_params! {
+                        ":is_duration": schedule.is_duration as i32,
+                        ":is_all_day": schedule.is_all_day as i32,
+                        ":starts_at": schedule.starts_at,
+                        ":ends_at": schedule.ends_at,
+                        ":id": id,
+                        ":now": now,
+                    },
                 )
                 .map_err(|e| e.to_string())?;
         }

@@ -3,6 +3,7 @@ pub mod tasks;
 pub mod time_logs;
 pub mod calendar_events;
 pub mod timer;
+pub mod time_helpers;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {

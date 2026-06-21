@@ -1,6 +1,7 @@
-use rusqlite::{Connection, OptionalExtension};
+use rusqlite::{named_params, Connection, OptionalExtension};
 use serde::Serialize;
 use uuid::Uuid;
+use crate::time_helpers::now_iso;
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -21,61 +22,72 @@ pub fn add_new_timer(
   connection: &Connection,
 ) -> Result<String, String> {
   let id = Uuid::new_v4().to_string();
+  let now = now_iso();
 
   connection.execute(
     "INSERT INTO time_logs (
       id, task_id, mode, timer_preset, is_running,
-      started_at, current_run_started_at, created_at, updated_at
+      started_at, current_run_started_at,
+      created_at, updated_at
     )
     VALUES (
-      ?1, ?2, ?3, ?4, 1,
-      strftime('%Y-%m-%dT%H:%M:%SZ', 'now'), strftime('%s', 'now'),
-      strftime('%Y-%m-%dT%H:%M:%SZ', 'now'), strftime('%Y-%m-%dT%H:%M:%SZ', 'now')
+      :id, :task_id, :mode, :timer_preset, 1,
+      :now, strftime('%s', 'now'),
+      :now, :now
     )",
-    (&id, task_id, mode, timer_preset),
+    named_params! {
+      ":id": id,
+      ":task_id": task_id,
+      ":mode": mode,
+      ":timer_preset": timer_preset,
+      ":now": now,
+    },
   ).map_err(|e| e.to_string())?;
 
   Ok(id)
 }
 
 pub fn mark_as_paused(id: String, connection: &Connection) -> Result<(), String> {
+  let now = now_iso();
   connection.execute(
     "UPDATE time_logs SET
       is_running = 0,
       accumulated_elapsed_seconds = accumulated_elapsed_seconds + (strftime('%s', 'now') - current_run_started_at),
       pause_count = pause_count + 1,
       current_run_started_at = NULL,
-      updated_at = strftime('%Y-%m-%dT%H:%M:%SZ', 'now')
-    WHERE id = ?1",
-    (&id,),
+      updated_at = :now
+    WHERE id = :id",
+    named_params! { ":id": id, ":now": now },
   ).map_err(|e| e.to_string())?;
 
   Ok(())
 }
 
 pub fn mark_as_restarted(id: String, connection: &Connection) -> Result<(), String> {
+  let now = now_iso();
   connection.execute(
     "UPDATE time_logs SET
       is_running = 1,
       current_run_started_at = strftime('%s', 'now'),
-      updated_at = strftime('%Y-%m-%dT%H:%M:%SZ', 'now')
-    WHERE id = ?1",
-    (&id,),
+      updated_at = :now
+    WHERE id = :id",
+    named_params! { ":id": id, ":now": now },
   ).map_err(|e| e.to_string())?;
 
   Ok(())
 }
 
 pub fn mark_as_completed(id: String, connection: &Connection) -> Result<(), String> {
+  let now = now_iso();
   connection.execute(
     "UPDATE time_logs SET
       is_running = 0,
       accumulated_elapsed_seconds = accumulated_elapsed_seconds + (strftime('%s', 'now') - current_run_started_at),
       current_run_started_at = NULL,
-      completed_at = strftime('%Y-%m-%dT%H:%M:%SZ', 'now'),
-      updated_at = strftime('%Y-%m-%dT%H:%M:%SZ', 'now')
-    WHERE id = ?1",
-    (&id,),
+      completed_at = :now,
+      updated_at = :now
+    WHERE id = :id",
+    named_params! { ":id": id, ":now": now },
   ).map_err(|e| e.to_string())?;
 
   Ok(())
