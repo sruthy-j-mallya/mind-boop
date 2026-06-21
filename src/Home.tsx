@@ -16,7 +16,6 @@ const Home = () => (
       <Routes>
         <Route path="/" Component={HomeCalendar} />
         <Route path="/inbox" Component={Inbox} />
-        <Route path="/timer/tasks/:id" Component={FocusSession} />
         <Route path="/timer" Component={FocusSession} />
       </Routes>
     </div>
