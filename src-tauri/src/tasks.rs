@@ -50,15 +50,16 @@ pub async fn show_task(id: String, state: State<'_, DbState>) -> Result<Task, St
   task_db::show_db_task(id, &connection)
 }
 
+// TODO: Decouple title and description updates
 #[tauri::command]
-pub async fn update_task_title_and_description(id: String, title: String, description: String, state: State<'_, DbState>) -> Result<String, String> {
+pub async fn update_task_title_and_description(id: String, title: String, description: Option<String>, state: State<'_, DbState>) -> Result<String, String> {
   let connection = state.connection.lock().map_err(|e| e.to_string())?;
 
   task_db::update_db_task_title_and_description(id, title, description, &connection)
 }
 
 #[tauri::command]
-pub async fn set_estimated_minutes(id: String, estimated_minutes: u16, state: State<'_, DbState>) -> Result<String, String> {
+pub async fn set_estimated_minutes(id: String, estimated_minutes: Option<u16>, state: State<'_, DbState>) -> Result<String, String> {
   let connection = state.connection.lock().map_err(|e| e.to_string())?;
 
   task_db::set_db_estimated_minutes(id, estimated_minutes, &connection)

@@ -211,7 +211,7 @@ pub fn it_updates_title_and_description_of_a_task(){
     rusqlite::params![task_id, "Test task", "Test task description"],
   ).expect("Task should get inserted to DB");
 
-  let result = update_db_task_title_and_description(task_id.clone(), new_title.clone(), new_description.clone(), &connection);
+  let result = update_db_task_title_and_description(task_id.clone(), new_title.clone(), Some(new_description.clone()), &connection);
   assert!(result.is_ok());
 
   let success_msg = result.expect("Success message should be present");
@@ -232,7 +232,7 @@ pub fn it_sets_estimated_minutes_of_a_task() {
 
   insert_sample_task(&task_id, "Test task", &connection);
 
-  let result = set_db_estimated_minutes(task_id.clone(), 75, &connection);
+  let result = set_db_estimated_minutes(task_id.clone(), Some(75), &connection);
   assert!(result.is_ok());
 
   let success_msg = result.expect("Success message should be present");

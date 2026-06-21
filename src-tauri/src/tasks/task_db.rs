@@ -97,7 +97,7 @@ pub fn show_db_task(id: String, connection: &Connection) -> Result<Task, String>
     .map_err(|e| e.to_string())
 }
 
-pub fn update_db_task_title_and_description(id: String, title: String, description: String, connection: &Connection) -> Result<String, String> {
+pub fn update_db_task_title_and_description(id: String, title: String, description: Option<String>, connection: &Connection) -> Result<String, String> {
     let result = connection.execute(
         "UPDATE tasks SET title = ?1, description = ?2, updated_at = strftime('%Y-%m-%dT%H:%M:%SZ', 'now') WHERE id = ?3",
         (title, description, id),
@@ -110,7 +110,7 @@ pub fn update_db_task_title_and_description(id: String, title: String, descripti
     Ok("Task updated successfully".to_string())
 }
 
-pub fn set_db_estimated_minutes(id: String, estimated_minutes: u16, connection: &Connection) -> Result<String, String> {
+pub fn set_db_estimated_minutes(id: String, estimated_minutes: Option<u16>, connection: &Connection) -> Result<String, String> {
     let result = connection.execute(
         "UPDATE tasks SET estimated_minutes = ?1,  updated_at = strftime('%Y-%m-%dT%H:%M:%SZ', 'now') WHERE id = ?2",
         (estimated_minutes, id),
