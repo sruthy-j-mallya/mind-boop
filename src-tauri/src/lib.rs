@@ -10,12 +10,12 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .manage(db::init_db())
         .invoke_handler(tauri::generate_handler![
+            tasks::list_tasks,
+            tasks::show_task,
             tasks::create_task_with_title,
             tasks::create_task,
             tasks::update_task_title,
             tasks::update_task_description,
-            tasks::list_tasks,
-            tasks::show_task,
             tasks::set_estimated_minutes,
             tasks::set_task_schedule,
             tasks::complete_task,
