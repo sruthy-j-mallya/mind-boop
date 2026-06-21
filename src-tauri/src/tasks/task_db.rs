@@ -49,7 +49,7 @@ pub fn list_db_tasks(search_string: &str, connection: &Connection,) -> Result<Ve
 pub fn create_db_task(
   title: String,
   description: Option<String>,
-  estimated_minutes: u16,
+  estimated_minutes: Option<u16>,
   is_duration: bool,
   is_all_day: bool,
   starts_at: Option<String>,

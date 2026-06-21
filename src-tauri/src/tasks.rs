@@ -16,7 +16,7 @@ pub async fn list_tasks(search_string: &str, state: State<'_, DbState>) -> Resul
 pub async fn create_task(
   title: String,
   description: Option<String>,
-  estimated_minutes: u16,
+  estimated_minutes: Option<u16>,
   is_duration: bool,
   is_all_day: bool,
   starts_at: Option<String>,
