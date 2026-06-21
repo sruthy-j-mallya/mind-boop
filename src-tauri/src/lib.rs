@@ -10,8 +10,8 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .manage(db::init_db())
         .invoke_handler(tauri::generate_handler![
+            tasks::create_task_with_title,
             tasks::create_task,
-            tasks::create_task_with_title_only,
             tasks::update_task_title,
             tasks::update_task_description,
             tasks::list_tasks,
