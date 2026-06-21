@@ -12,7 +12,8 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             tasks::create_task,
             tasks::create_task_with_title_only,
-            tasks::update_task_title_and_description,
+            tasks::update_task_title,
+            tasks::update_task_description,
             tasks::list_tasks,
             tasks::show_task,
             tasks::set_estimated_minutes,

@@ -34,9 +34,13 @@ type CreateTaskPayload = {
   endsAt?: string;
 };
 
-type UpdateTaskPayload = {
+type UpdateTaskTitlePayload = {
   id: string;
   title: string;
+};
+
+type UpdateTaskDescriptionPayload = {
+  id: string;
   description: string;
 };
 
@@ -168,15 +172,24 @@ export const useCompleteTask = () => {
   });
 };
 
-export const useUpdateTask = () => {
+export const useUpdateTaskTitle = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, title, description }: UpdateTaskPayload) =>
-      invoke("update_task_title_and_description", {
-        id,
-        title,
-        description,
-      }),
+    mutationFn: async ({ id, title }: UpdateTaskTitlePayload) =>
+      invoke("update_task_title", { id, title }),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["tasks", id] });
+      queryClient.invalidateQueries({ queryKey: ["calendarTasks"] });
+    },
+  });
+};
+
+export const useUpdateTaskDescription = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, description }: UpdateTaskDescriptionPayload) =>
+      invoke("update_task_description", { id, description }),
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
       queryClient.invalidateQueries({ queryKey: ["tasks", id] });

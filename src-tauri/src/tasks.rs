@@ -50,12 +50,18 @@ pub async fn show_task(id: String, state: State<'_, DbState>) -> Result<Task, St
   task_db::show_db_task(id, &connection)
 }
 
-// TODO: Decouple title and description updates
 #[tauri::command]
-pub async fn update_task_title_and_description(id: String, title: String, description: Option<String>, state: State<'_, DbState>) -> Result<String, String> {
+pub async fn update_task_title(id: String, title: String, state: State<'_, DbState>) -> Result<String, String> {
   let connection = state.connection.lock().map_err(|e| e.to_string())?;
 
-  task_db::update_db_task_title_and_description(id, title, description, &connection)
+  task_db::update_db_task_title(id, title, &connection)
+}
+
+#[tauri::command]
+pub async fn update_task_description(id: String, description: Option<String>, state: State<'_, DbState>) -> Result<String, String> {
+  let connection = state.connection.lock().map_err(|e| e.to_string())?;
+
+  task_db::update_db_task_description(id, description, &connection)
 }
 
 #[tauri::command]

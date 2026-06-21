@@ -7,7 +7,8 @@ import {
   useSetEstimatedMinutes,
   useSetTaskSchedule,
   useShowTask,
-  useUpdateTask,
+  useUpdateTaskDescription,
+  useUpdateTaskTitle,
 } from "@/tanstackQueries/useTaskQueries";
 import {
   scheduleToTaskScheduleFields,
@@ -77,7 +78,8 @@ const TaskPanel = ({
     useCreateTaskWithTitle((createdTaskId: string) => {
       setTaskId(createdTaskId);
     });
-  const { mutate: updateTask } = useUpdateTask();
+  const { mutate: updateTaskTitle } = useUpdateTaskTitle();
+  const { mutate: updateTaskDescription } = useUpdateTaskDescription();
 
   useEffect(() => {
     if (
@@ -87,12 +89,15 @@ const TaskPanel = ({
     ) {
       return;
     }
-    updateTask({
-      id: taskId,
-      title: debouncedTitle,
-      description: debouncedDescription,
-    });
-  }, [hasUserEdited, debouncedTitle, debouncedDescription, updateTask, taskId]);
+    updateTaskTitle({ id: taskId, title: debouncedTitle });
+  }, [hasUserEdited, debouncedTitle, updateTaskTitle, taskId]);
+
+  useEffect(() => {
+    if (!hasUserEdited || taskId.length == 0) {
+      return;
+    }
+    updateTaskDescription({ id: taskId, description: debouncedDescription });
+  }, [hasUserEdited, debouncedDescription, updateTaskDescription, taskId]);
 
   const handleCreateTask = () => {
     if (

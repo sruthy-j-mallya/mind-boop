@@ -5,7 +5,8 @@ use mind_boop_lib::tasks::task_db::{
   set_db_estimated_minutes,
   set_db_task_schedule,
   show_db_task,
-  update_db_task_title_and_description,
+  update_db_task_title,
+  update_db_task_description,
   complete_db_task
 };
 use rusqlite::Connection;
@@ -198,9 +199,35 @@ pub fn it_gives_the_task_details_with_given_id() {
 }
 
 #[test]
-pub fn it_updates_title_and_description_of_a_task(){
+pub fn it_updates_the_title_of_a_task(){
   let connection = set_up_db();
   let new_title = String::from("New task title");
+
+  let task_id = Uuid::new_v4().to_string();
+
+  connection.execute(
+    "INSERT INTO tasks (id, title, description, created_at, updated_at)
+      VALUES (?1, ?2, ?3, strftime('%Y-%m-%dT%H:%M:%SZ', 'now'), strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))",
+    rusqlite::params![task_id, "Test task", "Test task description"],
+  ).expect("Task should get inserted to DB");
+
+  let result = update_db_task_title(task_id.clone(), new_title.clone(), &connection);
+  assert!(result.is_ok());
+
+  let success_msg = result.expect("Success message should be present");
+  assert_eq!(String::from("Task title updated successfully"), success_msg);
+
+  let updated_task_result: Result<(String, Option<String>), rusqlite::Error> = connection.query_row("SELECT id, title, description FROM tasks WHERE id = ?1", [task_id], |row| Ok((row.get(1)?, row.get(2)?)));
+  let (updated_title, description_option) = updated_task_result.expect("Task title should be present");
+
+  assert_eq!(new_title, updated_title);
+  let unchanged_description = description_option.expect("Description should be present");
+  assert_eq!(String::from("Test task description"), unchanged_description)
+}
+
+#[test]
+pub fn it_updates_the_description_of_a_task() {
+  let connection = set_up_db();
   let new_description = String::from("New task description");
 
   let task_id = Uuid::new_v4().to_string();
@@ -211,16 +238,16 @@ pub fn it_updates_title_and_description_of_a_task(){
     rusqlite::params![task_id, "Test task", "Test task description"],
   ).expect("Task should get inserted to DB");
 
-  let result = update_db_task_title_and_description(task_id.clone(), new_title.clone(), Some(new_description.clone()), &connection);
+  let result = update_db_task_description(task_id.clone(), Some(new_description.clone()), &connection);
   assert!(result.is_ok());
 
   let success_msg = result.expect("Success message should be present");
-  assert_eq!(String::from("Task updated successfully"), success_msg);
+  assert_eq!(String::from("Task description updated successfully"), success_msg);
 
   let updated_task_result: Result<(String, Option<String>), rusqlite::Error> = connection.query_row("SELECT id, title, description FROM tasks WHERE id = ?1", [task_id], |row| Ok((row.get(1)?, row.get(2)?)));
-  let (updated_title, description_option) = updated_task_result.expect("Task title should be present");
+  let (unchanged_title, description_option) = updated_task_result.expect("Task title should be present");
 
-  assert_eq!(new_title, updated_title);
+  assert_eq!(String::from("Test task"), unchanged_title);
   let updated_description = description_option.expect("Description should be present");
   assert_eq!(new_description, updated_description)
 }
