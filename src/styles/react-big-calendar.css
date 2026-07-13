@@ -1,0 +1,51 @@
+.rbc-time-header-cell {
+  height: 100px;
+}
+
+.rbc-off-range-bg {
+  background-color: oklch(0.97 0 0);
+}
+
+/* TODO: Change this to match the theme*/
+.rbc-today {
+  background-color: oklch(82.772% 0.05314 239.725);
+}
+
+.dark .rbc-off-range-bg {
+  background-color: oklch(0.205 0 0);
+}
+
+/* TODO: Change this to match the theme*/
+.dark .rbc-today {
+  background-color: oklch(26.333% 0.04774 228.329);
+}
+
+.rbc-timeslot-group {
+  border-color: oklch(0.922 0 0);
+}
+
+.dark .rbc-timeslot-group {
+  border-color: oklch(1 0 0 / 10%);
+}
+
+.rbc-time-slot {
+  border-color: oklch(0.922 0 0);
+}
+
+.dark .rbc-time-slot {
+  border-color: oklch(1 0 0 / 10%);
+}
+
+.rbc-time-slot {
+  border-color: oklch(0.922 0 0);
+}
+
+.dark .rbc-time-slot {
+  border-color: oklch(1 0 0 / 10%);
+}
+
+/* TODO: This has been added to hide the time label from calendar events */
+/* See if there is any other proper fix */
+.log-event .rbc-event-label {
+  display: none;
+}

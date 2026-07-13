@@ -22,3 +22,10 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Agent local permissions
+.agents/settings.local.json
+
+# .cursor and .claude are symlinks to .agents for editor compatibility
+.cursor
+.claude

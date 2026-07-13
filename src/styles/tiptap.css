@@ -1,0 +1,184 @@
+/* TipTap styles */
+
+.tiptap-editor .ProseMirror {
+  font-family: var(--font-sans);
+  color: var(--foreground);
+}
+
+.tiptap-editor .ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  color: var(--muted-foreground);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+.tiptap-editor .ProseMirror h1 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin: 0.75rem 0 0.35rem;
+}
+
+.tiptap-editor .ProseMirror h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin: 0.65rem 0 0.3rem;
+}
+
+.tiptap-editor .ProseMirror h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0.5rem 0 0.25rem;
+}
+
+.tiptap-editor .ProseMirror p {
+  margin: 0.35rem 0;
+}
+
+.tiptap-editor .ProseMirror p[data-placeholder] {
+  font-size: small;
+}
+
+.tiptap-editor .ProseMirror ul:not([data-type="taskList"]),
+.tiptap-editor .ProseMirror ol {
+  margin: 0.35rem 0;
+  padding-left: 1.5rem;
+  list-style-position: outside;
+}
+
+/* Preflight removes list markers; restore for bullet & numbered lists only */
+.tiptap-editor .ProseMirror ul:not([data-type="taskList"]) {
+  list-style-type: disc;
+}
+
+.tiptap-editor .ProseMirror ol {
+  list-style-type: decimal;
+}
+
+.tiptap-editor .ProseMirror li {
+  margin: 0.15rem 0;
+  display: list-item;
+}
+
+.tiptap-editor .ProseMirror ul[data-type="taskList"] {
+  list-style: none;
+  padding-left: 0;
+}
+
+.tiptap-editor .ProseMirror ul[data-type="taskList"] li {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.tiptap-editor .ProseMirror ul[data-type="taskList"] li > label {
+  flex: 0 0 1rem;
+  width: 1rem;
+  height: 1rem;
+  user-select: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tiptap-editor .ProseMirror ul[data-type="taskList"] li > div {
+  flex: 1 1 auto;
+}
+
+.tiptap-editor .ProseMirror ul[data-type="taskList"] li > div > p {
+  margin: 0;
+}
+
+.tiptap-editor
+  .ProseMirror
+  ul[data-type="taskList"]
+  li
+  > label
+  input[type="checkbox"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 1rem;
+  height: 1rem;
+  margin: 0;
+  border: 1px solid var(--border);
+  border-radius: 0.25rem;
+  background: var(--background);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+
+.tiptap-editor
+  .ProseMirror
+  ul[data-type="taskList"]
+  li
+  > label
+  input[type="checkbox"]:checked {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+.tiptap-editor
+  .ProseMirror
+  ul[data-type="taskList"]
+  li
+  > label
+  input[type="checkbox"]:checked::after {
+  content: "";
+  width: 0.3rem;
+  height: 0.55rem;
+  border: solid var(--primary-foreground);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+  margin-top: -1px;
+}
+
+.tiptap-editor .ProseMirror blockquote {
+  margin: 0.5rem 0;
+  padding-left: 0.85rem;
+  border-left: 3px solid var(--border);
+  color: var(--muted-foreground);
+}
+
+.tiptap-editor .ProseMirror mark {
+  border-radius: 2px;
+  padding: 0 0.1em;
+}
+
+.tiptap-editor .ProseMirror code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.9em;
+  background: var(--muted);
+  border-radius: 4px;
+  padding: 0.1em 0.35em;
+}
+
+.tiptap-editor .ProseMirror pre {
+  margin: 0.5rem 0;
+  padding: 0.75rem 0.9rem;
+  border-radius: 6px;
+  background: var(--muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.85rem;
+  overflow-x: auto;
+}
+
+.tiptap-editor .ProseMirror pre code {
+  background: none;
+  padding: 0;
+  font-size: inherit;
+}
+
+.tiptap-editor .ProseMirror hr {
+  border: 0;
+  border-top: 1px solid var(--border);
+  margin: 1rem 0;
+}
+
+.tiptap-editor .ProseMirror a {
+  color: var(--foreground);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

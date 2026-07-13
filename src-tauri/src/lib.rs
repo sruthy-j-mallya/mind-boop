@@ -1,14 +1,33 @@
-// Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-#[tauri::command]
-fn greet(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
-}
+pub mod db;
+pub mod tasks;
+pub mod time_logs;
+pub mod calendar_events;
+pub mod timer;
+pub mod time_helpers;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![greet])
+        .manage(db::init_db())
+        .invoke_handler(tauri::generate_handler![
+            tasks::list_tasks,
+            tasks::show_task,
+            tasks::create_task_with_title,
+            tasks::create_task,
+            tasks::update_task_title,
+            tasks::update_task_description,
+            tasks::set_estimated_minutes,
+            tasks::set_task_schedule,
+            tasks::complete_task,
+            calendar_events::list_calendar_tasks,
+            time_logs::list_time_logs,
+            timer::start,
+            timer::pause,
+            timer::restart,
+            timer::complete,
+            timer::get_status,
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
