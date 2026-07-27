@@ -10,8 +10,6 @@ import { useListTimeLogs } from "@/tanstackQueries/useTimeLogQueries";
 
 import { taskToEvent, timeLogToEvent } from "./utils";
 
-import { ResizablePanel, ResizablePanelGroup } from "@/components/ui/Resizable";
-
 import { CalendarEvent } from "./types";
 
 const HomeCalendar = () => {
@@ -38,46 +36,40 @@ const HomeCalendar = () => {
   };
 
   return (
-    <ResizablePanelGroup className="flex h-full gap-4 overflow-hidden">
-      <ResizablePanel className="mt-6 flex-1">
-        <Calendar
-          className="h-full"
-          localizer={calendarLocalizer}
-          view={view}
-          date={date}
-          events={events}
-          views={["day", "week", "month"]}
-          eventPropGetter={(event) => ({
-            className:
-              (event as CalendarEvent).type === "timeLog" ? "log-event" : "",
-            style: {
-              backgroundColor:
-                (event as CalendarEvent).type === "task"
-                  ? "hsl(210, 100%, 60%)"
-                  : "hsl(330, 50%, 40%)",
-              border: "none",
-              borderRadius: "4px",
-            },
-          })}
-          components={{
-            toolbar: ({ view }) => (
-              <Toolbar
-                view={view}
-                handleViewChange={handleView}
-                date={date}
-                setDate={setDate}
-              />
-            ),
-            week: {
-              header: ({ date }: { date: Date }) => (
-                <WeekDayHeader date={date} />
-              ),
-            },
-            event: EventPopover,
-          }}
-        />
-      </ResizablePanel>
-    </ResizablePanelGroup>
+    <Calendar
+      className="mt-6 h-full"
+      localizer={calendarLocalizer}
+      view={view}
+      date={date}
+      events={events}
+      views={["day", "week", "month"]}
+      eventPropGetter={(event) => ({
+        className:
+          (event as CalendarEvent).type === "timeLog" ? "log-event" : "",
+        style: {
+          backgroundColor:
+            (event as CalendarEvent).type === "task"
+              ? "hsl(210, 100%, 60%)"
+              : "hsl(330, 50%, 40%)",
+          border: "none",
+          borderRadius: "4px",
+        },
+      })}
+      components={{
+        toolbar: ({ view }) => (
+          <Toolbar
+            view={view}
+            handleViewChange={handleView}
+            date={date}
+            setDate={setDate}
+          />
+        ),
+        week: {
+          header: ({ date }: { date: Date }) => <WeekDayHeader date={date} />,
+        },
+        event: EventPopover,
+      }}
+    />
   );
 };
 
