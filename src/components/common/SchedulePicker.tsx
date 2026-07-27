@@ -60,7 +60,7 @@ const SchedulePicker = ({
       open={isPopoverOpen}
       onOpenChange={(open) => setIsPopoverOpen(open)}
     >
-      <PopoverTrigger>
+      <PopoverTrigger asChild>
         <Button
           variant="link"
           className="min-w-0 overflow-hidden p-0 text-xs font-normal text-blue-500"
