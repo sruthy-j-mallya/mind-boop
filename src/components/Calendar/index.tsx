@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Calendar } from "react-big-calendar";
+import { Calendar as ReactBigCalendar } from "react-big-calendar";
 import EventPopover from "@/components/Calendar/EventPopover";
 import Toolbar from "@/components/Calendar/Toolbar";
 import WeekDayHeader from "@/components/Calendar/WeekDayHeader";
@@ -12,7 +12,7 @@ import { taskToEvent, timeLogToEvent } from "./utils";
 
 import { CalendarEvent } from "./types";
 
-const HomeCalendar = () => {
+const Calendar = () => {
   const [view, setView] = useState<CalendarView>(() => {
     const saved = localStorage.getItem("calendarView");
     return (saved as CalendarView) ?? "month";
@@ -23,11 +23,12 @@ const HomeCalendar = () => {
   const { data: timeLogs = [] } = useListTimeLogs();
 
   const events = useMemo<CalendarEvent[]>(() => {
-    const taskEvents = calendarTasks
-      .map(taskToEvent)
-      .filter((e): e is CalendarEvent => e !== null);
+    const taskEvents = calendarTasks.map(taskToEvent);
     const logEvents = timeLogs.map(timeLogToEvent);
-    return [...taskEvents, ...logEvents];
+
+    return [...taskEvents, ...logEvents].filter(
+      (e): e is CalendarEvent => e !== null,
+    );
   }, [calendarTasks, timeLogs]);
 
   const handleView = (nextView: CalendarView) => {
@@ -36,7 +37,7 @@ const HomeCalendar = () => {
   };
 
   return (
-    <Calendar
+    <ReactBigCalendar
       className="mt-6 h-full"
       localizer={calendarLocalizer}
       view={view}
@@ -73,4 +74,4 @@ const HomeCalendar = () => {
   );
 };
 
-export default HomeCalendar;
+export default Calendar;

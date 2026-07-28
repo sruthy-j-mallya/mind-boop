@@ -39,12 +39,16 @@ const taskToEvent = (task: CalendarTask): CalendarEvent | null => {
   };
 };
 
-const timeLogToEvent = (log: TimeLog): CalendarEvent => ({
-  title: log.taskTitle,
-  start: new Date(log.startedAt),
-  end: log.completedAt ? new Date(log.completedAt) : new Date(),
-  type: "timeLog",
-  taskId: log.taskId,
-});
+const timeLogToEvent = (log: TimeLog): CalendarEvent | null => {
+  if (!log.completedAt) return null;
+
+  return {
+    title: log.taskTitle,
+    start: new Date(log.startedAt),
+    end: log.completedAt ? new Date(log.completedAt) : new Date(),
+    type: "timeLog",
+    taskId: log.taskId,
+  };
+};
 
 export { taskToEvent, timeLogToEvent };

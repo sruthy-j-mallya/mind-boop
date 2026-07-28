@@ -1,6 +1,6 @@
 import AppSidebar from "@/components/AppSidebar";
 import { SidebarProvider } from "@/components/ui/Sidebar";
-import HomeCalendar from "@/components/Calendar/HomeCalendar";
+import Calendar from "@/components/Calendar";
 import { Route, Routes } from "react-router-dom";
 import Inbox from "./components/Inbox";
 import FocusSession from "./components/Timer/FocusSession";
@@ -14,7 +14,7 @@ const Home = () => (
     </div>
     <div className="h-dvh w-screen">
       <Routes>
-        <Route path="/" Component={HomeCalendar} />
+        <Route path="/" Component={Calendar} />
         <Route path="/inbox" Component={Inbox} />
         <Route path="/timer" Component={FocusSession} />
       </Routes>
